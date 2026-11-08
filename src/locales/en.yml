@@ -526,6 +526,19 @@ options:
           confirm: Confirm
           cancel: Cancel
           description: This operation will clear all your custom configurations and reset them to default values. Your glossaries are kept — delete those from the glossary page. Please confirm.
+    auditLog:
+      sectionTitle: Request Audit Log
+      days: days
+      enabled:
+        title: Save Request History
+        description: Record prompts, parameters, and responses sent to all providers (LLM and translation) to review and improve prompts.
+      retention:
+        title: Retention Period
+        description: Automatically delete log entries older than this period (up to 1,000 logs stored).
+      manage:
+        title: Manage Logs
+        description: Inspect sent requests, prompts, responses or clean up stored records.
+        button: Open Log Manager
     userExperience:
       title: User experience
       beta:
@@ -558,6 +571,9 @@ options:
     translationHub:
       title: Translation Hub
       description: Open the Translation Hub in a new tab.
+    sidePanel:
+      title: AI Side Panel
+      description: Open or close the AI Side Panel.
     selectionSpeak:
       title: "Read aloud"
       description: "Read the text you selected aloud. Press again to stop."
@@ -627,6 +643,7 @@ options:
       disableGlobally: Disable globally
     tooltips:
       togglePageTranslation: Toggle page translation
+      sidePanel: Open AI Side Panel
       floatingButtonOptions: Floating button options
       lockPosition: Lock position
       unlockPosition: Unlock position
@@ -1218,6 +1235,43 @@ options:
   advanced:
     title: Advanced
     pageDescription: Powerful settings that are not part of the everyday path.
+    auditLogs:
+      title: Request Logs
+      description: Review requests sent to Providers, inspect prompts, evaluate responses, and manage stored logs.
+      detailTitle: Request & Response Details
+      time: Timestamp
+      feature: Feature
+      provider: Provider
+      latency: Latency
+      status: Status
+      promptContent: Prompt Content
+      responseOutput: Response Output
+      parameters: Parameters
+      errorMessage: Error Message
+      viewDetail: View Details
+      delete: Delete
+      clearAll: Clear All
+      clearAllConfirmTitle: Clear all request audit logs?
+      clearAllConfirmDesc: All stored request logs will be permanently deleted. This action cannot be undone.
+      cancel: Cancel
+      confirmDelete: Confirm Delete
+      emptyTitle: No logs found
+      emptyDesc: When you use AI or translation features and logging is enabled, requests will appear here.
+      disabledBanner: Request logging is currently disabled. New requests are not being recorded.
+      goToPreference: Go to Settings
+      searchPlaceholder: Search prompt, response, model...
+      filterStatusAll: All Statuses
+      statusSuccess: Success
+      statusError: Error
+      statusAborted: Aborted
+      filterTypeAll: All Types
+      typeTranslation: Translation
+      refresh: Refresh
+      totalCount: "Total: $1 records"
+      pageIndicator: "Page $1 / $2"
+      previous: Previous
+      next: Next
+      actions: Actions
     glossary:
       title: Glossary
       pageDescription: Give the words that matter to you a fixed translation, and choose where each list applies.

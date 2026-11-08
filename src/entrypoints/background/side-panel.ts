@@ -250,29 +250,42 @@ export function setupSidePanelMessageHandler({
 }) {
   const windowState = createSidePanelWindowState()
   const sidePanel = getSidePanelApi(extensionBrowser)
-  if (sidePanel?.kind !== "chromium-side-panel") {
-    registerMessageHandler(
-      "toggleSidePanel",
-      createToggleSidePanelHandler({
-        getApi: () => getSidePanelApi(extensionBrowser),
-        windowState,
-      }),
-    )
-    return
+  const toggleHandler = createToggleSidePanelHandler({
+    getApi: () => getSidePanelApi(extensionBrowser),
+    windowState,
+  })
+
+  if (sidePanel?.kind === "chromium-side-panel") {
+    sidePanel.api.onOpened?.addListener((info) => {
+      windowState.markOpened(info)
+    })
+    sidePanel.api.onClosed?.addListener((info) => {
+      windowState.markClosed(info)
+    })
   }
 
-  sidePanel.api.onOpened?.addListener((info) => {
-    windowState.markOpened(info)
-  })
-  sidePanel.api.onClosed?.addListener((info) => {
-    windowState.markClosed(info)
-  })
+  registerMessageHandler("toggleSidePanel", toggleHandler)
 
-  registerMessageHandler(
-    "toggleSidePanel",
-    createToggleSidePanelHandler({
-      getApi: () => getSidePanelApi(extensionBrowser),
-      windowState,
-    }),
-  )
+  const commands = (extensionBrowser as any).commands
+  if (typeof commands?.onCommand?.addListener === "function") {
+    commands.onCommand.addListener(async (command: string) => {
+      if (command === "open_side_panel") {
+        try {
+          const [activeTab] = await extensionBrowser.tabs.query({
+            active: true,
+            currentWindow: true,
+          })
+          const windowId = activeTab?.windowId
+          if (typeof windowId === "number") {
+            await toggleHandler({
+              data: { source: "extension-user-action" },
+              sender: { tab: { windowId, id: activeTab?.id } },
+            })
+          }
+        } catch (error) {
+          log.error("Failed to toggle side panel on command", { error })
+        }
+      }
+    })
+  }
 }

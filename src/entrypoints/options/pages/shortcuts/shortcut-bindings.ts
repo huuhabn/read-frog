@@ -77,6 +77,11 @@ export function getShortcutBindings(config: Config): ShortcutBinding[] {
       title: i18n.t("options.shortcuts.translationHub.title"),
       shortcut: config.translationHub.shortcut,
     },
+    {
+      id: "side-panel-shortcut",
+      title: i18n.t("options.shortcuts.sidePanel.title"),
+      shortcut: config.sidePanel?.shortcut ?? "",
+    },
     ...getSelectionToolbarActions(config.selectionToolbar).map((action) => ({
       id: getActionShortcutId(action.id),
       title: action.name,

@@ -482,7 +482,7 @@ describe("floatingButton controls", () => {
     renderFloatingButton()
 
     const mainButton = getMainButton()
-    expect(screen.getAllByRole("button")).toHaveLength(5)
+    expect(screen.getAllByRole("button")).toHaveLength(6)
 
     fireEvent.pointerDown(mainButton, {
       pointerId: 1,

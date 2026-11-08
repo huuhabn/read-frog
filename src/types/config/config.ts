@@ -17,6 +17,7 @@ import {
   getProviderIdsForCapability,
 } from "@/utils/providers/provider-registry"
 import { normalizeSelectionToolbarLists } from "@/utils/selection-toolbar-order"
+import { auditLogConfigSchema } from "./audit-log"
 import { floatingButtonSchema } from "./floating-button"
 import { glossaryConfigSchema } from "./glossary"
 import { languageDetectionConfigSchema } from "./language-detection"
@@ -27,6 +28,7 @@ import {
   selectionToolbarCustomActionsSchema,
 } from "./selection-toolbar"
 import { shortcutSchema } from "./shortcut"
+import { sidePanelSchema } from "./side-panel"
 import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
 import { translateConfigSchema } from "./translate"
@@ -213,6 +215,8 @@ export const configSchema = z
     uiLanguage: uiLanguageSchema,
     translationHub: translationHubSchema,
     glossary: glossaryConfigSchema,
+    sidePanel: sidePanelSchema,
+    auditLog: auditLogConfigSchema,
   })
   .superRefine((data, ctx) => {
     for (const featureKey of FEATURE_KEYS) {

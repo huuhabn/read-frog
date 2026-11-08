@@ -81,6 +81,7 @@ describe("shortcut bindings", () => {
       "selection-annotation-mode-shortcut",
       "subtitles-toggle-shortcut",
       "translation-hub-shortcut",
+      "side-panel-shortcut",
       getActionShortcutId("default-dictionary"),
       getActionShortcutId("default-sentence-analysis"),
       getActionShortcutId("default-improve-writing"),

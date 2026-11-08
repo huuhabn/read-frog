@@ -1,0 +1,220 @@
+import { useState } from "react"
+import { Icon } from "@iconify/react"
+import { MarkdownRenderer } from "@/components/markdown-renderer"
+import { Badge } from "@/components/ui/base-ui/badge"
+import { Button } from "@/components/ui/base-ui/button"
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/base-ui/dialog"
+import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
+import { i18n } from "@/utils/i18n"
+import { cn } from "@/utils/styles/utils"
+
+interface AuditLogDetailModalProps {
+  isOpen: boolean
+  onClose: () => void
+  log: AuditLogItem | null
+}
+
+export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModalProps) {
+  const [copiedField, setCopiedField] = useState<string | null>(null)
+
+  if (!log) return null
+
+  const handleCopy = async (text: string, fieldName: string) => {
+    await navigator.clipboard.writeText(text)
+    setCopiedField(fieldName)
+    setTimeout(() => setCopiedField(null), 2000)
+  }
+
+  const formatTimestamp = (d: Date) => {
+    return new Intl.DateTimeFormat(undefined, {
+      dateStyle: "medium",
+      timeStyle: "medium",
+    }).format(new Date(d))
+  }
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col gap-4 overflow-hidden p-6">
+        <DialogHeader className="border-b border-border/60 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2">
+            <DialogTitle className="flex items-center gap-2 text-base font-semibold">
+              <Icon icon="tabler:file-text" className="size-5 text-primary" />
+              <span>{i18n.t("options.advanced.auditLogs.detailTitle")}</span>
+            </DialogTitle>
+            <div className="flex items-center gap-1.5">
+              <Badge
+                variant={log.status === "success" ? "default" : log.status === "error" ? "destructive" : "secondary"}
+                className={cn(
+                  "text-xs uppercase font-mono",
+                  log.status === "success" && "bg-emerald-600/90 text-white hover:bg-emerald-600",
+                )}
+              >
+                {log.status}
+              </Badge>
+              <Badge variant="outline" className="font-mono text-xs">
+                {log.latencyMs} ms
+              </Badge>
+            </div>
+          </div>
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
+            <div>
+              <span className="font-medium text-foreground">{i18n.t("options.advanced.auditLogs.time")}: </span>
+              {formatTimestamp(log.createdAt)}
+            </div>
+            <div>
+              <span className="font-medium text-foreground">{i18n.t("options.advanced.auditLogs.feature")}: </span>
+              {log.sourceFeature}
+            </div>
+            <div>
+              <span className="font-medium text-foreground">{i18n.t("options.advanced.auditLogs.provider")}: </span>
+              {log.providerId} {log.model ? `(${log.model})` : ""}
+            </div>
+          </div>
+        </DialogHeader>
+
+        <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+          {/* Error Message if present */}
+          {log.errorMessage && (
+            <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive">
+              <div className="flex items-center gap-1.5 font-semibold">
+                <Icon icon="tabler:alert-triangle" className="size-4" />
+                <span>{i18n.t("options.advanced.auditLogs.errorMessage")}</span>
+              </div>
+              <p className="mt-1 font-mono text-[11px] whitespace-pre-wrap">{log.errorMessage}</p>
+            </div>
+          )}
+
+          {/* System Prompt */}
+          {log.systemPrompt && (
+            <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
+              <div className="flex items-center justify-between pb-1.5 border-b border-border/40">
+                <span className="font-semibold text-foreground flex items-center gap-1.5">
+                  <Icon icon="tabler:terminal" className="size-4 text-primary" />
+                  System Prompt
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 gap-1 px-1.5 text-[11px]"
+                  onClick={() => void handleCopy(log.systemPrompt || "", "systemPrompt")}
+                >
+                  <Icon
+                    icon={copiedField === "systemPrompt" ? "tabler:check" : "tabler:copy"}
+                    className={cn("size-3.5", copiedField === "systemPrompt" && "text-emerald-500")}
+                  />
+                  <span>{copiedField === "systemPrompt" ? "Đã chép" : "Sao chép"}</span>
+                </Button>
+              </div>
+              <p className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-muted-foreground leading-relaxed">
+                {log.systemPrompt}
+              </p>
+            </div>
+          )}
+
+          {/* User Prompt / Messages */}
+          <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
+            <div className="flex items-center justify-between pb-1.5 border-b border-border/40">
+              <span className="font-semibold text-foreground flex items-center gap-1.5">
+                <Icon icon="tabler:message-circle" className="size-4 text-primary" />
+                {i18n.t("options.advanced.auditLogs.promptContent")}
+              </span>
+              <Button
+                size="sm"
+                variant="ghost"
+                className="h-6 gap-1 px-1.5 text-[11px]"
+                onClick={() => void handleCopy(log.prompt, "prompt")}
+              >
+                <Icon
+                  icon={copiedField === "prompt" ? "tabler:check" : "tabler:copy"}
+                  className={cn("size-3.5", copiedField === "prompt" && "text-emerald-500")}
+                />
+                <span>{copiedField === "prompt" ? "Đã chép" : "Sao chép"}</span>
+              </Button>
+            </div>
+            <p className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-foreground leading-relaxed select-text">
+              {log.prompt}
+            </p>
+          </div>
+
+          {/* Reasoning / Thinking if present */}
+          {log.thinking && (
+            <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
+              <div className="flex items-center justify-between pb-1.5 border-b border-amber-500/20">
+                <span className="font-semibold text-foreground flex items-center gap-1.5">
+                  <Icon icon="tabler:brain" className="size-4 text-amber-500" />
+                  Reasoning / Thinking Process
+                </span>
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 gap-1 px-1.5 text-[11px]"
+                  onClick={() => void handleCopy(log.thinking || "", "thinking")}
+                >
+                  <Icon
+                    icon={copiedField === "thinking" ? "tabler:check" : "tabler:copy"}
+                    className={cn("size-3.5", copiedField === "thinking" && "text-emerald-500")}
+                  />
+                  <span>{copiedField === "thinking" ? "Đã chép" : "Sao chép"}</span>
+                </Button>
+              </div>
+              <p className="mt-2 whitespace-pre-wrap text-[11px] text-muted-foreground leading-relaxed italic">
+                {log.thinking}
+              </p>
+            </div>
+          )}
+
+          {/* Response Output */}
+          <div className="rounded-lg border border-border/80 bg-muted/20 p-3">
+            <div className="flex items-center justify-between pb-1.5 border-b border-border/40">
+              <span className="font-semibold text-foreground flex items-center gap-1.5">
+                <Icon icon="tabler:sparkles" className="size-4 text-primary" />
+                {i18n.t("options.advanced.auditLogs.responseOutput")}
+              </span>
+              {log.responseOutput && (
+                <Button
+                  size="sm"
+                  variant="ghost"
+                  className="h-6 gap-1 px-1.5 text-[11px]"
+                  onClick={() => void handleCopy(log.responseOutput || "", "output")}
+                >
+                  <Icon
+                    icon={copiedField === "output" ? "tabler:check" : "tabler:copy"}
+                    className={cn("size-3.5", copiedField === "output" && "text-emerald-500")}
+                  />
+                  <span>{copiedField === "output" ? "Đã chép" : "Sao chép"}</span>
+                </Button>
+              )}
+            </div>
+            <div className="mt-2 select-text">
+              {log.responseOutput ? (
+                <MarkdownRenderer content={log.responseOutput} />
+              ) : (
+                <p className="text-muted-foreground italic text-[11px]">
+                  {log.status === "error" ? "(Không có phản hồi do lỗi)" : "(Phản hồi rỗng)"}
+                </p>
+              )}
+            </div>
+          </div>
+
+          {/* Parameters & Technical Metadata */}
+          {log.parameters && Object.keys(log.parameters).length > 0 && (
+            <div className="rounded-lg border border-border/60 bg-muted/10 p-2.5">
+              <span className="font-medium text-muted-foreground text-[11px]">
+                {i18n.t("options.advanced.auditLogs.parameters")}:
+              </span>
+              <pre className="mt-1 font-mono text-[10px] text-muted-foreground whitespace-pre-wrap">
+                {JSON.stringify(log.parameters, null, 2)}
+              </pre>
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  )
+}

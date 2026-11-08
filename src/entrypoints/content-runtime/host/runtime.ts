@@ -10,6 +10,7 @@ import { createLogger } from "@/utils/logging/logger"
 import { onMessage, sendMessage } from "@/utils/message"
 import { clearEffectiveSiteControlUrl } from "@/utils/site-control"
 import { areSamePageTranslationOrigin } from "@/utils/url"
+import { bindSidePanelShortcutKey } from "./bind-side-panel-shortcut"
 import { bindTranslationHubShortcutKey } from "./bind-translation-hub-shortcut"
 import { setupUrlChangeListener } from "./listen"
 import { closePageDiagnosisPanel, togglePageDiagnosisPanel } from "./page-diagnosis"
@@ -66,6 +67,8 @@ export async function bootstrapHostContent(
   const cleanupTranslationModeShortcut = await bindTranslationModeShortcutKey()
 
   const cleanupTranslationHubShortcut = await bindTranslationHubShortcutKey()
+
+  const cleanupSidePanelShortcut = await bindSidePanelShortcutKey()
 
   const detectAndReportPageLanguage = async (url: string) => {
     const generation = ++detectionGeneration
@@ -169,6 +172,7 @@ export async function bootstrapHostContent(
     cleanupTranslationShortcut()
     cleanupTranslationModeShortcut()
     cleanupTranslationHubShortcut()
+    cleanupSidePanelShortcut()
     cleanupTranslationStateListener()
     cleanupFrameTranslationStateListener()
     cleanupDetectedLanguageRefreshListener()

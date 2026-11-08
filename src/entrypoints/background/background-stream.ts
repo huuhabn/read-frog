@@ -38,6 +38,7 @@ import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config/provider"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
+import { recordAuditLog } from "@/utils/audit-log/audit-log-service"
 import { BUILT_IN_AI_PROVIDER_IDS } from "@/utils/constants/provider-ids"
 import { upgradeAction } from "@/utils/error-action"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
@@ -862,15 +863,84 @@ export async function runStreamTextInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const partStream =
-    serializablePayload.providerKind === "system"
-      ? await createHostedTextPartStream(serializablePayload, signal)
-      : await createLocalTextPartStream(serializablePayload, options)
+  const startTime = performance.now()
+  let status: "success" | "error" | "aborted" = "success"
+  let errorMessage: string | undefined
+  let finalSnapshot: BackgroundTextStreamSnapshot | undefined
 
-  return consumeTextPartStream(partStream, {
-    onChunk,
-    signal,
-  })
+  try {
+    const partStream =
+      serializablePayload.providerKind === "system"
+        ? await createHostedTextPartStream(serializablePayload, signal)
+        : await createLocalTextPartStream(serializablePayload, options)
+
+    finalSnapshot = await consumeTextPartStream(partStream, {
+      onChunk,
+      signal,
+    })
+    return finalSnapshot
+  } catch (error) {
+    if (signal?.aborted || (error as Error)?.name === "AbortError") {
+      status = "aborted"
+    } else {
+      status = "error"
+      errorMessage = (error as Error)?.message || String(error)
+    }
+    throw error
+  } finally {
+    let promptStr = serializablePayload.prompt || ""
+    if (!promptStr && Array.isArray(serializablePayload.messages)) {
+      promptStr = serializablePayload.messages
+        .map((m) => {
+          if (m && typeof m === "object" && "content" in m) {
+            const role = "role" in m ? String((m as { role: unknown }).role) : "user"
+            const content =
+              typeof (m as { content: unknown }).content === "string"
+                ? (m as { content: string }).content
+                : JSON.stringify((m as { content: unknown }).content)
+            return `${role}: ${content}`
+          }
+          return typeof m === "string" ? m : JSON.stringify(m)
+        })
+        .join("\n\n")
+    }
+
+    const providerConfigObj =
+      serializablePayload.providerKind === "local"
+        ? (serializablePayload.providerConfig as
+            | { model?: { model?: string; customModel?: string } | string }
+            | undefined)
+        : undefined
+
+    const modelName =
+      typeof providerConfigObj?.model === "object"
+        ? providerConfigObj.model?.customModel || providerConfigObj.model?.model
+        : providerConfigObj?.model
+
+    const featureName =
+      serializablePayload.providerKind === "system"
+        ? serializablePayload.hostedFeature
+        : "AI Stream"
+
+    void recordAuditLog({
+      sourceFeature: featureName,
+      providerId: serializablePayload.providerId,
+      providerType: "llm",
+      model: modelName,
+      systemPrompt: serializablePayload.instructions,
+      prompt: promptStr,
+      parameters: {
+        temperature: serializablePayload.temperature,
+        topP: serializablePayload.topP,
+        maxTokens: serializablePayload.maxOutputTokens,
+      },
+      responseOutput: finalSnapshot?.output,
+      thinking: finalSnapshot?.thinking?.text,
+      latencyMs: Math.round(performance.now() - startTime),
+      status,
+      errorMessage,
+    })
+  }
 }
 
 async function createLocalStructuredObjectPartStream<TOutput extends Record<string, unknown>>(

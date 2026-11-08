@@ -64,6 +64,17 @@ export default defineConfig({
       "webNavigation",
       ...(browser !== "firefox" ? ["offscreen", "sidePanel"] : []),
     ],
+    ...(browser !== "firefox" && {
+      commands: {
+        open_side_panel: {
+          suggested_key: {
+            default: "Ctrl+Shift+S",
+            mac: "Command+Shift+S",
+          },
+          description: "Open or close the AI Side Panel",
+        },
+      },
+    }),
     host_permissions: [
       "*://*/*", // Required for scripting.executeScript in any frame
     ],

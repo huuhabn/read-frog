@@ -25,6 +25,7 @@ import { urlMatchesPattern } from "@/utils/url-pattern"
 import { enablePageTranslationAtom, isDraggingButtonAtom } from "../../atoms"
 import { shadowWrapper } from "../../main"
 import HiddenButton from "./components/hidden-button"
+import SidePanelButton from "./side-panel-button"
 import TranslateButton from "./translate-button"
 
 const readFrogLogoUrl = new URL(readFrogLogo, browser.runtime.getURL("/")).href
@@ -401,6 +402,9 @@ export default function FloatingButton() {
       style={containerStyle}
       onMouseLeave={handleMouseLeave}
     >
+      {!isDraggingButton && (
+        <SidePanelButton side={floatingButtonSide} expanded={isFloatingButtonExpanded} />
+      )}
       {!isDraggingButton && (
         <TranslateButton side={floatingButtonSide} expanded={isFloatingButtonExpanded} />
       )}

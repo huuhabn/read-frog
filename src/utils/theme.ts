@@ -20,6 +20,10 @@ export function applyTheme(target: HTMLElement, theme: "light" | "dark") {
 }
 
 export async function getLocalThemeMode(): Promise<ThemeMode> {
-  const themeMode = await storage.getItem<ThemeMode>(`local:${THEME_STORAGE_KEY}`)
-  return themeMode ?? DEFAULT_THEME_MODE
+  try {
+    const themeMode = await storage.getItem<ThemeMode>(`local:${THEME_STORAGE_KEY}`)
+    return themeMode ?? DEFAULT_THEME_MODE
+  } catch {
+    return DEFAULT_THEME_MODE
+  }
 }

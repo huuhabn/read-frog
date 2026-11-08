@@ -11,7 +11,7 @@ export function CollapseToggle() {
   const { open, toggleSidebar } = useSidebar()
 
   return (
-    <div className="absolute top-1/2 right-0 hidden translate-x-1/2 -translate-y-1/2 md:block">
+    <div className="absolute top-6 right-0 hidden translate-x-1/2 -translate-y-1/2 md:block">
       <Button
         variant="outline"
         size="icon-xs"

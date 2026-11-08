@@ -7,6 +7,7 @@ import { SelectionAnnotationModeShortcut } from "./selection-annotation-mode-sho
 import { SelectionAnnotationShortcut } from "./selection-annotation-shortcut"
 import { SelectionSpeakShortcut } from "./selection-speak-shortcut"
 import { SelectionTranslationShortcut } from "./selection-translation-shortcut"
+import { SidePanelShortcut } from "./side-panel-shortcut"
 import { SubtitlesToggleShortcut } from "./subtitles-toggle-shortcut"
 import { TranslationHubShortcut } from "./translation-hub-shortcut"
 import { TranslationModeShortcut } from "./translation-mode-shortcut"
@@ -34,6 +35,7 @@ export function ShortcutsPage() {
       <SubtitlesToggleShortcut />
       <NodeTranslationHotkey />
       <TranslationHubShortcut />
+      <SidePanelShortcut />
       <ActionShortcuts />
     </PageLayout>
   )

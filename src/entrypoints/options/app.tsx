@@ -46,6 +46,9 @@ const GlossaryEditorPage = lazy(() =>
     default: module.GlossaryEditorPage,
   })),
 )
+const AuditLogsPage = lazy(() =>
+  import("./pages/advanced/audit-logs").then((module) => ({ default: module.AuditLogsPage })),
+)
 
 /** Advanced has no page of its own; its group's only entry is the glossary. */
 function AdvancedRedirect() {
@@ -142,6 +145,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/help-and-community": HelpAndCommunityPage,
   "/advanced/glossary": GlossaryPage,
   "/advanced/glossary/:glossaryId": GlossaryEditorPage,
+  "/advanced/audit-logs": AuditLogsPage,
   "/preference/config-backup": ConfigBackupPage,
   "/preference/extension-activation": ExtensionActivationPage,
   "/page-translation/custom-css": CustomCssPage,

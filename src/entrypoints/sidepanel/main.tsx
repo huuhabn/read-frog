@@ -1,14 +1,24 @@
 import "@/utils/zod-config"
+import type { Config } from "@/types/config/config"
 import type { ThemeMode } from "@/types/config/theme"
-import { Provider as JotaiProvider } from "jotai"
+import { Provider as JotaiProvider, useAtomValue } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
-import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
 import { ThemeProvider } from "@/components/providers/theme-provider"
+import { configAtom } from "@/utils/atoms/config"
+import { sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { APP_NAME } from "@/utils/constants/app"
+import { getLocalConfig } from "@/utils/config/storage"
+import { DEFAULT_CONFIG } from "@/utils/constants/config"
+import { initI18n } from "@/utils/i18n"
 import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { getLocalThemeMode } from "@/utils/theme"
+import { ChatView } from "./components/chat/chat-view"
+import { ReadView } from "./components/read/read-view"
+import { SidePanelNavBar } from "./components/sidepanel-nav-bar"
+import { TranslateView } from "./components/translate/translate-view"
+import { WriteView } from "./components/write/write-view"
 import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
@@ -19,7 +29,10 @@ function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [[typeof baseThemeModeAtom, ThemeMode]]
+  initialValues: [
+    [typeof configAtom, Config],
+    [typeof baseThemeModeAtom, ThemeMode],
+  ]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -27,29 +40,55 @@ function HydrateAtoms({
 }
 
 function SidePanelShell() {
+  const activeTab = useAtomValue(sidepanelNavTabAtom)
+
   return (
-    <main className="flex min-h-screen flex-col bg-background px-5 py-6 text-foreground">
-      <section className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
-        <img src={readFrogLogo} alt={APP_NAME} className="size-16 rounded-full" />
-        <div className="space-y-2">
-          <h1 className="text-xl font-semibold tracking-tight">{APP_NAME}</h1>
-          <p className="text-sm text-muted-foreground">Side Panel is coming soon.</p>
-        </div>
-      </section>
-    </main>
+    <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground antialiased">
+      <main className="flex-1 h-full overflow-hidden">
+        {activeTab === "chat" && <ChatView />}
+        {activeTab === "read" && <ReadView />}
+        {activeTab === "write" && <WriteView />}
+        {activeTab === "translate" && <TranslateView />}
+        {activeTab === "history" && <ChatView />}
+      </main>
+      <SidePanelNavBar />
+    </div>
   )
 }
 
 async function initApp() {
   const root = document.getElementById("root")!
-  root.className = "min-h-screen bg-background text-base antialiased"
+  root.className = "h-screen w-screen overflow-hidden bg-background text-base antialiased"
 
-  const themeMode = await getLocalThemeMode()
+  let config = DEFAULT_CONFIG
+  let themeMode: ThemeMode = "system"
+
+  try {
+    const [configValue, localThemeMode] = await Promise.all([
+      getLocalConfig(),
+      getLocalThemeMode(),
+    ])
+    if (configValue) config = configValue
+    if (localThemeMode) themeMode = localThemeMode
+  } catch (error) {
+    console.warn("[SidePanel] Failed to load config or theme from storage, using defaults:", error)
+  }
+
+  try {
+    await initI18n(config.uiLanguage)
+  } catch (error) {
+    console.warn("[SidePanel] Failed to initialize i18n:", error)
+  }
 
   renderPersistentReactRoot(
     root,
     <JotaiProvider>
-      <HydrateAtoms initialValues={[[baseThemeModeAtom, themeMode]]}>
+      <HydrateAtoms
+        initialValues={[
+          [configAtom, config],
+          [baseThemeModeAtom, themeMode],
+        ]}
+      >
         <ThemeProvider>
           <SidePanelShell />
         </ThemeProvider>

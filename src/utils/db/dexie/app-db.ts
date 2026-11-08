@@ -4,7 +4,9 @@ import { Dexie } from "dexie"
 import { APP_NAME } from "@/utils/constants/app"
 import AiSegmentationCache from "./tables/ai-segmentation-cache"
 import ArticleSummaryCache from "./tables/article-summary-cache"
+import AuditLog from "./tables/audit-log"
 import BatchRequestRecord from "./tables/batch-request-record"
+import ChatSession from "./tables/chat-session"
 import Glossary from "./tables/glossary"
 import GlossarySyncSnapshot from "./tables/glossary-sync-snapshot"
 import GlossaryTerm from "./tables/glossary-term"
@@ -28,6 +30,10 @@ export default class AppDB extends Dexie {
   glossarySyncSnapshot!: EntityTable<GlossarySyncSnapshot, "id">
 
   logRecord!: EntityTable<LogRecordEntry, "id">
+
+  chatSession!: EntityTable<ChatSession, "id">
+
+  auditLog!: EntityTable<AuditLog, "id">
 
   constructor() {
     super(`${upperCamelCase(APP_NAME)}DB`)
@@ -199,8 +205,7 @@ export default class AppDB extends Dexie {
         await table.bulkDelete(droppedIds)
         await table.bulkPut(kept)
       })
-    // v8 adds the local log (utils/logging). Ordered and trimmed by its
-    // auto-increment id alone, so nothing else is indexed.
+    // v8 adds the local log (utils/logging) and user chat sessions for AI Side Panel.
     this.version(8).stores({
       translationCache: `
         key,
@@ -232,6 +237,61 @@ export default class AppDB extends Dexie {
         id`,
       logRecord: `
         ++id`,
+      chatSession: `
+        id,
+        title,
+        providerId,
+        model,
+        createdAt,
+        updatedAt`,
+    })
+    // v9 adds request audit log table for provider monitoring & prompt tuning
+    this.version(9).stores({
+      translationCache: `
+        key,
+        translation,
+        createdAt`,
+      batchRequestRecord: `
+        key,
+        createdAt,
+        originalRequestCount,
+        provider,
+        model`,
+      articleSummaryCache: `
+        key,
+        createdAt`,
+      aiSegmentationCache: `
+        key,
+        createdAt`,
+      glossary: `
+        id,
+        enabled,
+        createdAt`,
+      glossaryTerm: `
+        id,
+        glossaryId,
+        &[glossaryId+targetLang+matchKey],
+        enabled,
+        updatedAt`,
+      glossarySyncSnapshot: `
+        id`,
+      logRecord: `
+        ++id`,
+      chatSession: `
+        id,
+        title,
+        providerId,
+        model,
+        createdAt,
+        updatedAt`,
+      auditLog: `
+        id,
+        createdAt,
+        providerId,
+        providerType,
+        model,
+        sourceFeature,
+        status`,
     })
     this.translationCache.mapToClass(TranslationCache)
     this.batchRequestRecord.mapToClass(BatchRequestRecord)
@@ -241,5 +301,7 @@ export default class AppDB extends Dexie {
     this.glossaryTerm.mapToClass(GlossaryTerm)
     this.glossarySyncSnapshot.mapToClass(GlossarySyncSnapshot)
     this.logRecord.mapToClass(LogRecordEntry)
+    this.chatSession.mapToClass(ChatSession)
+    this.auditLog.mapToClass(AuditLog)
   }
 }

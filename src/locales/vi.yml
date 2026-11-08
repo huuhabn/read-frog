@@ -525,6 +525,19 @@ options:
           confirm: Xác nhận
           cancel: Hủy
           description: Thao tác này sẽ xoá toàn bộ cấu hình tuỳ chỉnh và đặt lại về mặc định. Bộ thuật ngữ của bạn được giữ lại — hãy xoá chúng từ trang bộ thuật ngữ. Vui lòng xác nhận.
+    auditLog:
+      sectionTitle: Nhật ký Request (Audit Log)
+      days: ngày
+      enabled:
+        title: Lưu lịch sử Request
+        description: Ghi lại nội dung câu lệnh (prompt), tham số và kết quả trả về từ tất cả Provider (LLM và dịch thuật) để phục vụ kiểm tra và cải thiện prompt.
+      retention:
+        title: Thời gian lưu trữ
+        description: Tự động xóa các bản ghi nhật ký cũ hơn khoảng thời gian này (tối đa lưu 1.000 log).
+      manage:
+        title: Quản lý Nhật ký
+        description: Xem chi tiết các request đã gửi, nội dung prompt, kết quả AI trả về hoặc xóa bớt nhật ký.
+        button: Mở trang Quản lý Log
     userExperience:
       title: Trải nghiệm người dùng
       beta:
@@ -557,6 +570,9 @@ options:
     translationHub:
       title: Trung tâm Dịch thuật
       description: Mở Trung tâm Dịch thuật trong tab mới.
+    sidePanel:
+      title: AI Side Panel
+      description: Mở hoặc đóng AI Side Panel.
     selectionSpeak:
       title: "Đọc vùng chọn"
       description: "Đọc to văn bản đã chọn. Nhấn lần nữa để dừng."
@@ -626,6 +642,7 @@ options:
       disableGlobally: Tắt toàn cục
     tooltips:
       togglePageTranslation: Bật/tắt dịch trang
+      sidePanel: Mở AI Side Panel
       floatingButtonOptions: Tùy chọn nút nổi
       lockPosition: Khóa vị trí
       unlockPosition: Mở khóa vị trí
@@ -1071,6 +1088,43 @@ options:
   advanced:
     title: Nâng cao
     pageDescription: Những thiết lập mạnh mẽ nhưng không dùng đến hằng ngày.
+    auditLogs:
+      title: Nhật ký Request
+      description: Theo dõi chi tiết các request gửi đến Provider, kiểm tra prompt, đánh giá phản hồi và dọn dẹp dữ liệu.
+      detailTitle: Chi tiết Request & Phản hồi
+      time: Thời gian
+      feature: Tính năng
+      provider: Nhà cung cấp
+      latency: Độ trễ
+      status: Trạng thái
+      promptContent: Nội dung Prompt
+      responseOutput: Phản hồi nhận về
+      parameters: Tham số
+      errorMessage: Thông báo lỗi
+      viewDetail: Xem chi tiết
+      delete: Xóa
+      clearAll: Xóa toàn bộ
+      clearAllConfirmTitle: Xóa tất cả nhật ký request?
+      clearAllConfirmDesc: Toàn bộ lịch sử request đã lưu trong tiện ích sẽ bị xóa hoàn toàn. Hành động này không thể hoàn tác.
+      cancel: Hủy
+      confirmDelete: Xác nhận xóa
+      emptyTitle: Chưa có nhật ký nào
+      emptyDesc: Khi bạn sử dụng AI hoặc dịch thuật và tính năng lưu nhật ký được bật, các request sẽ hiển thị tại đây.
+      disabledBanner: Tính năng lưu Audit Log hiện đang tắt. Các request mới sẽ không được ghi lại.
+      goToPreference: Đến cài đặt bật
+      searchPlaceholder: Tìm kiếm prompt, kết quả, model...
+      filterStatusAll: Tất cả trạng thái
+      statusSuccess: Thành công
+      statusError: Lỗi
+      statusAborted: Đã hủy
+      filterTypeAll: Tất cả loại
+      typeTranslation: Dịch thuật
+      refresh: Làm mới
+      totalCount: "Tổng cộng: $1 bản ghi"
+      pageIndicator: "Trang $1 / $2"
+      previous: Trước
+      next: Sau
+      actions: Thao tác
     glossary:
       title: Bảng thuật ngữ
       pageDescription: Đặt bản dịch cố định cho những từ quan trọng với bạn, và chọn nơi áp dụng cho từng danh sách.

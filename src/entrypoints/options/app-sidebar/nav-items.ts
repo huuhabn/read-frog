@@ -20,6 +20,7 @@ export const ROUTE_DEFS = [
   // sidebar lists its links itself — but route exactly like any other page.
   { path: "/advanced/glossary" },
   { path: "/advanced/glossary/:glossaryId" },
+  { path: "/advanced/audit-logs" },
   { path: "/preference/config-backup" },
   { path: "/preference/extension-activation" },
   { path: "/page-translation/custom-css" },

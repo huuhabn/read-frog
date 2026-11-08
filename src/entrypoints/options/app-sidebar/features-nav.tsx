@@ -224,6 +224,14 @@ export function FeaturesNav() {
                       <span>{i18n.t("options.advanced.glossary.title")}</span>
                     </SidebarMenuSubButton>
                   </SidebarMenuSubItem>
+                  <SidebarMenuSubItem>
+                    <SidebarMenuSubButton
+                      render={<Link to="/advanced/audit-logs" />}
+                      isActive={pathname.startsWith("/advanced/audit-logs")}
+                    >
+                      <span>{i18n.t("options.advanced.auditLogs.title")}</span>
+                    </SidebarMenuSubButton>
+                  </SidebarMenuSubItem>
                 </SidebarMenuSub>
               </CollapsibleContent>
             </SidebarMenuItem>

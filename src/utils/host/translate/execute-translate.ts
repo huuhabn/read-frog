@@ -5,6 +5,7 @@ import type { TranslationTextFormat } from "@/types/config/translate"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import { LANGUAGE_ENGLISH_NAMES } from "@read-frog/definitions"
 import { isLLMProviderConfig, isNonAPIProvider, isPureAPIProvider } from "@/types/config/provider"
+import { recordAuditLog } from "@/utils/audit-log/audit-log-service"
 import { aiTranslate } from "./api/ai"
 import { deeplTranslate } from "./api/deepl"
 import { deeplxTranslate } from "./api/deeplx"
@@ -44,49 +45,78 @@ export async function executeTranslate<TContext>(
   const { provider } = providerConfig
   let translatedText = ""
 
-  if (isNonAPIProvider(provider)) {
-    const google = provider === "google-translate"
-    const sourceLang = (google ? toGoogleSourceCode : toMicrosoftSourceCode)(langConfig.sourceCode)
-    const targetLang = (google ? toGoogleLanguageCode : toMicrosoftLanguageCode)(
-      langConfig.targetCode,
-    )
-    if (provider === "google-translate") {
-      translatedText = await googleTranslate(preparedText, sourceLang, targetLang, {
-        textFormat: options?.textFormat,
-        preserveLineBreaks: options?.preserveLineBreaks,
-        signal: options?.signal,
-      })
-    } else if (provider === "microsoft-translate") {
-      translatedText = await microsoftTranslate(preparedText, sourceLang, targetLang, {
-        textFormat: options?.textFormat,
-        signal: options?.signal,
-      })
-    }
-  } else if (isPureAPIProvider(provider)) {
-    const { sourceCode, targetCode } = langConfig
-    if (provider === "deeplx") {
-      translatedText = await deeplxTranslate(preparedText, sourceCode, targetCode, providerConfig, {
-        textFormat: options?.textFormat,
-        signal: options?.signal,
-      })
-    } else if (provider === "deepl") {
-      translatedText = await deeplTranslate(text, sourceCode, targetCode, providerConfig, {
-        textFormat: options?.textFormat,
-        signal: options?.signal,
-      })
-    }
-  } else if (isLLMProviderConfig(providerConfig)) {
-    const targetLangName = LANGUAGE_ENGLISH_NAMES[langConfig.targetCode]
-    translatedText = await aiTranslate(
-      preparedText,
-      targetLangName,
-      providerConfig,
-      promptResolver,
-      options,
-    )
-  } else {
-    throw new Error(`Unknown provider: ${provider}`)
-  }
+  const startTime = performance.now()
+  let status: "success" | "error" = "success"
+  let errorMessage: string | undefined
+  let finalResult = ""
 
-  return normalizeTranslationOutput(providerConfig, translatedText).trim()
+  try {
+    if (isNonAPIProvider(provider)) {
+      const google = provider === "google-translate"
+      const sourceLang = (google ? toGoogleSourceCode : toMicrosoftSourceCode)(langConfig.sourceCode)
+      const targetLang = (google ? toGoogleLanguageCode : toMicrosoftLanguageCode)(
+        langConfig.targetCode,
+      )
+      if (provider === "google-translate") {
+        translatedText = await googleTranslate(preparedText, sourceLang, targetLang, {
+          textFormat: options?.textFormat,
+          preserveLineBreaks: options?.preserveLineBreaks,
+          signal: options?.signal,
+        })
+      } else if (provider === "microsoft-translate") {
+        translatedText = await microsoftTranslate(preparedText, sourceLang, targetLang, {
+          textFormat: options?.textFormat,
+          signal: options?.signal,
+        })
+      }
+    } else if (isPureAPIProvider(provider)) {
+      const { sourceCode, targetCode } = langConfig
+      if (provider === "deeplx") {
+        translatedText = await deeplxTranslate(preparedText, sourceCode, targetCode, providerConfig, {
+          textFormat: options?.textFormat,
+          signal: options?.signal,
+        })
+      } else if (provider === "deepl") {
+        translatedText = await deeplTranslate(text, sourceCode, targetCode, providerConfig, {
+          textFormat: options?.textFormat,
+          signal: options?.signal,
+        })
+      }
+    } else if (isLLMProviderConfig(providerConfig)) {
+      const targetLangName = LANGUAGE_ENGLISH_NAMES[langConfig.targetCode]
+      translatedText = await aiTranslate(
+        preparedText,
+        targetLangName,
+        providerConfig,
+        promptResolver,
+        options,
+      )
+    } else {
+      throw new Error(`Unknown provider: ${provider}`)
+    }
+
+    finalResult = normalizeTranslationOutput(providerConfig, translatedText).trim()
+    return finalResult
+  } catch (err) {
+    status = "error"
+    errorMessage = (err as Error)?.message || String(err)
+    throw err
+  } finally {
+    if (!isLLMProviderConfig(providerConfig)) {
+      void recordAuditLog({
+        sourceFeature: options?.isBatch ? "Batch Translation" : "Page Translation",
+        providerId: providerConfig.id,
+        providerType: "translation",
+        prompt: preparedText,
+        parameters: {
+          sourceLang: langConfig.sourceCode,
+          targetLang: langConfig.targetCode,
+        },
+        responseOutput: finalResult,
+        latencyMs: Math.round(performance.now() - startTime),
+        status,
+        errorMessage,
+      })
+    }
+  }
 }
