@@ -1,7 +1,7 @@
+import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 // @vitest-environment jsdom
 import { render, screen, fireEvent, waitFor } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { AuditLogsPage } from "../index"
 
 const mockState = vi.hoisted(() => ({
@@ -22,10 +22,12 @@ const mockState = vi.hoisted(() => ({
 }))
 
 vi.mock("@/utils/audit-log/audit-log-service", () => ({
-  queryAuditLogs: vi.fn<(...args: unknown[]) => Promise<{ items: typeof mockState.logs; total: number }>>().mockImplementation(async () => ({
-    items: mockState.logs,
-    total: mockState.logs.length,
-  })),
+  queryAuditLogs: vi
+    .fn<(...args: unknown[]) => Promise<{ items: typeof mockState.logs; total: number }>>()
+    .mockImplementation(async () => ({
+      items: mockState.logs,
+      total: mockState.logs.length,
+    })),
   deleteAuditLog: vi.fn<(id: string) => Promise<void>>().mockImplementation(async (id) => {
     mockState.logs = mockState.logs.filter((l) => l.id !== id)
   }),
@@ -47,16 +49,20 @@ vi.mock("jotai", async () => {
   const actual = await vi.importActual("jotai")
   return {
     ...actual,
-    useAtomValue: vi.fn<() => { enabled: boolean; retentionDays: number; maxLogs: number }>().mockReturnValue({
-      enabled: true,
-      retentionDays: 30,
-      maxLogs: 1000,
-    }),
+    useAtomValue: vi
+      .fn<() => { enabled: boolean; retentionDays: number; maxLogs: number }>()
+      .mockReturnValue({
+        enabled: true,
+        retentionDays: 30,
+        maxLogs: 1000,
+      }),
   }
 })
 
 vi.mock("react-router", () => ({
-  Link: ({ children, to }: { children: React.ReactNode; to: string }) => <a href={to}>{children}</a>,
+  Link: ({ children, to }: { children: React.ReactNode; to: string }) => (
+    <a href={to}>{children}</a>
+  ),
 }))
 
 describe("AuditLogsPage", () => {

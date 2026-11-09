@@ -1,13 +1,17 @@
-import { useEffect, useRef, useState } from "react"
+import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
 import { useAtom, useAtomValue } from "jotai"
 import { BookOpen, Check, Copy, FileText, Globe, RefreshCw, Sparkles, Square } from "lucide-react"
-import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
-import { isLLMProviderConfig } from "@/types/config/provider"
+import { useEffect, useRef, useState } from "react"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { includePageContextAtom, selectedChatModelAtom, sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
+import {
+  includePageContextAtom,
+  selectedChatModelAtom,
+  sidepanelNavTabAtom,
+} from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { getActiveTabContent, type ActiveTabContent } from "@/utils/sidepanel/page-context"
 
@@ -86,7 +90,8 @@ export function ReadView() {
         {
           providerKind: "local",
           providerId: selectedModel.providerId,
-          providerConfig: matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          providerConfig:
+            matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
           messages: [
             {
               role: "system",
@@ -108,7 +113,10 @@ export function ReadView() {
       )
     } catch (err: unknown) {
       if ((err as Error)?.name !== "AbortError") {
-        setSummary((prev) => `${prev}\n\n*(Lỗi tóm tắt: ${(err as Error)?.message || "Không thể kết nối model"})*`)
+        setSummary(
+          (prev) =>
+            `${prev}\n\n*(Lỗi tóm tắt: ${(err as Error)?.message || "Không thể kết nối model"})*`,
+        )
       }
     } finally {
       setIsSummarizing(false)
@@ -149,14 +157,14 @@ export function ReadView() {
       {/* Page Info Card */}
       <div className="border-b border-border/50 bg-muted/20 p-3">
         <div className="flex items-start gap-2">
-          <Globe className="size-4 shrink-0 text-muted-foreground mt-0.5" />
+          <Globe className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
           <div className="min-w-0 flex-1 space-y-1">
             <h3 className="truncate text-xs font-medium text-foreground">
               {activeTab?.title || "Không nhận diện được tab"}
             </h3>
             <p className="truncate text-[10px] text-muted-foreground">{activeTab?.url}</p>
             {activeTab?.pageText && (
-              <Badge variant="outline" className="text-[9px] px-1.5 py-0 h-4">
+              <Badge variant="outline" className="h-4 px-1.5 py-0 text-[9px]">
                 ~{activeTab.pageText.length} ký tự
               </Badge>
             )}
@@ -198,9 +206,9 @@ export function ReadView() {
       {/* Summary Content Body */}
       <div className="flex-1 overflow-y-auto p-4">
         {summary ? (
-          <div className="relative group/sum rounded-xl border border-border/60 bg-muted/20 p-3 text-xs leading-relaxed">
-            <div className="flex items-center justify-between border-b border-border/40 pb-2 mb-3">
-              <span className="text-[11px] font-semibold text-primary uppercase tracking-wider">
+          <div className="group/sum relative rounded-xl border border-border/60 bg-muted/20 p-3 text-xs leading-relaxed">
+            <div className="mb-3 flex items-center justify-between border-b border-border/40 pb-2">
+              <span className="text-[11px] font-semibold tracking-wider text-primary uppercase">
                 {activeMode === "takeaways"
                   ? "Key Takeaways"
                   : activeMode === "tldr"
@@ -212,7 +220,7 @@ export function ReadView() {
                   <Button
                     size="sm"
                     variant="destructive"
-                    className="h-6 px-2 text-[10px] gap-1"
+                    className="h-6 gap-1 px-2 text-[10px]"
                     onClick={handleStop}
                   >
                     <Square className="size-2.5" />
@@ -225,7 +233,11 @@ export function ReadView() {
                   className="size-6 text-muted-foreground hover:text-foreground"
                   onClick={() => void handleCopy()}
                 >
-                  {isCopied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+                  {isCopied ? (
+                    <Check className="size-3 text-emerald-500" />
+                  ) : (
+                    <Copy className="size-3" />
+                  )}
                 </Button>
               </div>
             </div>
@@ -240,7 +252,7 @@ export function ReadView() {
       </div>
 
       {/* Bottom Footer Actions */}
-      <div className="border-t border-border/60 p-3 bg-muted/10">
+      <div className="border-t border-border/60 bg-muted/10 p-3">
         <Button
           variant="outline"
           size="sm"

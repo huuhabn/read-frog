@@ -1,8 +1,21 @@
 import type { SidePanelNavTab } from "@/utils/atoms/sidepanel"
 import { useAtom } from "jotai"
-import { BookOpen, History, Languages, MessageSquare, PenTool, ScrollText, Settings } from "lucide-react"
+import {
+  BookOpen,
+  History,
+  Languages,
+  MessageSquare,
+  PenTool,
+  ScrollText,
+  Settings,
+} from "lucide-react"
 import readFrogLogo from "@/assets/icons/read-frog.png?url&no-inline"
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/base-ui/tooltip"
 import { sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
 import { openOptionsPage } from "@/utils/navigation"
 import { cn } from "@/utils/styles/utils"
@@ -36,7 +49,11 @@ export function SidePanelNavBar() {
     <aside className="flex h-screen w-10 flex-col items-center justify-between border-l border-border/60 bg-muted/20 py-2.5 select-none">
       <div className="flex flex-col items-center gap-3">
         <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 p-0.5 shadow-xs">
-          <img src={readFrogLogo} alt="Workmate AI" className="size-5.5 rounded-md object-contain" />
+          <img
+            src={readFrogLogo}
+            alt="Workmate AI"
+            className="size-5.5 rounded-md object-contain"
+          />
         </div>
 
         <TooltipProvider delay={150}>

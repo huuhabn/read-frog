@@ -1,8 +1,8 @@
-import { useCallback, useEffect, useState } from "react"
+import type ChatSession from "@/utils/db/dexie/tables/chat-session"
 import { MessageSquare, Plus, Trash2, X } from "lucide-react"
+import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { db } from "@/utils/db/dexie/db"
-import type ChatSession from "@/utils/db/dexie/tables/chat-session"
 import { cn } from "@/utils/styles/utils"
 
 interface ChatHistoryDrawerProps {
@@ -133,7 +133,7 @@ export function ChatHistoryDrawer({
                         {messageCount} message{messageCount === 1 ? "" : "s"}
                       </span>
                       <span>•</span>
-                      <span className="truncate max-w-[100px]">{session.model}</span>
+                      <span className="max-w-[100px] truncate">{session.model}</span>
                     </div>
                   </div>
                   <Button

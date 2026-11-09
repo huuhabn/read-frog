@@ -29,10 +29,7 @@ function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [
-    [typeof configAtom, Config],
-    [typeof baseThemeModeAtom, ThemeMode],
-  ]
+  initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -44,7 +41,7 @@ function SidePanelShell() {
 
   return (
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground antialiased">
-      <main className="flex-1 h-full overflow-hidden">
+      <main className="h-full flex-1 overflow-hidden">
         {activeTab === "chat" && <ChatView />}
         {activeTab === "read" && <ReadView />}
         {activeTab === "write" && <WriteView />}
@@ -64,10 +61,7 @@ async function initApp() {
   let themeMode: ThemeMode = "system"
 
   try {
-    const [configValue, localThemeMode] = await Promise.all([
-      getLocalConfig(),
-      getLocalThemeMode(),
-    ])
+    const [configValue, localThemeMode] = await Promise.all([getLocalConfig(), getLocalThemeMode()])
     if (configValue) config = configValue
     if (localThemeMode) themeMode = localThemeMode
   } catch (error) {

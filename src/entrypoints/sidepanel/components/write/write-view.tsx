@@ -1,10 +1,10 @@
-import { useState, useRef } from "react"
+import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
 import { useAtomValue } from "jotai"
 import { ArrowDown, Check, Copy, FileEdit, PenTool, Sparkles, Square } from "lucide-react"
-import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
-import { isLLMProviderConfig } from "@/types/config/provider"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Textarea } from "@/components/ui/base-ui/textarea"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { selectedChatModelAtom } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
@@ -81,7 +81,8 @@ export function WriteView() {
         {
           providerKind: "local",
           providerId: selectedModel.providerId,
-          providerConfig: matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          providerConfig:
+            matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
           messages: [
             { role: "system", content: instruction },
             { role: "user", content: inputText },
@@ -121,7 +122,7 @@ export function WriteView() {
         <Button
           size="sm"
           variant="outline"
-          className="h-7 text-[11px] gap-1"
+          className="h-7 gap-1 text-[11px]"
           onClick={() => void handlePasteSelection()}
         >
           <FileEdit className="size-3" />
@@ -129,7 +130,7 @@ export function WriteView() {
         </Button>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {/* Input Text Box */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
@@ -141,7 +142,7 @@ export function WriteView() {
             onChange={(e) => setInputText(e.target.value)}
             placeholder="Nhập hoặc dán đoạn văn bản cần viết lại..."
             rows={4}
-            className="text-xs resize-none"
+            className="resize-none text-xs"
           />
         </div>
 
@@ -154,11 +155,11 @@ export function WriteView() {
                 key={btn.id}
                 size="sm"
                 variant={currentAction === btn.id ? "default" : "outline"}
-                className="h-8 justify-start text-xs font-normal px-2.5"
+                className="h-8 justify-start px-2.5 text-xs font-normal"
                 disabled={!inputText.trim() || isProcessing}
                 onClick={() => void handleExecute(btn.id)}
               >
-                <Sparkles className="size-3 text-primary mr-1 shrink-0" />
+                <Sparkles className="mr-1 size-3 shrink-0 text-primary" />
                 <span className="truncate">{btn.label}</span>
               </Button>
             ))}
@@ -174,7 +175,7 @@ export function WriteView() {
                 <Button
                   size="sm"
                   variant="destructive"
-                  className="h-6 px-2 text-[10px] gap-1"
+                  className="h-6 gap-1 px-2 text-[10px]"
                   onClick={handleStop}
                 >
                   <Square className="size-2.5" />
@@ -186,7 +187,7 @@ export function WriteView() {
                   <Button
                     size="sm"
                     variant="ghost"
-                    className="h-6 px-2 text-[10px] gap-1 text-muted-foreground"
+                    className="h-6 gap-1 px-2 text-[10px] text-muted-foreground"
                     onClick={() => {
                       setInputText(outputText)
                       setOutputText("")
@@ -202,7 +203,11 @@ export function WriteView() {
                     className="size-6 text-muted-foreground hover:text-foreground"
                     onClick={() => void handleCopy()}
                   >
-                    {isCopied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+                    {isCopied ? (
+                      <Check className="size-3 text-emerald-500" />
+                    ) : (
+                      <Copy className="size-3" />
+                    )}
                   </Button>
                 </>
               )}

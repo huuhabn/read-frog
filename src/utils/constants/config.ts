@@ -1,5 +1,4 @@
 import type { Config } from "@/types/config/config"
-import { DEFAULT_AUDIT_LOG_CONFIG } from "@/types/config/audit-log"
 import type { FloatingButtonSide } from "@/types/config/floating-button"
 import type {
   SelectionToolbarCustomAction,
@@ -7,6 +6,8 @@ import type {
 } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
+import { DEFAULT_AUDIT_LOG_CONFIG } from "@/types/config/audit-log"
+import { DEFAULT_SIDE_PANEL_SHORTCUT_KEY } from "@/types/config/side-panel"
 import {
   buildDictionaryActionLayout,
   buildImproveWritingActionLayout,
@@ -68,7 +69,6 @@ import {
   DEFAULT_SELECTION_TRANSLATION_SHORTCUT_KEY,
   DEFAULT_TRANSLATION_MODE_SHORTCUT_KEY,
 } from "./translate"
-import { DEFAULT_SIDE_PANEL_SHORTCUT_KEY } from "@/types/config/side-panel"
 import { DEFAULT_TRANSLATION_HUB_SHORTCUT_KEY } from "./translation-hub"
 import { TRANSLATION_NODE_STYLE_ON_INSTALLED } from "./translation-node-style"
 import { DEFAULT_TTS_CONFIG } from "./tts"

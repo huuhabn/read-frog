@@ -1,15 +1,10 @@
-import { useState } from "react"
+import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { Icon } from "@iconify/react"
+import { useState } from "react"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/base-ui/dialog"
-import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
@@ -39,7 +34,7 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="max-w-3xl max-h-[85vh] flex flex-col gap-4 overflow-hidden p-6">
+      <DialogContent className="flex max-h-[85vh] max-w-3xl flex-col gap-4 overflow-hidden p-6">
         <DialogHeader className="border-b border-border/60 pb-3">
           <div className="flex flex-wrap items-center justify-between gap-2">
             <DialogTitle className="flex items-center gap-2 text-base font-semibold">
@@ -48,9 +43,15 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
             </DialogTitle>
             <div className="flex items-center gap-1.5">
               <Badge
-                variant={log.status === "success" ? "default" : log.status === "error" ? "destructive" : "secondary"}
+                variant={
+                  log.status === "success"
+                    ? "default"
+                    : log.status === "error"
+                      ? "destructive"
+                      : "secondary"
+                }
                 className={cn(
-                  "text-xs uppercase font-mono",
+                  "font-mono text-xs uppercase",
                   log.status === "success" && "bg-emerald-600/90 text-white hover:bg-emerald-600",
                 )}
               >
@@ -64,21 +65,27 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
 
           <div className="mt-2 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-muted-foreground">
             <div>
-              <span className="font-medium text-foreground">{i18n.t("options.advanced.auditLogs.time")}: </span>
+              <span className="font-medium text-foreground">
+                {i18n.t("options.advanced.auditLogs.time")}:{" "}
+              </span>
               {formatTimestamp(log.createdAt)}
             </div>
             <div>
-              <span className="font-medium text-foreground">{i18n.t("options.advanced.auditLogs.feature")}: </span>
+              <span className="font-medium text-foreground">
+                {i18n.t("options.advanced.auditLogs.feature")}:{" "}
+              </span>
               {log.sourceFeature}
             </div>
             <div>
-              <span className="font-medium text-foreground">{i18n.t("options.advanced.auditLogs.provider")}: </span>
+              <span className="font-medium text-foreground">
+                {i18n.t("options.advanced.auditLogs.provider")}:{" "}
+              </span>
               {log.providerId} {log.model ? `(${log.model})` : ""}
             </div>
           </div>
         </DialogHeader>
 
-        <div className="flex-1 overflow-y-auto space-y-4 pr-1 text-xs">
+        <div className="flex-1 space-y-4 overflow-y-auto pr-1 text-xs">
           {/* Error Message if present */}
           {log.errorMessage && (
             <div className="rounded-lg border border-destructive/30 bg-destructive/10 p-3 text-destructive">
@@ -93,8 +100,8 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
           {/* System Prompt */}
           {log.systemPrompt && (
             <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
-              <div className="flex items-center justify-between pb-1.5 border-b border-border/40">
-                <span className="font-semibold text-foreground flex items-center gap-1.5">
+              <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
+                <span className="flex items-center gap-1.5 font-semibold text-foreground">
                   <Icon icon="tabler:terminal" className="size-4 text-primary" />
                   System Prompt
                 </span>
@@ -111,7 +118,7 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
                   <span>{copiedField === "systemPrompt" ? "Đã chép" : "Sao chép"}</span>
                 </Button>
               </div>
-              <p className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-muted-foreground leading-relaxed">
+              <p className="mt-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-muted-foreground">
                 {log.systemPrompt}
               </p>
             </div>
@@ -119,8 +126,8 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
 
           {/* User Prompt / Messages */}
           <div className="rounded-lg border border-border/80 bg-muted/30 p-3">
-            <div className="flex items-center justify-between pb-1.5 border-b border-border/40">
-              <span className="font-semibold text-foreground flex items-center gap-1.5">
+            <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
+              <span className="flex items-center gap-1.5 font-semibold text-foreground">
                 <Icon icon="tabler:message-circle" className="size-4 text-primary" />
                 {i18n.t("options.advanced.auditLogs.promptContent")}
               </span>
@@ -137,7 +144,7 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
                 <span>{copiedField === "prompt" ? "Đã chép" : "Sao chép"}</span>
               </Button>
             </div>
-            <p className="mt-2 whitespace-pre-wrap font-mono text-[11px] text-foreground leading-relaxed select-text">
+            <p className="mt-2 font-mono text-[11px] leading-relaxed whitespace-pre-wrap text-foreground select-text">
               {log.prompt}
             </p>
           </div>
@@ -145,8 +152,8 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
           {/* Reasoning / Thinking if present */}
           {log.thinking && (
             <div className="rounded-lg border border-amber-500/30 bg-amber-500/5 p-3">
-              <div className="flex items-center justify-between pb-1.5 border-b border-amber-500/20">
-                <span className="font-semibold text-foreground flex items-center gap-1.5">
+              <div className="flex items-center justify-between border-b border-amber-500/20 pb-1.5">
+                <span className="flex items-center gap-1.5 font-semibold text-foreground">
                   <Icon icon="tabler:brain" className="size-4 text-amber-500" />
                   Reasoning / Thinking Process
                 </span>
@@ -163,7 +170,7 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
                   <span>{copiedField === "thinking" ? "Đã chép" : "Sao chép"}</span>
                 </Button>
               </div>
-              <p className="mt-2 whitespace-pre-wrap text-[11px] text-muted-foreground leading-relaxed italic">
+              <p className="mt-2 text-[11px] leading-relaxed whitespace-pre-wrap text-muted-foreground italic">
                 {log.thinking}
               </p>
             </div>
@@ -171,8 +178,8 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
 
           {/* Response Output */}
           <div className="rounded-lg border border-border/80 bg-muted/20 p-3">
-            <div className="flex items-center justify-between pb-1.5 border-b border-border/40">
-              <span className="font-semibold text-foreground flex items-center gap-1.5">
+            <div className="flex items-center justify-between border-b border-border/40 pb-1.5">
+              <span className="flex items-center gap-1.5 font-semibold text-foreground">
                 <Icon icon="tabler:sparkles" className="size-4 text-primary" />
                 {i18n.t("options.advanced.auditLogs.responseOutput")}
               </span>
@@ -195,7 +202,7 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
               {log.responseOutput ? (
                 <MarkdownRenderer content={log.responseOutput} />
               ) : (
-                <p className="text-muted-foreground italic text-[11px]">
+                <p className="text-[11px] text-muted-foreground italic">
                   {log.status === "error" ? "(Không có phản hồi do lỗi)" : "(Phản hồi rỗng)"}
                 </p>
               )}
@@ -205,10 +212,10 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
           {/* Parameters & Technical Metadata */}
           {log.parameters && Object.keys(log.parameters).length > 0 && (
             <div className="rounded-lg border border-border/60 bg-muted/10 p-2.5">
-              <span className="font-medium text-muted-foreground text-[11px]">
+              <span className="text-[11px] font-medium text-muted-foreground">
                 {i18n.t("options.advanced.auditLogs.parameters")}:
               </span>
-              <pre className="mt-1 font-mono text-[10px] text-muted-foreground whitespace-pre-wrap">
+              <pre className="mt-1 font-mono text-[10px] whitespace-pre-wrap text-muted-foreground">
                 {JSON.stringify(log.parameters, null, 2)}
               </pre>
             </div>

@@ -1,8 +1,8 @@
-import { useEffect, useRef } from "react"
+import type { CustomAIAction } from "./custom-ai-actions"
 import { Sparkles, X } from "lucide-react"
+import { useEffect, useRef } from "react"
 import { Kbd } from "@/components/ui/base-ui/kbd"
 import { cn } from "@/utils/styles/utils"
-import type { CustomAIAction } from "./custom-ai-actions"
 
 interface SlashPromptPopoverProps {
   query: string
@@ -41,7 +41,7 @@ export function SlashPromptPopover({
   return (
     <div
       data-testid="slash-prompt-popover"
-      className="absolute bottom-[calc(100%+8px)] left-0 right-0 z-30 flex flex-col overflow-hidden rounded-xl border border-border/80 bg-popover/95 text-popover-foreground shadow-2xl backdrop-blur-md animate-in fade-in-0 zoom-in-95 duration-150"
+      className="absolute right-0 bottom-[calc(100%+8px)] left-0 z-30 flex animate-in flex-col overflow-hidden rounded-xl border border-border/80 bg-popover/95 text-popover-foreground shadow-2xl backdrop-blur-md duration-150 fade-in-0 zoom-in-95"
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border/60 bg-muted/40 px-3 py-2 text-xs">
@@ -50,7 +50,7 @@ export function SlashPromptPopover({
             <Sparkles className="size-3" />
           </div>
           <span className="font-semibold text-foreground">Custom AI Actions</span>
-          <span className="rounded-full bg-primary/15 px-1.5 py-0.2 text-[10px] font-medium text-primary">
+          <span className="py-0.2 rounded-full bg-primary/15 px-1.5 text-[10px] font-medium text-primary">
             {actions.length}
           </span>
         </div>
@@ -76,9 +76,9 @@ export function SlashPromptPopover({
       </div>
 
       {/* List */}
-      <div ref={listRef} className="max-h-64 overflow-y-auto p-1.5 space-y-0.5">
+      <div ref={listRef} className="max-h-64 space-y-0.5 overflow-y-auto p-1.5">
         {actions.length === 0 ? (
-          <div className="py-6 px-3 text-center">
+          <div className="px-3 py-6 text-center">
             <p className="text-xs font-medium text-foreground">
               Không tìm thấy action phù hợp với &ldquo;/{query}&rdquo;
             </p>
@@ -101,7 +101,7 @@ export function SlashPromptPopover({
                 onClick={() => onSelect(action)}
                 onMouseEnter={() => onHoverIndex(idx)}
                 className={cn(
-                  "group flex w-full items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors cursor-pointer",
+                  "group flex w-full cursor-pointer items-start gap-2.5 rounded-lg px-2.5 py-2 text-left transition-colors",
                   isSelected
                     ? "bg-accent text-accent-foreground ring-1 ring-primary/30"
                     : "hover:bg-muted/50",
@@ -121,11 +121,11 @@ export function SlashPromptPopover({
                 <div className="min-w-0 flex-1">
                   <div className="flex items-center justify-between gap-1">
                     <span className="truncate text-xs font-medium">{action.title}</span>
-                    <span className="shrink-0 rounded bg-muted px-1.5 py-0.2 font-mono text-[9px] uppercase tracking-wider text-muted-foreground">
+                    <span className="py-0.2 shrink-0 rounded bg-muted px-1.5 font-mono text-[9px] tracking-wider text-muted-foreground uppercase">
                       {action.category}
                     </span>
                   </div>
-                  <p className="mt-0.5 line-clamp-1 text-[11px] text-muted-foreground leading-normal">
+                  <p className="mt-0.5 line-clamp-1 text-[11px] leading-normal text-muted-foreground">
                     {action.description}
                   </p>
                 </div>

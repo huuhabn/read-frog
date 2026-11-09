@@ -1,6 +1,6 @@
+import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { getLocalConfig } from "@/utils/config/storage"
 import { db } from "@/utils/db/dexie/db"
-import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 
 export type AuditLogEntryInput = Omit<AuditLogItem, "id" | "createdAt">
 
@@ -75,7 +75,9 @@ export interface QueryAuditLogsResult {
   total: number
 }
 
-export async function queryAuditLogs(options: QueryAuditLogsOptions = {}): Promise<QueryAuditLogsResult> {
+export async function queryAuditLogs(
+  options: QueryAuditLogsOptions = {},
+): Promise<QueryAuditLogsResult> {
   const {
     searchQuery = "",
     providerId,

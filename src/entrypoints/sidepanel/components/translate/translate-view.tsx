@@ -1,8 +1,7 @@
-import { useState, useRef } from "react"
+import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
 import { useAtomValue } from "jotai"
 import { Check, Copy, FileEdit, Languages, Sparkles, Square } from "lucide-react"
-import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
-import { isLLMProviderConfig } from "@/types/config/provider"
+import { useState, useRef } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import {
   DropdownMenu,
@@ -11,6 +10,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
 import { Textarea } from "@/components/ui/base-ui/textarea"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { selectedChatModelAtom } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
@@ -39,7 +39,9 @@ export function TranslateView() {
 
   const [sourceText, setSourceText] = useState("")
   const [translatedText, setTranslatedText] = useState("")
-  const [targetLang, setTargetLang] = useState<LanguageOption>(POPULAR_LANGUAGES[0] || { code: "vi", name: "Tiếng Việt" })
+  const [targetLang, setTargetLang] = useState<LanguageOption>(
+    POPULAR_LANGUAGES[0] || { code: "vi", name: "Tiếng Việt" },
+  )
   const [isTranslating, setIsTranslating] = useState(false)
   const [isCopied, setIsCopied] = useState(false)
 
@@ -75,7 +77,8 @@ export function TranslateView() {
         {
           providerKind: "local",
           providerId: selectedModel.providerId,
-          providerConfig: matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          providerConfig:
+            matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
           messages: [
             {
               role: "system",
@@ -97,7 +100,9 @@ export function TranslateView() {
       )
     } catch (err: unknown) {
       if ((err as Error)?.name !== "AbortError") {
-        setTranslatedText(`*(Lỗi dịch thuật: ${(err as Error)?.message || "Không thể kết nối model"})*`)
+        setTranslatedText(
+          `*(Lỗi dịch thuật: ${(err as Error)?.message || "Không thể kết nối model"})*`,
+        )
       }
     } finally {
       setIsTranslating(false)
@@ -121,7 +126,7 @@ export function TranslateView() {
         <Button
           size="sm"
           variant="outline"
-          className="h-7 text-[11px] gap-1"
+          className="h-7 gap-1 text-[11px]"
           onClick={() => void handlePasteSelection()}
         >
           <FileEdit className="size-3" />
@@ -129,11 +134,13 @@ export function TranslateView() {
         </Button>
       </header>
 
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
+      <div className="flex-1 space-y-4 overflow-y-auto p-4">
         {/* Source Text */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Tự động nhận diện ngôn ngữ</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Tự động nhận diện ngôn ngữ
+            </span>
             <span className="text-[10px] text-muted-foreground">{sourceText.length} ký tự</span>
           </div>
           <Textarea
@@ -141,7 +148,7 @@ export function TranslateView() {
             onChange={(e) => setSourceText(e.target.value)}
             placeholder="Nhập nội dung cần dịch..."
             rows={4}
-            className="text-xs resize-none"
+            className="resize-none text-xs"
           />
         </div>
 
@@ -172,7 +179,7 @@ export function TranslateView() {
             <Button
               size="sm"
               variant="destructive"
-              className="h-7 px-3 text-xs gap-1"
+              className="h-7 gap-1 px-3 text-xs"
               onClick={handleStop}
             >
               <Square className="size-3" />
@@ -182,7 +189,7 @@ export function TranslateView() {
             <Button
               size="sm"
               disabled={!sourceText.trim()}
-              className="h-7 px-3 text-xs gap-1"
+              className="h-7 gap-1 px-3 text-xs"
               onClick={() => void handleTranslate()}
             >
               <Sparkles className="size-3" />
@@ -194,7 +201,9 @@ export function TranslateView() {
         {/* Translation Output */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-medium text-muted-foreground">Bản dịch ({targetLang.name}):</span>
+            <span className="text-xs font-medium text-muted-foreground">
+              Bản dịch ({targetLang.name}):
+            </span>
             {translatedText && (
               <Button
                 size="icon"
@@ -202,7 +211,11 @@ export function TranslateView() {
                 className="size-6 text-muted-foreground hover:text-foreground"
                 onClick={() => void handleCopy()}
               >
-                {isCopied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+                {isCopied ? (
+                  <Check className="size-3 text-emerald-500" />
+                ) : (
+                  <Copy className="size-3" />
+                )}
               </Button>
             )}
           </div>

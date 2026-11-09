@@ -1,5 +1,5 @@
-import { beforeEach, describe, expect, it, vi } from "vitest"
 import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
   clearAllAuditLogs,
   deleteAuditLog,
@@ -20,7 +20,9 @@ const mockState = vi.hoisted(() => ({
 }))
 
 vi.mock("@/utils/config/storage", () => ({
-  getLocalConfig: vi.fn<() => Promise<typeof mockState.config>>().mockImplementation(async () => mockState.config),
+  getLocalConfig: vi
+    .fn<() => Promise<typeof mockState.config>>()
+    .mockImplementation(async () => mockState.config),
 }))
 
 vi.mock("@/utils/db/dexie/db", () => {
@@ -41,32 +43,39 @@ vi.mock("@/utils/db/dexie/db", () => {
         const idSet = new Set(ids)
         mockState.logs = mockState.logs.filter((l) => !idSet.has(l.id))
       }),
-      where: vi.fn<(index: string) => { below: (date: Date) => { delete: () => Promise<number> } }>().mockImplementation((index) => ({
-        below: (date: Date) => ({
-          delete: async () => {
-            const beforeCount = mockState.logs.length
-            if (index === "createdAt") {
-              mockState.logs = mockState.logs.filter((l) => l.createdAt >= date)
-            }
-            return beforeCount - mockState.logs.length
-          },
-        }),
-      })),
-      orderBy: vi.fn<(_index: string) => {
-        reverse: () => { toArray: () => Promise<AuditLogItem[]> }
-        limit: (n: number) => { primaryKeys: () => Promise<string[]> }
-      }>().mockImplementation((_index) => ({
-        reverse: () => ({
-          toArray: async () => [...mockState.logs].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
-        }),
-        limit: (n: number) => ({
-          primaryKeys: async () =>
-            [...mockState.logs]
-              .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
-              .slice(0, n)
-              .map((l) => l.id),
-        }),
-      })),
+      where: vi
+        .fn<(index: string) => { below: (date: Date) => { delete: () => Promise<number> } }>()
+        .mockImplementation((index) => ({
+          below: (date: Date) => ({
+            delete: async () => {
+              const beforeCount = mockState.logs.length
+              if (index === "createdAt") {
+                mockState.logs = mockState.logs.filter((l) => l.createdAt >= date)
+              }
+              return beforeCount - mockState.logs.length
+            },
+          }),
+        })),
+      orderBy: vi
+        .fn<
+          (_index: string) => {
+            reverse: () => { toArray: () => Promise<AuditLogItem[]> }
+            limit: (n: number) => { primaryKeys: () => Promise<string[]> }
+          }
+        >()
+        .mockImplementation((_index) => ({
+          reverse: () => ({
+            toArray: async () =>
+              [...mockState.logs].sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+          }),
+          limit: (n: number) => ({
+            primaryKeys: async () =>
+              [...mockState.logs]
+                .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime())
+                .slice(0, n)
+                .map((l) => l.id),
+          }),
+        })),
     },
   }
 

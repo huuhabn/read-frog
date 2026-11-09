@@ -1,4 +1,5 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
+import type { ChatMessageItem } from "@/utils/db/dexie/tables/chat-session"
 import { useAtom, useAtomValue } from "jotai"
 import {
   Check,
@@ -11,8 +12,7 @@ import {
   Sparkles,
   Square,
 } from "lucide-react"
-import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
-import { isLLMProviderConfig } from "@/types/config/provider"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
@@ -23,6 +23,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
 import { Textarea } from "@/components/ui/base-ui/textarea"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   activeChatSessionIdAtom,
@@ -31,14 +32,10 @@ import {
 } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { db } from "@/utils/db/dexie/db"
-import type { ChatMessageItem } from "@/utils/db/dexie/tables/chat-session"
 import { getActiveTabContent, type ActiveTabContent } from "@/utils/sidepanel/page-context"
 import { cn } from "@/utils/styles/utils"
 import { ChatHistoryDrawer } from "./chat-history-drawer"
-import {
-  filterCustomAIActions,
-  type CustomAIAction,
-} from "./custom-ai-actions"
+import { filterCustomAIActions, type CustomAIAction } from "./custom-ai-actions"
 import { SlashPromptPopover } from "./slash-prompt-popover"
 
 const QUICK_PROMPTS = [
@@ -80,9 +77,7 @@ export function ChatView() {
   }, [slashQuery])
 
   const safeSelectedActionIndex =
-    filteredActions.length === 0
-      ? 0
-      : Math.min(selectedActionIndex, filteredActions.length - 1)
+    filteredActions.length === 0 ? 0 : Math.min(selectedActionIndex, filteredActions.length - 1)
 
   // Close slash popover when clicking outside
   useEffect(() => {
@@ -102,9 +97,7 @@ export function ChatView() {
   }, [isSlashOpen])
 
   // Filter available LLM providers from config
-  const llmProviders = providersConfig.filter(
-    (p) => isLLMProviderConfig(p) && p.enabled,
-  )
+  const llmProviders = providersConfig.filter((p) => isLLMProviderConfig(p) && p.enabled)
 
   // Auto load active tab content
   useEffect(() => {
@@ -228,7 +221,8 @@ export function ChatView() {
         {
           providerKind: "local",
           providerId: selectedModel.providerId,
-          providerConfig: matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          providerConfig:
+            matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
           messages: formattedMessages,
           temperature: 0.7,
         },
@@ -252,7 +246,8 @@ export function ChatView() {
       if ((err as Error)?.name === "AbortError") {
         console.info("Chat generation stopped by user")
       } else {
-        const errMessage = (err as Error)?.message || "Lỗi kết nối AI Provider. Vui lòng kiểm tra API Key."
+        const errMessage =
+          (err as Error)?.message || "Lỗi kết nối AI Provider. Vui lòng kiểm tra API Key."
         accumulatedText += `\n\n*(Lỗi: ${errMessage})*`
         setMessages((prev) => {
           const next = [...prev]
@@ -327,7 +322,9 @@ export function ChatView() {
       }
       if (e.key === "ArrowUp") {
         e.preventDefault()
-        setSelectedActionIndex((prev) => (prev - 1 + filteredActions.length) % filteredActions.length)
+        setSelectedActionIndex(
+          (prev) => (prev - 1 + filteredActions.length) % filteredActions.length,
+        )
         return
       }
       if (e.key === "Enter" && !e.shiftKey) {
@@ -358,7 +355,7 @@ export function ChatView() {
         <DropdownMenu>
           <DropdownMenuTrigger className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-foreground/90 transition-colors hover:bg-muted">
             <Sparkles className="size-3.5 text-primary" />
-            <span className="truncate max-w-[120px]">{selectedModel.model || "Select Model"}</span>
+            <span className="max-w-[120px] truncate">{selectedModel.model || "Select Model"}</span>
             <ChevronDown className="size-3 opacity-60" />
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start" className="w-56 text-xs">
@@ -424,7 +421,7 @@ export function ChatView() {
             </div>
             <div className="space-y-1">
               <h3 className="text-sm font-semibold tracking-tight">Sider AI Assistant</h3>
-              <p className="text-xs text-muted-foreground max-w-[240px]">
+              <p className="max-w-[240px] text-xs text-muted-foreground">
                 Đặt câu hỏi, tóm tắt bài viết hoặc dịch thuật với các mô hình AI thông minh.
               </p>
             </div>
@@ -457,16 +454,16 @@ export function ChatView() {
                       "max-w-[88%] rounded-xl px-3 py-2 text-xs leading-relaxed",
                       isUser
                         ? "bg-primary text-primary-foreground shadow-xs"
-                        : "bg-muted/40 border border-border/50 text-foreground",
+                        : "border border-border/50 bg-muted/40 text-foreground",
                     )}
                   >
                     {isUser ? (
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     ) : (
-                      <div className="relative group/msg">
+                      <div className="group/msg relative">
                         <MarkdownRenderer content={msg.content} />
                         {msg.content && (
-                          <div className="mt-2 flex items-center justify-end gap-1 pt-1 opacity-0 group-hover/msg:opacity-100 transition-opacity">
+                          <div className="mt-2 flex items-center justify-end gap-1 pt-1 opacity-0 transition-opacity group-hover/msg:opacity-100">
                             <Button
                               size="icon"
                               variant="ghost"
@@ -495,7 +492,7 @@ export function ChatView() {
       {/* Page Context Badge */}
       {activeTab?.title && (
         <div className="flex items-center justify-between border-t border-border/40 bg-muted/20 px-3 py-1.5 text-[11px]">
-          <div className="flex items-center gap-1.5 min-w-0">
+          <div className="flex min-w-0 items-center gap-1.5">
             <Globe className="size-3.5 shrink-0 text-muted-foreground" />
             <span className="truncate text-muted-foreground">{activeTab.title}</span>
           </div>
@@ -507,7 +504,7 @@ export function ChatView() {
             <Badge
               variant={usePageContext ? "default" : "outline"}
               className={cn(
-                "h-5 text-[10px] cursor-pointer transition-colors",
+                "h-5 cursor-pointer text-[10px] transition-colors",
                 usePageContext ? "bg-primary text-primary-foreground" : "text-muted-foreground",
               )}
             >
@@ -518,7 +515,7 @@ export function ChatView() {
       )}
 
       {/* Input Box */}
-      <div ref={inputContainerRef} className="relative border-t border-border/60 p-3 bg-background">
+      <div ref={inputContainerRef} className="relative border-t border-border/60 bg-background p-3">
         {/* Custom AI Actions Floating Popover */}
         {isSlashOpen && (
           <SlashPromptPopover
@@ -539,12 +536,14 @@ export function ChatView() {
             onKeyDown={handleKeyDown}
             placeholder="Hỏi bất kỳ điều gì, hoặc gõ '/' để chọn Custom AI Actions... (Enter để gửi)"
             rows={2}
-            className="min-h-[44px] max-h-32 resize-none border-0 bg-transparent p-1 text-xs shadow-none focus-visible:ring-0"
+            className="max-h-32 min-h-[44px] resize-none border-0 bg-transparent p-1 text-xs shadow-none focus-visible:ring-0"
           />
           <div className="flex items-center justify-between pt-1">
-            <span className="text-[10px] text-muted-foreground/70 flex items-center gap-1">
+            <span className="flex items-center gap-1 text-[10px] text-muted-foreground/70">
               <span>Gõ</span>
-              <kbd className="font-mono rounded bg-muted px-1 text-[9px] border border-border/50">/</kbd>
+              <kbd className="rounded border border-border/50 bg-muted px-1 font-mono text-[9px]">
+                /
+              </kbd>
               <span>để chọn Custom AI Actions</span>
             </span>
             {isStreaming ? (

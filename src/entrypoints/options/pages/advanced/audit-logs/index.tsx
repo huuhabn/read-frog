@@ -1,6 +1,7 @@
-import { useEffect, useState } from "react"
+import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { Icon } from "@iconify/react"
 import { useAtomValue } from "jotai"
+import { useEffect, useState } from "react"
 import { Link } from "react-router"
 import {
   AlertDialog,
@@ -16,13 +17,12 @@ import {
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   clearAllAuditLogs,
   deleteAuditLog,
   queryAuditLogs,
 } from "@/utils/audit-log/audit-log-service"
-import { configFieldsAtomMap } from "@/utils/atoms/config"
-import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { PageLayout } from "../../../components/page-layout"
@@ -47,22 +47,22 @@ export function AuditLogsPage() {
 
   useEffect(() => {
     let isCancelled = false
-    if (refreshTrigger < 0) return
-
-    const offset = (currentPage - 1) * PAGE_SIZE
-    void queryAuditLogs({
-      searchQuery,
-      status: statusFilter,
-      providerType: typeFilter,
-      offset,
-      limit: PAGE_SIZE,
-    }).then(({ items, total }) => {
-      if (!isCancelled) {
-        setLogs(items)
-        setTotalCount(total)
-        setIsLoading(false)
-      }
-    })
+    if (refreshTrigger >= 0) {
+      const offset = (currentPage - 1) * PAGE_SIZE
+      void queryAuditLogs({
+        searchQuery,
+        status: statusFilter,
+        providerType: typeFilter,
+        offset,
+        limit: PAGE_SIZE,
+      }).then(({ items, total }) => {
+        if (!isCancelled) {
+          setLogs(items)
+          setTotalCount(total)
+          setIsLoading(false)
+        }
+      })
+    }
 
     return () => {
       isCancelled = true
@@ -133,7 +133,7 @@ export function AuditLogsPage() {
               size="sm"
               variant="outline"
               render={<Link to="/preference" />}
-              className="h-7 text-xs border-amber-500/40 hover:bg-amber-500/20"
+              className="h-7 border-amber-500/40 text-xs hover:bg-amber-500/20"
             >
               {i18n.t("options.advanced.auditLogs.goToPreference")}
             </Button>
@@ -146,13 +146,13 @@ export function AuditLogsPage() {
             <div className="relative min-w-[200px] flex-1 sm:max-w-xs">
               <Icon
                 icon="tabler:search"
-                className="absolute left-2.5 top-1/2 -translate-y-1/2 size-4 text-muted-foreground"
+                className="absolute top-1/2 left-2.5 size-4 -translate-y-1/2 text-muted-foreground"
               />
               <Input
                 placeholder={i18n.t("options.advanced.auditLogs.searchPlaceholder")}
                 value={searchQuery}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="h-8 pl-8 text-xs bg-background"
+                className="h-8 bg-background pl-8 text-xs"
               />
             </div>
 
@@ -160,7 +160,7 @@ export function AuditLogsPage() {
             <select
               value={statusFilter}
               onChange={(e) => handleStatusChange(e.target.value as typeof statusFilter)}
-              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
+              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-hidden"
             >
               <option value="all">{i18n.t("options.advanced.auditLogs.filterStatusAll")}</option>
               <option value="success">{i18n.t("options.advanced.auditLogs.statusSuccess")}</option>
@@ -172,11 +172,13 @@ export function AuditLogsPage() {
             <select
               value={typeFilter}
               onChange={(e) => handleTypeChange(e.target.value as typeof typeFilter)}
-              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
+              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-hidden"
             >
               <option value="all">{i18n.t("options.advanced.auditLogs.filterTypeAll")}</option>
               <option value="llm">AI / LLM</option>
-              <option value="translation">{i18n.t("options.advanced.auditLogs.typeTranslation")}</option>
+              <option value="translation">
+                {i18n.t("options.advanced.auditLogs.typeTranslation")}
+              </option>
             </select>
 
             <Button
@@ -208,13 +210,17 @@ export function AuditLogsPage() {
                 />
                 <AlertDialogContent>
                   <AlertDialogHeader>
-                    <AlertDialogTitle>{i18n.t("options.advanced.auditLogs.clearAllConfirmTitle")}</AlertDialogTitle>
+                    <AlertDialogTitle>
+                      {i18n.t("options.advanced.auditLogs.clearAllConfirmTitle")}
+                    </AlertDialogTitle>
                     <AlertDialogDescription>
                       {i18n.t("options.advanced.auditLogs.clearAllConfirmDesc")}
                     </AlertDialogDescription>
                   </AlertDialogHeader>
                   <AlertDialogFooter>
-                    <AlertDialogCancel>{i18n.t("options.advanced.auditLogs.cancel")}</AlertDialogCancel>
+                    <AlertDialogCancel>
+                      {i18n.t("options.advanced.auditLogs.cancel")}
+                    </AlertDialogCancel>
                     <AlertDialogAction onClick={() => void handleClearAll()}>
                       {i18n.t("options.advanced.auditLogs.confirmDelete")}
                     </AlertDialogAction>
@@ -226,29 +232,37 @@ export function AuditLogsPage() {
         </div>
 
         {/* Log List / Table */}
-        <div className="rounded-xl border border-border/80 bg-background overflow-hidden shadow-xs">
+        <div className="overflow-hidden rounded-xl border border-border/80 bg-background shadow-xs">
           {logs.length === 0 ? (
             <div className="flex flex-col items-center justify-center p-12 text-center text-muted-foreground">
-              <Icon icon="tabler:file-x" className="size-10 text-muted-foreground/40 mb-3" />
+              <Icon icon="tabler:file-x" className="mb-3 size-10 text-muted-foreground/40" />
               <p className="text-sm font-medium text-foreground">
                 {i18n.t("options.advanced.auditLogs.emptyTitle")}
               </p>
-              <p className="text-xs text-muted-foreground mt-1 max-w-sm">
+              <p className="mt-1 max-w-sm text-xs text-muted-foreground">
                 {i18n.t("options.advanced.auditLogs.emptyDesc")}
               </p>
             </div>
           ) : (
             <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse text-xs">
+              <table className="w-full border-collapse text-left text-xs">
                 <thead>
-                  <tr className="border-b border-border/60 bg-muted/40 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    <th className="py-2.5 px-3">{i18n.t("options.advanced.auditLogs.time")}</th>
-                    <th className="py-2.5 px-3">{i18n.t("options.advanced.auditLogs.feature")}</th>
-                    <th className="py-2.5 px-3">{i18n.t("options.advanced.auditLogs.provider")}</th>
-                    <th className="py-2.5 px-3">{i18n.t("options.advanced.auditLogs.promptContent")}</th>
-                    <th className="py-2.5 px-3 text-right">{i18n.t("options.advanced.auditLogs.latency")}</th>
-                    <th className="py-2.5 px-3 text-center">{i18n.t("options.advanced.auditLogs.status")}</th>
-                    <th className="py-2.5 px-3 text-right">{i18n.t("options.advanced.auditLogs.actions")}</th>
+                  <tr className="border-b border-border/60 bg-muted/40 text-[11px] font-semibold tracking-wider text-muted-foreground uppercase">
+                    <th className="px-3 py-2.5">{i18n.t("options.advanced.auditLogs.time")}</th>
+                    <th className="px-3 py-2.5">{i18n.t("options.advanced.auditLogs.feature")}</th>
+                    <th className="px-3 py-2.5">{i18n.t("options.advanced.auditLogs.provider")}</th>
+                    <th className="px-3 py-2.5">
+                      {i18n.t("options.advanced.auditLogs.promptContent")}
+                    </th>
+                    <th className="px-3 py-2.5 text-right">
+                      {i18n.t("options.advanced.auditLogs.latency")}
+                    </th>
+                    <th className="px-3 py-2.5 text-center">
+                      {i18n.t("options.advanced.auditLogs.status")}
+                    </th>
+                    <th className="px-3 py-2.5 text-right">
+                      {i18n.t("options.advanced.auditLogs.actions")}
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
@@ -257,19 +271,19 @@ export function AuditLogsPage() {
                     const isError = log.status === "error"
 
                     return (
-                      <tr key={log.id} className="hover:bg-muted/30 transition-colors">
-                        <td className="py-2.5 px-3 whitespace-nowrap text-muted-foreground text-[11px] font-mono">
+                      <tr key={log.id} className="transition-colors hover:bg-muted/30">
+                        <td className="px-3 py-2.5 font-mono text-[11px] whitespace-nowrap text-muted-foreground">
                           {new Intl.DateTimeFormat(undefined, {
                             dateStyle: "short",
                             timeStyle: "medium",
                           }).format(new Date(log.createdAt))}
                         </td>
-                        <td className="py-2.5 px-3 whitespace-nowrap">
+                        <td className="px-3 py-2.5 whitespace-nowrap">
                           <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-foreground">
                             {log.sourceFeature}
                           </span>
                         </td>
-                        <td className="py-2.5 px-3 whitespace-nowrap">
+                        <td className="px-3 py-2.5 whitespace-nowrap">
                           <div className="flex flex-col">
                             <span className="font-medium text-foreground">{log.providerId}</span>
                             {log.model && (
@@ -279,24 +293,24 @@ export function AuditLogsPage() {
                             )}
                           </div>
                         </td>
-                        <td className="py-2.5 px-3 max-w-xs truncate text-muted-foreground font-mono text-[11px]">
+                        <td className="max-w-xs truncate px-3 py-2.5 font-mono text-[11px] text-muted-foreground">
                           {log.prompt}
                         </td>
-                        <td className="py-2.5 px-3 text-right whitespace-nowrap font-mono text-[11px] text-muted-foreground">
+                        <td className="px-3 py-2.5 text-right font-mono text-[11px] whitespace-nowrap text-muted-foreground">
                           {log.latencyMs} ms
                         </td>
-                        <td className="py-2.5 px-3 text-center whitespace-nowrap">
+                        <td className="px-3 py-2.5 text-center whitespace-nowrap">
                           <Badge
                             variant={isSuccess ? "default" : isError ? "destructive" : "secondary"}
                             className={cn(
-                              "text-[10px] uppercase font-mono px-1.5 py-0.2",
+                              "py-0.2 px-1.5 font-mono text-[10px] uppercase",
                               isSuccess && "bg-emerald-600/90 text-white hover:bg-emerald-600",
                             )}
                           >
                             {log.status}
                           </Badge>
                         </td>
-                        <td className="py-2.5 px-3 text-right whitespace-nowrap">
+                        <td className="px-3 py-2.5 text-right whitespace-nowrap">
                           <div className="flex items-center justify-end gap-1">
                             <Button
                               size="icon"

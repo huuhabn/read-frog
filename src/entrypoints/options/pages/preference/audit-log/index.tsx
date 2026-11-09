@@ -37,7 +37,7 @@ export function AuditLogSection() {
             onChange={(e) => {
               void setAuditLog({ retentionDays: Number(e.target.value) })
             }}
-            className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:outline-hidden focus:ring-1 focus:ring-primary"
+            className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-hidden"
           >
             <option value={7}>7 {i18n.t("options.preference.auditLog.days")}</option>
             <option value={14}>14 {i18n.t("options.preference.auditLog.days")}</option>

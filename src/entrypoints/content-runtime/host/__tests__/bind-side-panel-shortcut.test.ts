@@ -45,15 +45,11 @@ describe("bindSidePanelShortcutKey", () => {
 
     const cleanup = await bindSidePanelShortcutKey()
 
-    expect(mockRegister).toHaveBeenCalledWith(
-      "Alt+Shift+S",
-      expect.any(Function),
-      {
-        ignoreInputs: true,
-        preventDefault: true,
-        stopPropagation: true,
-      },
-    )
+    expect(mockRegister).toHaveBeenCalledWith("Alt+Shift+S", expect.any(Function), {
+      ignoreInputs: true,
+      preventDefault: true,
+      stopPropagation: true,
+    })
 
     // Trigger registered callback
     const registeredCallback = mockRegister.mock.calls[0]?.[1]
