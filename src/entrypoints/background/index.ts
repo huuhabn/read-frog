@@ -55,6 +55,15 @@ export default defineBackground({
     setupDiagnosticsHandlers()
     log.debug("Hello background!", { id: browser.runtime.id })
 
+    // Allow content scripts to access session storage in Chromium MV3
+    if (browser.storage?.session?.setAccessLevel) {
+      void browser.storage.session
+        .setAccessLevel({
+          accessLevel: "TRUSTED_AND_UNTRUSTED_CONTEXTS",
+        })
+        .catch(() => {})
+    }
+
     browser.runtime.onInstalled.addListener(async (details) => {
       // First, and for every reason rather than just "install": this is the only place the
       // install time is ever recorded, and it must not be lost to a service worker dying

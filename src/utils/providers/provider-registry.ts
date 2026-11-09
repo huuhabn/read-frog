@@ -6,7 +6,7 @@ import type {
   ProviderSelectorOption,
   SystemProviderSelectorItem,
 } from "@/utils/providers/provider-display"
-import readFrogLogo from "@/assets/providers/read-frog-provider.png?url&no-inline"
+import logo from "@/assets/icons/logo.png?url&no-inline"
 import { isLLMProviderConfig, isTranslateProviderConfig } from "@/types/config/provider"
 import {
   BUILT_IN_AI_PROVIDER_ID,
@@ -21,7 +21,7 @@ export {
   BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_ADVANCE_PROVIDER_ID,
 } from "@/utils/constants/provider-ids"
-export const BUILT_IN_AI_PROVIDER_LOGO = readFrogLogo
+export const BUILT_IN_AI_PROVIDER_LOGO = logo
 
 const BUILT_IN_AI_PROVIDER_NAME_KEY = "options.apiProviders.providers.name.builtInAi"
 const BUILT_IN_AI_PROVIDER_FALLBACK_NAME = "Built-in AI"

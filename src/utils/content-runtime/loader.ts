@@ -27,6 +27,7 @@ async function isSiteEnabledByStoredConfig() {
  * by the loader content script every page gets and the ebook section script.
  */
 export async function runContentLoader(parts: readonly ContentRuntimePart[]) {
+  if (!browser.runtime?.id) return
   if (parts.length === 0 || shouldSkipDocument(document)) return
   if (!(await isSiteEnabledByStoredConfig())) return
 
