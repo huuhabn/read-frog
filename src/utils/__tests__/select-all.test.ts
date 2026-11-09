@@ -69,7 +69,7 @@ describe("protectSelectAllShadowRoot", () => {
   it.each([
     ["the toolbar's listener runs first", false],
     ["the floating button's listener runs first", true],
-  ])("selects the page without any Read Frog UI when %s", (_, floatingButtonFirst) => {
+  ])("selects the page without any Workmate AI UI when %s", (_, floatingButtonFirst) => {
     const toolbar = createHost("read-frog-selection")
     const floatingButton = createHost("read-frog")
     for (const host of floatingButtonFirst
@@ -88,7 +88,7 @@ describe("protectSelectAllShadowRoot", () => {
     expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
   })
 
-  it("selects only the Read Frog UI under the pointer, whichever listener runs last", () => {
+  it("selects only the Workmate AI UI under the pointer, whichever listener runs last", () => {
     const toolbar = createHost("read-frog-selection")
     const floatingButton = createHost("read-frog")
     protect(toolbar)
@@ -107,7 +107,7 @@ describe("protectSelectAllShadowRoot", () => {
   })
 
   // Opening the translation card puts the focus on one of its buttons.
-  it("selects the page without any Read Frog UI while a button in it has the focus", () => {
+  it("selects the page without any Workmate AI UI while a button in it has the focus", () => {
     const toolbar = createHost("read-frog-selection")
     const floatingButton = createHost("read-frog")
     protect(toolbar)
@@ -150,7 +150,7 @@ describe("protectSelectAllShadowRoot", () => {
     expect(range.intersectsNode(floatingButton.shadowHost)).toBe(false)
   })
 
-  it("leaves Ctrl+A to a text field in Read Frog UI", () => {
+  it("leaves Ctrl+A to a text field in Workmate AI UI", () => {
     const toolbar = createHost("read-frog-selection")
     const floatingButton = createHost("read-frog")
     protect(toolbar)

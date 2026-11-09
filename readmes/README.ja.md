@@ -1,6 +1,6 @@
 <div align="center"><a name="readme-top"></a>
 
-[![Read Frog banner][image-banner]][website]
+[![Workmate AI banner][image-banner]][website]
 
 <p align="center">
   <a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" width="250" height="55" /></a>
@@ -74,9 +74,9 @@ https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 はじめに・コミュニティ
 
-Read Frog のビジョンは、あらゆるレベルの言語学習者に、使いやすく、賢く、個人に合わせた学習体験を届けることです。AI の時代になり、それは現実的になりましたが、市場にはこの需要を満たす製品がまだ多くありません。そこで私たちは自分たちで作ることにしました。
+Workmate AI のビジョンは、あらゆるレベルの言語学習者に、使いやすく、賢く、個人に合わせた学習体験を届けることです。AI の時代になり、それは現実的になりましたが、市場にはこの需要を満たす製品がまだ多くありません。そこで私たちは自分たちで作ることにしました。
 
-ユーザーであっても開発者であっても、Read Frog はこのビジョンに向かうための重要なツールになります。現在も活発に開発中のため、問題を見つけた場合はぜひ[Issue][issues-link]で知らせてください。
+ユーザーであっても開発者であっても、Workmate AI はこのビジョンに向かうための重要なツールになります。現在も活発に開発中のため、問題を見つけた場合はぜひ[Issue][issues-link]で知らせてください。
 
 ### ダウンロード
 
@@ -96,7 +96,7 @@ Read Frog のビジョンは、あらゆるレベルの言語学習者に、使�
 >
 > **⭐️ Star をお願いします**。GitHub のリリース通知をすぐに受け取れます。
 
-[![Star Read Frog on GitHub][image-star]][github-star-link]
+[![Star Workmate AI on GitHub][image-star]][github-star-link]
 
 <details>
 <summary>
@@ -115,7 +115,7 @@ Read Frog のビジョンは、あらゆるレベルの言語学習者に、使�
 
 ## ✨ 機能
 
-Read Frog の機能で、毎日の Web 読書を没入型の言語学習体験に変えられます。
+Workmate AI の機能で、毎日の Web 読書を没入型の言語学習体験に変えられます。
 
 ### 🪄 [カスタムAIアクション][docs-custom-actions]
 
@@ -127,7 +127,7 @@ Read Frog の機能で、毎日の Web 読書を没入型の言語学習体験�
 
 語彙、定義、例文、翻訳、読書メモを Notebase に保存し、カスタマイズ可能なカードテンプレートからフラッシュカードを作成できます。読書中に見つけた内容を、流れを止めずに学習教材へ変えられます。
 
-期限が来たカードをオンラインで復習し、**もう一度**、**難しい**、**良い**、**簡単**で評価します。Read Frog の間隔反復スケジューラーが評価をもとに、忘れそうになる直前の最適なタイミングでカードを再表示します。
+期限が来たカードをオンラインで復習し、**もう一度**、**難しい**、**良い**、**簡単**で評価します。Workmate AI の間隔反復スケジューラーが評価をもとに、忘れそうになる直前の最適なタイミングでカードを再表示します。
 
 ### 🔄 [バイリンガル / 翻訳のみ][docs-page-translation]
 
@@ -143,7 +143,7 @@ Web ページ上の任意のテキストを選択すると、便利なツール�
 
 ### 🧠 [文脈対応翻訳][blog-context-translation]
 
-読んでいる内容の文脈を AI に理解させます。有効にすると、Read Frog はページタイトルと簡潔な Markdown 版の本文を抽出し、より正確で文脈に合った翻訳のために AI へ渡します。
+読んでいる内容の文脈を AI に理解させます。有効にすると、Workmate AI はページタイトルと簡潔な Markdown 版の本文を抽出し、より正確で文脈に合った翻訳のために AI へ渡します。
 
 専門用語は分野に応じて正しく訳され、文学的表現はニュアンスを保ち、曖昧な表現も周囲の文脈に基づいて解釈されます。
 
@@ -179,7 +179,7 @@ Vercel AI SDK を通じて OpenAI、DeepSeek、Anthropic Claude、Google Gemini�
 
 あらゆる種類の貢献を歓迎します。
 
-1. Read Frog を友人や家族に紹介する。
+1. Workmate AI を友人や家族に紹介する。
 2. [Issue][issues-link] やフィードバックを報告する。
 3. コードを貢献する。
 
@@ -200,7 +200,7 @@ ReadFrog は GPLv3 と商用ライセンスのデュアルライセンスです�
     <tr>
       <th colspan="2">
         <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
+        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Workmate AI contributors"><br>
         <br>
       </th>
     </tr>

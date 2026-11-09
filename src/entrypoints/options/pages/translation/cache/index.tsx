@@ -20,7 +20,7 @@ import { ConfigSection } from "../../../components/config-section"
 
 const log = createLogger("options/pages/translation/cache")
 
-/** Translations Read Frog keeps so a page it has seen before costs nothing to open again. */
+/** Translations Workmate AI keeps so a page it has seen before costs nothing to open again. */
 export function CacheSection() {
   const [open, setOpen] = useState(false)
   const [isClearing, setIsClearing] = useState(false)

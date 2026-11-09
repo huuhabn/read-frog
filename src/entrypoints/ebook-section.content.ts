@@ -31,7 +31,7 @@ export default defineContentScript({
         ;(globalThis as Record<string, unknown>)[SITE_CONTROL_URL_WINDOW_KEY] = pageUrl
       }
     } catch {
-      // A cross-origin top frame cannot be a Read Frog reader page.
+      // A cross-origin top frame cannot be a Workmate AI reader page.
       return
     }
 

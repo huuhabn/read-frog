@@ -66,7 +66,7 @@ function readLiveSelectionSession(): SelectionSession | null {
  * of the key pressed and the selection to act on, and says whether it did anything.
  *
  * A key claims the keystroke only when its command ran: with nothing selected (or the command
- * switched off) the page gets the key as if Read Frog had no shortcut on it, which keeps a
+ * switched off) the page gets the key as if Workmate AI had no shortcut on it, which keeps a
  * clash with a site's own shortcut to the moments the user meant ours. The keys also work in
  * the page's text fields — a selection made there is one to act on too (Improve Writing is
  * mostly used on it) — but not in the extension's own.

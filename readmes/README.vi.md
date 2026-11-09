@@ -1,6 +1,6 @@
 <div align="center"><a name="readme-top"></a>
 
-[![Read Frog banner][image-banner]][website]
+[![Workmate AI banner][image-banner]][website]
 
 <p align="center">
   <a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" width="250" height="55" /></a>
@@ -74,9 +74,9 @@ https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Bắt đầu và tham gia cộng đồng
 
-Tầm nhìn của Read Frog là mang đến trải nghiệm học ngôn ngữ dễ dùng, thông minh và cá nhân hóa cho người học ở mọi trình độ. Trong thời đại AI, điều này đã trở nên khả thi, nhưng vẫn chưa có nhiều sản phẩm đáp ứng tốt nhu cầu đó. Vì vậy chúng tôi quyết định tự xây dựng.
+Tầm nhìn của Workmate AI là mang đến trải nghiệm học ngôn ngữ dễ dùng, thông minh và cá nhân hóa cho người học ở mọi trình độ. Trong thời đại AI, điều này đã trở nên khả thi, nhưng vẫn chưa có nhiều sản phẩm đáp ứng tốt nhu cầu đó. Vì vậy chúng tôi quyết định tự xây dựng.
 
-Dù bạn là người dùng hay nhà phát triển, Read Frog có thể là một phần quan trọng trong hành trình này. Dự án đang được phát triển tích cực, và mọi phản hồi hoặc [vấn đề][issues-link] đều được hoan nghênh.
+Dù bạn là người dùng hay nhà phát triển, Workmate AI có thể là một phần quan trọng trong hành trình này. Dự án đang được phát triển tích cực, và mọi phản hồi hoặc [vấn đề][issues-link] đều được hoan nghênh.
 
 ### Tải xuống
 
@@ -96,7 +96,7 @@ Dù bạn là người dùng hay nhà phát triển, Read Frog có thể là m�
 >
 > **⭐️ Hãy star dự án**, bạn sẽ nhận thông báo phát hành từ GitHub mà không bị chậm trễ.
 
-[![Star Read Frog on GitHub][image-star]][github-star-link]
+[![Star Workmate AI on GitHub][image-star]][github-star-link]
 
 <details>
 <summary>
@@ -115,7 +115,7 @@ Dù bạn là người dùng hay nhà phát triển, Read Frog có thể là m�
 
 ## ✨ Tính năng
 
-Biến việc đọc web hằng ngày thành trải nghiệm học ngôn ngữ nhập vai với các tính năng của Read Frog.
+Biến việc đọc web hằng ngày thành trải nghiệm học ngôn ngữ nhập vai với các tính năng của Workmate AI.
 
 ### 🪄 [Hành động AI tùy chỉnh][docs-custom-actions]
 
@@ -127,7 +127,7 @@ Bắt đầu với mẫu **Từ điển** và **Cải thiện bài viết** có 
 
 Lưu từ vựng, định nghĩa, câu ví dụ, bản dịch và ghi chú đọc vào Notebase, sau đó biến chúng thành thẻ ghi nhớ bằng các mẫu thẻ có thể tùy chỉnh. Nội dung bạn bắt gặp khi đọc trở thành tài liệu học mà không làm gián đoạn mạch đọc.
 
-Ôn các thẻ đến hạn trực tuyến và đánh giá từng thẻ là **Lại**, **Khó**, **Tốt** hoặc **Dễ**. Bộ lập lịch lặp lại ngắt quãng của Read Frog dùng phản hồi này để đưa mỗi thẻ trở lại ngay trước khi bạn có thể quên.
+Ôn các thẻ đến hạn trực tuyến và đánh giá từng thẻ là **Lại**, **Khó**, **Tốt** hoặc **Dễ**. Bộ lập lịch lặp lại ngắt quãng của Workmate AI dùng phản hồi này để đưa mỗi thẻ trở lại ngay trước khi bạn có thể quên.
 
 ### 🔄 [Song ngữ / Chỉ bản dịch][docs-page-translation]
 
@@ -143,7 +143,7 @@ Thanh công cụ tự đặt vị trí trong khung nhìn, hỗ trợ kéo thả 
 
 ### 🧠 [Dịch theo ngữ cảnh][blog-context-translation]
 
-Cho phép AI hiểu đầy đủ ngữ cảnh của nội dung bạn đang đọc. Read Frog trích xuất tiêu đề trang và phiên bản Markdown ngắn gọn của nội dung để AI tạo bản dịch chính xác và phù hợp ngữ cảnh hơn.
+Cho phép AI hiểu đầy đủ ngữ cảnh của nội dung bạn đang đọc. Workmate AI trích xuất tiêu đề trang và phiên bản Markdown ngắn gọn của nội dung để AI tạo bản dịch chính xác và phù hợp ngữ cảnh hơn.
 
 Thuật ngữ kỹ thuật được dịch đúng trong lĩnh vực của nó, cách diễn đạt văn học giữ được sắc thái, còn những cụm từ mơ hồ được hiểu dựa trên nội dung xung quanh.
 
@@ -159,7 +159,7 @@ Tự động phát hiện ngôn ngữ và ánh xạ giọng nói theo từng ng�
 
 ### 📦 [Yêu cầu theo lô][docs-request-control]
 
-Tiết kiệm tới 70% chi phí API bằng cách gom yêu cầu thông minh. Read Frog nhóm nhiều yêu cầu dịch thành một lệnh gọi API duy nhất, giảm overhead và lượng token sử dụng mà vẫn giữ chất lượng dịch.
+Tiết kiệm tới 70% chi phí API bằng cách gom yêu cầu thông minh. Workmate AI nhóm nhiều yêu cầu dịch thành một lệnh gọi API duy nhất, giảm overhead và lượng token sử dụng mà vẫn giữ chất lượng dịch.
 
 Hệ thống có cơ chế retry với exponential backoff và tự động fallback về yêu cầu riêng lẻ nếu xử lý theo lô thất bại.
 
@@ -179,7 +179,7 @@ Ngoài ra còn có các lựa chọn dịch miễn phí như Google Translate, M
 
 Mọi hình thức đóng góp đều được hoan nghênh.
 
-1. Giới thiệu Read Frog cho bạn bè và gia đình.
+1. Giới thiệu Workmate AI cho bạn bè và gia đình.
 2. Báo cáo [issue][issues-link] và gửi phản hồi.
 3. Đóng góp mã nguồn.
 
@@ -200,7 +200,7 @@ ReadFrog được cấp phép kép theo GPLv3 và giấy phép thương mại.
     <tr>
       <th colspan="2">
         <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
+        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Workmate AI contributors"><br>
         <br>
       </th>
     </tr>

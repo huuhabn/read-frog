@@ -60,7 +60,7 @@ If a final `Page.captureScreenshot` is used, compare its actual pixel dimensions
 ## Presentation overlays
 
 - Inject overlays from the recorder with a unique data attribute, and remove them after the scene.
-- **Every injected node must carry `class="notranslate"` and `translate="no"`.** Read Frog walks the DOM and will otherwise treat a caption pill as a translation unit: the pill gets translated on camera, and its nodes pollute the wrapper/anchor counts the scene asserts.
+- **Every injected node must carry `class="notranslate"` and `translate="no"`.** Workmate AI walks the DOM and will otherwise treat a caption pill as a translation unit: the pill gets translated on camera, and its nodes pollute the wrapper/anchor counts the scene asserts.
 - Give overlays `pointer-events: none` so they cannot intercept the click the scene is proving, and a high `z-index` that still sits below nothing the scene needs to show.
 - The injected pill is the only caption in the finished video — the builder composites nothing on top. Place it top-left by default and keep it to one line; move it only when the subject itself lives in that corner.
 - Keep captions and click rings identical between baseline and candidate takes.

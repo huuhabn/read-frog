@@ -20,7 +20,7 @@ import { ConfigSection } from "../../../components/config-section"
 
 const log = createLogger("options/pages/video-subtitles/cache")
 
-/** Segmentation results Read Frog keeps so a video it has cut before costs nothing to replay. */
+/** Segmentation results Workmate AI keeps so a video it has cut before costs nothing to replay. */
 export function CacheSection() {
   const [open, setOpen] = useState(false)
   const [isClearing, setIsClearing] = useState(false)

@@ -1,6 +1,6 @@
 ---
 name: record-extension-demo
-description: Record polished, evidence-backed demos of the Read Frog extension as MP4 (and optional GIF) by driving real Chrome with the built extension, following captioned scene scripts, asserting extension state in the DOM, comparing baseline and candidate behavior when useful, post-processing the capture, and visually validating the result. Use for PR demos of user-visible frontend changes, feature walkthroughs, before/after bug evidence, popup/options/side-panel UI changes, or short interaction recordings.
+description: Record polished, evidence-backed demos of the Workmate AI extension as MP4 (and optional GIF) by driving real Chrome with the built extension, following captioned scene scripts, asserting extension state in the DOM, comparing baseline and candidate behavior when useful, post-processing the capture, and visually validating the result. Use for PR demos of user-visible frontend changes, feature walkthroughs, before/after bug evidence, popup/options/side-panel UI changes, or short interaction recordings.
 metadata:
   author: read-frog
   version: "1.0.0"
@@ -156,7 +156,7 @@ Return:
 - any mocked data, skipped scene, weaker assertion, or environment limitation;
 - paste-ready destination Markdown after upload, or the exact upload step still required.
 
-For GitHub PRs and issues, prefer repository-scoped `github.com/user-attachments` URLs via `gh image` (see [references/read-frog.md](references/read-frog.md)). Never extract or pass a GitHub browser session token. Read Frog is a public repository, but uploads are permanent: inspect frames before uploading.
+For GitHub PRs and issues, prefer repository-scoped `github.com/user-attachments` URLs via `gh image` (see [references/read-frog.md](references/read-frog.md)). Never extract or pass a GitHub browser session token. Workmate AI is a public repository, but uploads are permanent: inspect frames before uploading.
 
 Close the browser, stop the fixture server, and leave the repository unchanged except for the requested work.
 

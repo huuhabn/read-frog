@@ -121,7 +121,7 @@ vi.mock("wxt/testing/fake-browser", async () => {
   Object.assign(actual.fakeBrowser.runtime, {
     getManifest: () => ({
       manifest_version: 3,
-      name: "Read Frog",
+      name: "Workmate AI",
       version: "1.0.0",
       description: "Test manifest",
     }),

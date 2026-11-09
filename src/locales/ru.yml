@@ -1,5 +1,5 @@
-name: Read Frog
-extName: "Read Frog - ИИ-перевод и карточки"
+name: Workmate AI
+extName: "Workmate AI - ИИ-перевод и карточки"
 extDescription: "Двуязычный ИИ-перевод веб-страниц и субтитров YouTube, Netflix и X. Сохраняйте новые слова и повторяйте их на карточках."
 uninstallSurveyUrl: https://tally.so/r/nPK6Ob
 account:
@@ -19,7 +19,7 @@ contextMenu:
   readAloudSelection: Прочитать вслух "%s"
   showOriginal: Показать оригинал
 sidePanel:
-  firefoxUserActionHint: В Firefox откройте Read Frog из боковой панели браузера.
+  firefoxUserActionHint: В Firefox откройте Workmate AI из боковой панели браузера.
   firefoxUserActionHelpText: Как открыть боковую панель Firefox
   firefoxUserActionHelpUrl: https://support.mozilla.org/ru/kb/ispolzovanije-bokovoi-paneli-dostup-instrumenty-i-vertikalnyje-vkladki
 popup:
@@ -54,11 +54,11 @@ popup:
   discord:
     tooltip: Присоединяйтесь к Discord, чтобы связаться с разработчиками и получить ранний доступ к новым функциям
   blog:
-    notification: Что нового в Read Frog
+    notification: Что нового в Workmate AI
   aiSmartContext: Умный контекст ИИ
   aiSmartContextDescription: Использует контекст веб-страницы для улучшения качества перевода. Требуется LLM-провайдер перевода.
   storeReview:
-    title: Нравится Read Frog?
+    title: Нравится Workmate AI?
     description: Отзыв в магазине поможет другим читателям найти расширение.
     action: Оставить отзыв
     dismiss: Закрыть
@@ -121,12 +121,12 @@ options:
     roadmap: Дорожная карта
   helpAndCommunity:
     title: Помощь и сообщество
-    pageDescription: Узнайте, как пользоваться Read Frog, обратитесь за помощью к команде или присоединяйтесь к сообществу.
+    pageDescription: Узнайте, как пользоваться Workmate AI, обратитесь за помощью к команде или присоединяйтесь к сообществу.
     help:
       title: Помощь
     tutorial:
       title: Руководство
-      description: Прочитайте документацию и узнайте, как пользоваться Read Frog
+      description: Прочитайте документацию и узнайте, как пользоваться Workmate AI
     email:
       title: Написать нам
       description: Свяжитесь с командой напрямую по адресу contact@readfrog.app
@@ -154,8 +154,8 @@ options:
       qrCodeAlt: QR-код WeChat
   apiProviders:
     title: API-провайдеры
-    pageDescription: Подключите ИИ-сервисы, которые вызывает Read Frog, и выберите провайдера для каждой функции.
-    description: Добавьте провайдеров, которых может вызывать Read Frog. Более 20 встроено; также можно добавить пользовательские API, совместимые с Chat Completions, и API Open Responses.
+    pageDescription: Подключите ИИ-сервисы, которые вызывает Workmate AI, и выберите провайдера для каждой функции.
+    description: Добавьте провайдеров, которых может вызывать Workmate AI. Более 20 встроено; также можно добавить пользовательские API, совместимые с Chat Completions, и API Open Responses.
     configTitle: Настройка провайдеров
     addProvider: Добавить провайдера
     builtInProvider: Встроенный провайдер
@@ -265,8 +265,8 @@ options:
         customChatComplete: Пользовательский Chat Complete
         customResponses: Пользовательский Responses
       attribution:
-        builtInAi: Стандартная модель, размещённая Read Frog. Подписчики Pro и Ultra могут использовать её во всех функциях в рамках недельной квоты; на бесплатном тарифе она доступна только в пользовательских AI-действиях.
-        builtInAiAdvance: Продвинутая модель, размещённая Read Frog, — только для подписчиков Ultra. Работает во всех функциях встроенного ИИ — переводе страниц, пользовательских AI-действиях и других — с общей недельной квотой. Расходует квоту быстрее, чем стандартная модель.
+        builtInAi: Стандартная модель, размещённая Workmate AI. Подписчики Pro и Ultra могут использовать её во всех функциях в рамках недельной квоты; на бесплатном тарифе она доступна только в пользовательских AI-действиях.
+        builtInAiAdvance: Продвинутая модель, размещённая Workmate AI, — только для подписчиков Ultra. Работает во всех функциях встроенного ИИ — переводе страниц, пользовательских AI-действиях и других — с общей недельной квотой. Расходует квоту быстрее, чем стандартная модель.
       description:
         openai: Предоставляет модели, такие как GPT-4o
         azure: Модели OpenAI в Azure через ваши развертывания
@@ -349,15 +349,15 @@ options:
   patterns:
     duplicate: Этот шаблон уже в списке
     gluedWildcard: «*» должна заменять часть адреса целиком, например *.example.com или example.*
-    unsupported: Read Frog не может сопоставить этот адрес. Порты и схемы, кроме http и https, не поддерживаются.
+    unsupported: Workmate AI не может сопоставить этот адрес. Порты и схемы, кроме http и https, не поддерживаются.
   preference:
     title: Предпочтения
-    pageDescription: Задайте внешний вид Read Frog, места его работы, а также синхронизацию и резервное копирование конфигурации.
+    pageDescription: Задайте внешний вид Workmate AI, места его работы, а также синхронизацию и резервное копирование конфигурации.
     appearanceAndLanguage:
       title: Оформление и язык
       theme:
         title: Тема
-        description: Выберите тему для Read Frog.
+        description: Выберите тему для Workmate AI.
         system: Системная
         light: Светлая
         dark: Тёмная
@@ -451,7 +451,7 @@ options:
           accountChangedRetry: Пока диалог был открыт, сменился вошедший аккаунт Google. Ничего не загружено — синхронизируйте ещё раз.
           busy: Другая вкладка сейчас синхронизирует ваши глоссарии.
           malformed: Файл глоссариев в Drive не удалось прочитать, поэтому ничего не изменено.
-          versionTooNew: Этот файл глоссариев записан более новой версией Read Frog. Сначала обновите расширение.
+          versionTooNew: Этот файл глоссариев записан более новой версией Workmate AI. Сначала обновите расширение.
           duplicateFiles: В вашем Drive больше одного файла глоссариев. Ничего не изменено — удалите лишний.
           capExceeded: "Слияние превысило бы лимит глоссария на $1. Ничего не изменено."
           failed: Не удалось синхронизировать глоссарии
@@ -478,7 +478,7 @@ options:
         glossaryUndone: Глоссарии восстановлены в состояние до импорта
         glossaryUndoUnavailable: Отмена больше недоступна — глоссарии успели измениться.
         glossaryMalformed: Глоссарии из этого файла не удалось прочитать. Ничего не изменено.
-        glossaryVersionTooNew: Глоссарии в этом файле записаны более новой версией Read Frog. Сначала обновите расширение.
+        glossaryVersionTooNew: Глоссарии в этом файле записаны более новой версией Workmate AI. Сначала обновите расширение.
         glossaryCapExceeded: "В этом файле на $1 строк глоссария больше лимита в $2. Ничего не изменено."
         exportOptions:
           title: Выберите параметры экспорта
@@ -532,8 +532,8 @@ options:
         description: Включить экспериментальные функции, которые могут быть нестабильны
       analytics:
         title: Помочь улучшить пользовательский опыт
-        tooltip: Когда параметр включен, Read Frog отправляет анонимные сигналы об использовании продукта, чтобы мы могли находить ошибки, проверять надежность функций, улучшать производительность и UX-детали, а также понимать, что развивать дальше в первую очередь.
-        description: Улучшайте Read Frog, помогая находить ошибки, дорабатывать интерфейс и не только
+        tooltip: Когда параметр включен, Workmate AI отправляет анонимные сигналы об использовании продукта, чтобы мы могли находить ошибки, проверять надежность функций, улучшать производительность и UX-детали, а также понимать, что развивать дальше в первую очередь.
+        description: Улучшайте Workmate AI, помогая находить ошибки, дорабатывать интерфейс и не только
   shortcuts:
     title: Горячие клавиши
     pageDescription: Задайте клавиши, которые запускают перевод, озвучивание и AI-действия во время чтения.
@@ -603,7 +603,7 @@ options:
     demoImageAlt: Демо плавающей кнопки
     enable:
       title: Включить плавающую кнопку
-      description: Отображать плавающую кнопку на веб-страницах для быстрого доступа к функциям Read Frog
+      description: Отображать плавающую кнопку на веб-страницах для быстрого доступа к функциям Workmate AI
     display:
       title: Отображение
       side:
@@ -1157,7 +1157,7 @@ options:
       importModeMerge: Добавить к списку
       importModeReplace: Заменить список
       importEmpty: В этом файле не найдено терминов.
-      importMissingHeader: "Это не файл экспорта глоссария Read Frog. В нём должны быть эти столбцы:"
+      importMissingHeader: "Это не файл экспорта глоссария Workmate AI. В нём должны быть эти столбцы:"
       importOverflow: "Этот импорт превысит лимит на $1 терминов. Ничего не изменено."
       importSuccess: "Импортировано новых терминов: $1, обновлено: $2."
       importSkipped: "Пропущено неверных строк: $1, дубликатов: $2."
@@ -1179,7 +1179,7 @@ options:
           description: "Все термины будут удалены безвозвратно. Всего: $1. Это действие нельзя отменить."
   contextMenu:
     title: Контекстное меню
-    pageDescription: Управляйте пунктами Read Frog в контекстном меню браузера.
+    pageDescription: Управляйте пунктами Workmate AI в контекстном меню браузера.
     demoImageAlt: Демо контекстного меню
     enable:
       title: Включить перевод в контекстном меню
@@ -1400,9 +1400,9 @@ options:
       noVoicesFound: Голоса не найдены
       language:
         title: Голос для языка
-        description: Выберите язык, а затем голос, которым он будет читаться. Сброс вернёт голос, который Read Frog подбирает для этого языка.
+        description: Выберите язык, а затем голос, которым он будет читаться. Сброс вернёт голос, который Workmate AI подбирает для этого языка.
         reset: Сброс
-        previewSample: Привет от Read Frog! Так я буду звучать при чтении вслух.
+        previewSample: Привет от Workmate AI! Так я буду звучать при чтении вслух.
       fallback:
         title: Резервный голос
         description: Голос для языков, которым вы не назначили собственный.
@@ -1553,7 +1553,7 @@ options:
   rateUs:
     title: Оцените нас
   configMigration:
-    versionTooNew: Версия импортированной конфигурации новее, пожалуйста, обновите Read Frog до последней версии
+    versionTooNew: Версия импортированной конфигурации новее, пожалуйста, обновите Workmate AI до последней версии
     validationError: Ошибка валидации конфигурации
 side:
   sourceLang: Исходный язык
@@ -1660,13 +1660,13 @@ action:
   saveToNotebaseConnectExisting: Подключить существующую Notebase
   saveToNotebaseGoConfigure: Настроить
   saveToNotebaseLoginConnectedTitle: Войти и сохранить?
-  saveToNotebaseLoginConnectedDescription: Этот Custom Action подключён к аккаунту ниже. После входа Read Frog сохранит в существующую Notebase, если это возможно, или создаст новую Notebase для текущего аккаунта.
+  saveToNotebaseLoginConnectedDescription: Этот Custom Action подключён к аккаунту ниже. После входа Workmate AI сохранит в существующую Notebase, если это возможно, или создаст новую Notebase для текущего аккаунта.
   saveToNotebaseConnectionUnavailableTitle: Подключение Notebase недоступно
   saveToNotebaseMissingNotebaseDescription: Старая Notebase больше не существует или недоступна этому аккаунту. Создайте новую Notebase и сохраните результат либо подключите существующую Notebase в Custom AI Actions.
   saveToNotebaseAccountUnavailableDescription: Текущий аккаунт не совпадает с подключённым аккаунтом ниже. Создание и сохранение заменит прежнее подключение и сопоставления полей. Также можно подключить существующую Notebase в Custom AI Actions.
   saveToNotebasePendingLogin: Войдите, чтобы завершить сохранение
-  saveToNotebasePendingLoginDescription: После входа Read Frog автоматически создаст Notebase и сохранит этот результат.
-  saveToNotebasePendingConnectedLoginDescription: После входа Read Frog сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
+  saveToNotebasePendingLoginDescription: После входа Workmate AI автоматически создаст Notebase и сохранит этот результат.
+  saveToNotebasePendingConnectedLoginDescription: После входа Workmate AI сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
   upgrade: Повысить тариф
   updatePayment: Обновить оплату
   openCustomActions: Открыть Custom AI Actions
@@ -1732,7 +1732,7 @@ subtitles:
     downloadTranslatedComplete: Переведённые субтитры скачаны
     downloadSource: Скачать исходные субтитры
   state:
-    loading: Read Frog загрузка субтитров
+    loading: Workmate AI загрузка субтитров
     translating: Перевод…
     error: Произошла ошибка
   errors:

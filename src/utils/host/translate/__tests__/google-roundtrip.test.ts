@@ -108,7 +108,7 @@ describe("google translate escape/decode round trip", () => {
     ["tag-like text is not truncated", "if x <b then stop"],
     ["URL query params survive intact", "访问 https://example.com/?page=1&copy=true 查看详情"],
     ["literal entity mentions survive intact", "write &amp; for ampersand"],
-    ["apostrophes and quotes survive intact", `It's called "Read Frog"`],
+    ["apostrophes and quotes survive intact", `It's called "Workmate AI"`],
   ])("%s", async (_name, text) => {
     const result = await executeTranslate(text, langConfig, googleProviderConfig, vi.fn())
 

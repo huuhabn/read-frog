@@ -1,6 +1,6 @@
 ---
 name: extension-puppeteer-debugging
-description: Debug the built Read Frog extension in real Chrome. Use Chrome DevTools MCP for interactive inspection and screenshots; use the Puppeteer harness for repeatable end-to-end assertions, fixture pages, and translation toggle/restore flows. For leaks, freezes, or CPU storms use extension-perf-forensics.
+description: Debug the built Workmate AI extension in real Chrome. Use Chrome DevTools MCP for interactive inspection and screenshots; use the Puppeteer harness for repeatable end-to-end assertions, fixture pages, and translation toggle/restore flows. For leaks, freezes, or CPU storms use extension-perf-forensics.
 metadata:
   author: read-frog
   version: "1.1.0"

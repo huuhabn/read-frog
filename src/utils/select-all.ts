@@ -1,7 +1,7 @@
 import { isBodyRendered } from "@/utils/shadow-root"
 
 // 选区工具栏和悬浮按钮各在一个 content script 里注册自己的 host，监听器互不相通。
-// 所以每个监听器都只看 DOM：用这个属性找到所有 Read Frog 组件，用 :hover 判断鼠标在哪个组件上，
+// 所以每个监听器都只看 DOM：用这个属性找到所有 Workmate AI 组件，用 :hover 判断鼠标在哪个组件上，
 // 这样不管哪个监听器先跑，结果都一样。
 const PROTECTED_HOST_ATTRIBUTE = "data-read-frog-select-all-protected"
 

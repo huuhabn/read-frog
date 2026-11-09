@@ -1,6 +1,6 @@
 <div align="center"><a name="readme-top"></a>
 
-[![Read Frog banner][image-banner]][website]
+[![Workmate AI banner][image-banner]][website]
 
 <p align="center">
   <a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" width="250" height="55" /></a>
@@ -74,9 +74,9 @@ https://github.com/user-attachments/assets/2556f7bb-f6d4-45ac-845b-975be8572d68
 
 ## 👋🏻 快速開始與加入社群
 
-Read Frog 的願景，是為各種程度的語言學習者提供易用、智慧且個人化的學習體驗。在 AI 時代，這件事已經變得可行，但市場上仍很少有產品真正滿足這個需求。因此我們決定自己動手，讓世界最終不再依賴人類語言教師。
+Workmate AI 的願景，是為各種程度的語言學習者提供易用、智慧且個人化的學習體驗。在 AI 時代，這件事已經變得可行，但市場上仍很少有產品真正滿足這個需求。因此我們決定自己動手，讓世界最終不再依賴人類語言教師。
 
-無論你是使用者還是開發者，Read Frog 都會是你走向這個願景的重要工具。Read Frog 目前仍在積極開發中，歡迎針對遇到的任何[問題][issues-link]提供回饋。
+無論你是使用者還是開發者，Workmate AI 都會是你走向這個願景的重要工具。Workmate AI 目前仍在積極開發中，歡迎針對遇到的任何[問題][issues-link]提供回饋。
 
 ### 下載
 
@@ -121,7 +121,7 @@ Read Frog 的願景，是為各種程度的語言學習者提供易用、智慧�
 
 ## ✨ 功能
 
-透過 Read Frog 的強大功能，把日常網頁閱讀變成沉浸式語言學習旅程。
+透過 Workmate AI 的強大功能，把日常網頁閱讀變成沉浸式語言學習旅程。
 
 ### 🪄 [自訂 AI 指令][docs-custom-actions]
 
@@ -133,7 +133,7 @@ Read Frog 的願景，是為各種程度的語言學習者提供易用、智慧�
 
 將閱讀時遇到的單字、定義、例句、翻譯和筆記儲存到 Notebase，再透過可自訂的卡片範本產生單字卡。閱讀中發現的內容可以自然變成學習材料，不會打斷閱讀流程。
 
-在線上複習到期卡片，並選擇**重來**、**困難**、**良好**或**簡單**。Read Frog 的間隔重複排程會根據你的回饋安排下次複習，讓卡片在你即將忘記之前再次出現。
+在線上複習到期卡片，並選擇**重來**、**困難**、**良好**或**簡單**。Workmate AI 的間隔重複排程會根據你的回饋安排下次複習，讓卡片在你即將忘記之前再次出現。
 
 ### 🔄 [雙語 / 僅譯文][docs-page-translation]
 
@@ -149,7 +149,7 @@ Read Frog 的願景，是為各種程度的語言學習者提供易用、智慧�
 
 ### 🧠 [上下文感知翻譯][blog-context-translation]
 
-讓 AI 理解你正在閱讀內容的完整上下文。啟用後，Read Frog 會擷取頁面標題與精簡的 Markdown 頁面內容，交給 AI 產生更準確、更貼合語境的翻譯。
+讓 AI 理解你正在閱讀內容的完整上下文。啟用後，Workmate AI 會擷取頁面標題與精簡的 Markdown 頁面內容，交給 AI 產生更準確、更貼合語境的翻譯。
 
 技術術語會依所屬領域正確翻譯，文學表達能保留細膩語感，歧義片語也會依上下文而不是孤立文字來解讀。
 
@@ -165,7 +165,7 @@ Read Frog 的願景，是為各種程度的語言學習者提供易用、智慧�
 
 ### 📦 [批次請求][docs-request-control]
 
-透過智慧批次處理，最多可節省 70% API 成本。Read Frog 會把多個翻譯請求合併為一次 API 呼叫，在維持品質的同時降低開銷與 token 使用量。
+透過智慧批次處理，最多可節省 70% API 成本。Workmate AI 會把多個翻譯請求合併為一次 API 呼叫，在維持品質的同時降低開銷與 token 使用量。
 
 系統包含指數退避重試機制，並在批次失敗時自動退回單次請求，所有流程都會在背景透明處理。
 
@@ -185,7 +185,7 @@ Read Frog 的願景，是為各種程度的語言學習者提供易用、智慧�
 
 我們歡迎各種類型的貢獻。
 
-1. 向朋友和家人推薦 Read Frog。
+1. 向朋友和家人推薦 Workmate AI。
 2. 回報[問題][issues-link]並提供回饋。
 3. 貢獻程式碼。
 
@@ -206,7 +206,7 @@ ReadFrog 採用 GPLv3 與商業授權雙重授權。
     <tr>
       <th colspan="2">
         <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
+        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Workmate AI contributors"><br>
         <br>
       </th>
     </tr>

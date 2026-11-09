@@ -117,7 +117,7 @@ export function getBlogLocaleFromUILanguage(uiLanguage: UiLanguage): BlogLocale 
 }
 
 /**
- * Fetches the latest blog post from the Read Frog blog API.
+ * Fetches the latest blog post from the Workmate AI blog API.
  * Uses background fetch with optional 1-day cache.
  *
  * @param apiUrl - The URL of the blog API endpoint (default: production URL)

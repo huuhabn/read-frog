@@ -22,7 +22,7 @@ describe("Discord translation rules", () => {
     document.body.innerHTML = `
       <li id="chat-messages-1529001476482011136-1529199071137370203">
         <div id="message-content-1529199071137370203" class="markup__75297 messageContent_c19a55">
-          <span id="message-body">Read Frog edited-message DOM test</span>
+          <span id="message-body">Workmate AI edited-message DOM test</span>
           <span id="edited-metadata" class="timestamp_c19a55">
             <span>
               <time datetime="2026-07-21T18:51:53.357Z">

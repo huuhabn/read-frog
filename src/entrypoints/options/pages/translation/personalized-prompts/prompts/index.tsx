@@ -7,7 +7,7 @@ import { PageLayout } from "../../../../components/page-layout"
 import { promptAtoms } from "../atoms"
 
 /**
- * Every prompt Read Frog can translate a page with, drilled into from the Translation page.
+ * Every prompt Workmate AI can translate a page with, drilled into from the Translation page.
  * The community link lives here rather than on the row, which cannot hold a link of its own —
  * the whole row is already one.
  */

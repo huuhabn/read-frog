@@ -342,7 +342,7 @@ describe("getModelById", () => {
           },
           headers: {
             "HTTP-Referer": "https://example.com",
-            "X-Title": "Read Frog",
+            "X-Title": "Workmate AI",
           },
         },
       ],
@@ -359,7 +359,7 @@ describe("getModelById", () => {
         apiKey: "custom-key",
         headers: {
           "HTTP-Referer": "https://example.com",
-          "X-Title": "Read Frog",
+          "X-Title": "Workmate AI",
         },
       }),
     )

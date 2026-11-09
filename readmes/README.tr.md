@@ -1,6 +1,6 @@
 <div align="center"><a name="readme-top"></a>
 
-[![Read Frog banner][image-banner]][website]
+[![Workmate AI banner][image-banner]][website]
 
 <p align="center">
   <a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" width="250" height="55" /></a>
@@ -74,9 +74,9 @@ https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Başlangıç ve topluluk
 
-Read Frog'un vizyonu, her seviyeden dil öğrenen kişiye kullanımı kolay, akıllı ve kişiselleştirilmiş bir öğrenme deneyimi sunmaktır. AI çağında bu mümkün hale geldi, ancak piyasada bu ihtiyacı iyi karşılayan ürün sayısı az. Bu yüzden kendi çözümümüzü geliştirmeye karar verdik.
+Workmate AI'un vizyonu, her seviyeden dil öğrenen kişiye kullanımı kolay, akıllı ve kişiselleştirilmiş bir öğrenme deneyimi sunmaktır. AI çağında bu mümkün hale geldi, ancak piyasada bu ihtiyacı iyi karşılayan ürün sayısı az. Bu yüzden kendi çözümümüzü geliştirmeye karar verdik.
 
-Kullanıcı ya da geliştirici olmanız fark etmez; Read Frog bu vizyona giden yolda önemli bir araç olabilir. Proje aktif olarak geliştiriliyor, bu yüzden karşılaştığınız [sorunları][issues-link] ve geri bildirimleri bekliyoruz.
+Kullanıcı ya da geliştirici olmanız fark etmez; Workmate AI bu vizyona giden yolda önemli bir araç olabilir. Proje aktif olarak geliştiriliyor, bu yüzden karşılaştığınız [sorunları][issues-link] ve geri bildirimleri bekliyoruz.
 
 ### İndir
 
@@ -96,7 +96,7 @@ Kullanıcı ya da geliştirici olmanız fark etmez; Read Frog bu vizyona giden y
 >
 > **⭐️ Bize yıldız verin**, GitHub sürüm bildirimlerini gecikmeden alın.
 
-[![Star Read Frog on GitHub][image-star]][github-star-link]
+[![Star Workmate AI on GitHub][image-star]][github-star-link]
 
 <details>
 <summary>
@@ -115,7 +115,7 @@ Kullanıcı ya da geliştirici olmanız fark etmez; Read Frog bu vizyona giden y
 
 ## ✨ Özellikler
 
-Read Frog'un güçlü özellikleriyle günlük web okumalarınızı sürükleyici bir dil öğrenme deneyimine dönüştürün.
+Workmate AI'un güçlü özellikleriyle günlük web okumalarınızı sürükleyici bir dil öğrenme deneyimine dönüştürün.
 
 ### 🪄 [Özel AI Eylemleri][docs-custom-actions]
 
@@ -127,7 +127,7 @@ Yerleşik **Sözlük** ve **Yazıyı İyileştir** şablonlarıyla başlayabilir
 
 Kelimeleri, tanımları, örnek cümleleri, çevirileri ve okuma notlarını Notebase'e kaydedin; ardından özelleştirilebilir kart şablonlarıyla bilgi kartlarına dönüştürün. Okurken keşfettiğiniz içerik, akışınızı bozmadan çalışma materyaline dönüşür.
 
-Zamanı gelen kartları çevrimiçi gözden geçirin ve her birini **Tekrar**, **Zor**, **İyi** veya **Kolay** olarak değerlendirin. Read Frog'un aralıklı tekrar planlayıcısı, geri bildiriminize göre her kartı unutmanızdan hemen önce yeniden gösterir.
+Zamanı gelen kartları çevrimiçi gözden geçirin ve her birini **Tekrar**, **Zor**, **İyi** veya **Kolay** olarak değerlendirin. Workmate AI'un aralıklı tekrar planlayıcısı, geri bildiriminize göre her kartı unutmanızdan hemen önce yeniden gösterir.
 
 ### 🔄 [İki dilli / Yalnızca çeviri][docs-page-translation]
 
@@ -143,7 +143,7 @@ Araç çubuğu görünüm alanı içinde kalacak şekilde konumlanır, sürükle
 
 ### 🧠 [Bağlama duyarlı çeviri][blog-context-translation]
 
-AI'nin okuduğunuz içeriğin tam bağlamını anlamasını sağlayın. Read Frog sayfa başlığını ve sayfa içeriğinin kısa bir Markdown sürümünü çıkarır, daha doğru ve bağlama uygun çeviri için AI'ye iletir.
+AI'nin okuduğunuz içeriğin tam bağlamını anlamasını sağlayın. Workmate AI sayfa başlığını ve sayfa içeriğinin kısa bir Markdown sürümünü çıkarır, daha doğru ve bağlama uygun çeviri için AI'ye iletir.
 
 Teknik terimler alanına göre doğru çevrilir, edebi ifadeler nüansını korur ve belirsiz ifadeler çevredeki içeriğe göre yorumlanır.
 
@@ -159,7 +159,7 @@ Otomatik dil algılama ve dile göre ses eşleme, her dil için doğru sesi seç
 
 ### 📦 [Toplu istekler][docs-request-control]
 
-Akıllı istek toplama ile API maliyetlerinde %70'e kadar tasarruf edin. Read Frog birden çok çeviri isteğini tek API çağrısında birleştirerek kaliteyi korurken overhead ve token kullanımını azaltır.
+Akıllı istek toplama ile API maliyetlerinde %70'e kadar tasarruf edin. Workmate AI birden çok çeviri isteğini tek API çağrısında birleştirerek kaliteyi korurken overhead ve token kullanımını azaltır.
 
 Sistem üstel geri çekilmeli yeniden deneme ve toplu işlem başarısız olduğunda tekil isteklere otomatik dönüş içerir.
 
@@ -179,7 +179,7 @@ Ayrıca ücretsiz temel çeviri için Google Translate, Microsoft Translate ve D
 
 Her türlü katkıya açığız.
 
-1. Read Frog'u arkadaşlarınıza ve ailenize önerin.
+1. Workmate AI'u arkadaşlarınıza ve ailenize önerin.
 2. [Issue][issues-link] ve geri bildirim gönderin.
 3. Kod katkısı yapın.
 
@@ -200,7 +200,7 @@ Katkıda bulunan lisans şartları için [CONTRIBUTING.md](../CONTRIBUTING.md) d
     <tr>
       <th colspan="2">
         <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
+        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Workmate AI contributors"><br>
         <br>
       </th>
     </tr>

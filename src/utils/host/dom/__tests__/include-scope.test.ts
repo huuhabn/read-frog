@@ -293,7 +293,7 @@ describe("includeSelectors whitelist", () => {
       <article data-testid="tweet">
         <div data-testid="User-Name" id="user-name">
           <div class="css-175oi2r">
-            <span id="display-name" style="-webkit-line-clamp: 1">Read Frog</span>
+            <span id="display-name" style="-webkit-line-clamp: 1">Workmate AI</span>
             <span id="handle">@read_frog</span>
           </div>
         </div>

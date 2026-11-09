@@ -1,17 +1,4 @@
-<div align="center"><a name="readme-top"></a>
-
-[![Read Frog banner][image-banner]][website]
-
-<p align="center">
-  <a href="https://trendshift.io/repositories/22377" target="_blank"><img src="https://trendshift.io/api/badge/repositories/22377" alt="mengxi-ream%2Fread-frog | Trendshift" width="250" height="55" /></a>
-  <a href="https://www.star-history.com/mengxi-ream/read-frog">
-    <picture>
-      <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/badge?repo=mengxi-ream/read-frog&theme=dark" />
-      <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/badge?repo=mengxi-ream/read-frog" />
-      <img alt="Star History Rank" src="https://api.star-history.com/badge?repo=mengxi-ream/read-frog" width="260" height="55" />
-    </picture>
-  </a>
-</p>
+# Workmate AI
 
 An AI language-learning extension for browsers, and an open-source alternative to Immersive Translate.<br/>
 Translate web pages, the sentences you select, and subtitles on YouTube, X, and Netflix. Then save the words you meet and review them as flashcards on an FSRS schedule.<br/>
@@ -75,9 +62,9 @@ https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Getting Started & Join Our Community
 
-Read Frog's vision is to provide an easy-to-use, intelligent, and personalized language learning experience for language learners of all levels. This has become possible in the AI era, but there are few products on the market that meet this demand. Therefore, we decided to take matters into our own hands and ultimately make the world no longer reliant on human language instructors.
+Workmate AI's vision is to provide an easy-to-use, intelligent, and personalized language learning experience for language learners of all levels. This has become possible in the AI era, but there are few products on the market that meet this demand. Therefore, we decided to take matters into our own hands and ultimately make the world no longer reliant on human language instructors.
 
-Whether you are a user or a developer, Read Frog will be an important part of your journey toward this vision. Please be aware that Read Frog is currently under active development, and feedback is welcome for any [issues][issues-link] encountered.
+Whether you are a user or a developer, Workmate AI will be an important part of your journey toward this vision. Please be aware that Workmate AI is currently under active development, and feedback is welcome for any [issues][issues-link] encountered.
 
 ### Download
 
@@ -97,7 +84,7 @@ Whether you are a user or a developer, Read Frog will be an important part of yo
 >
 > **⭐️ Star Us**, You will receive all release notifications from GitHub without any delay \~
 
-[![Star Read Frog on GitHub][image-star]][github-star-link]
+[![Star Workmate AI on GitHub][image-star]][github-star-link]
 
 <details>
 <summary>
@@ -122,7 +109,7 @@ Whether you are a user or a developer, Read Frog will be an important part of yo
 
 ## ✨ Features
 
-Transform your everyday web reading into an immersive language learning journey with Read Frog's powerful features.
+Transform your everyday web reading into an immersive language learning journey with Workmate AI's powerful features.
 
 ### 🪄 [Custom AI Actions][docs-custom-actions]
 
@@ -140,7 +127,7 @@ Start with the built-in **Dictionary** and **Improve Writing** templates, or bui
 
 Save vocabulary, definitions, example sentences, translations, and reading notes to Notebase, then turn them into flashcards with customizable card templates. Content you discover while reading becomes study material without interrupting your flow.
 
-Review due cards online and rate each one **Again**, **Hard**, **Good**, or **Easy**. Read Frog's spaced-repetition scheduler uses your feedback to decide when each card should appear again—right before you are likely to forget it.
+Review due cards online and rate each one **Again**, **Hard**, **Good**, or **Easy**. Workmate AI's spaced-repetition scheduler uses your feedback to decide when each card should appear again—right before you are likely to forget it.
 
 <div align="right">
 
@@ -180,7 +167,7 @@ The toolbar intelligently positions itself to stay within the viewport, supports
 
 ### 🧠 [Context-Aware Translation][blog-context-translation]
 
-Enable AI to understand the full context of what you're reading. When activated, Read Frog extracts the page title and a concise Markdown version of the page content, providing this context to the AI for more accurate, contextually-appropriate translations.
+Enable AI to understand the full context of what you're reading. When activated, Workmate AI extracts the page title and a concise Markdown version of the page content, providing this context to the AI for more accurate, contextually-appropriate translations.
 
 This means technical terms get translated correctly within their domain, literary expressions maintain their nuance, and ambiguous phrases are interpreted based on the surrounding content rather than in isolation.
 
@@ -220,7 +207,7 @@ Automatic language detection (basic or LLM-powered) with per-language voice mapp
 
 ### 📦 [Batch Requests][docs-request-control]
 
-Save up to 70% on API costs with intelligent request batching. Read Frog groups multiple translation requests into single API calls, reducing overhead and token usage while maintaining translation quality.
+Save up to 70% on API costs with intelligent request batching. Workmate AI groups multiple translation requests into single API calls, reducing overhead and token usage while maintaining translation quality.
 
 The system includes smart retry logic with exponential backoff and automatic fallback to individual requests if batch processing fails. All handled transparently in the background.
 
@@ -248,7 +235,7 @@ Plus free translation options: Google Translate, Microsoft Translate, and DeepLX
 
 Contributions of all types are more than welcome.
 
-1. Promote Read Frog to your friends and family.
+1. Promote Workmate AI to your friends and family.
 2. Report [issues][issues-link] and feedback.
 3. Contribute code.
 
@@ -269,7 +256,7 @@ See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
     <tr>
       <th colspan="2">
         <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Read Frog contributors"><br>
+        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Workmate AI contributors"><br>
         <br>
       </th>
     </tr>

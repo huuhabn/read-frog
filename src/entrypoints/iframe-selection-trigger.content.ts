@@ -10,7 +10,7 @@ export default defineContentScript({
   matchOriginAsFallback: true,
   main(ctx) {
     if (window === window.top || window.origin === "null") return
-    // A Read Frog ebook section: the reader bridges its selections to the
+    // A Workmate AI ebook section: the reader bridges its selections to the
     // top frame's toolbar, and ebook-section.content.ts brings it page
     // translation.
     if (isReadFrogEbookSection(document)) return
