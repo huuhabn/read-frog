@@ -29,9 +29,15 @@ import {
   activeChatSessionIdAtom,
   includePageContextAtom,
   selectedChatModelAtom,
+  sidepanelNavTabAtom,
 } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { db } from "@/utils/db/dexie/db"
+import {
+  getLocalSelectedChatModel,
+  setLocalSelectedChatModel,
+  type SelectedModelConfig,
+} from "@/utils/sidepanel/chat-model-storage"
 import { getActiveTabContent, type ActiveTabContent } from "@/utils/sidepanel/page-context"
 import { cn } from "@/utils/styles/utils"
 import { ChatHistoryDrawer } from "./chat-history-drawer"
@@ -53,6 +59,7 @@ export function ChatView() {
   const [activeSessionId, setActiveSessionId] = useAtom(activeChatSessionIdAtom)
   const [selectedModel, setSelectedModel] = useAtom(selectedChatModelAtom)
   const [usePageContext, setUsePageContext] = useAtom(includePageContextAtom)
+  const [navTab, setNavTab] = useAtom(sidepanelNavTabAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
   const [messages, setMessages] = useState<ChatMessageItem[]>([])
@@ -61,6 +68,15 @@ export function ChatView() {
   const [activeTab, setActiveTab] = useState<ActiveTabContent | null>(null)
   const [isHistoryOpen, setIsHistoryOpen] = useState(false)
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null)
+
+  const isHistoryVisible = isHistoryOpen || navTab === "history"
+
+  const handleCloseHistory = useCallback(() => {
+    setIsHistoryOpen(false)
+    if (navTab === "history") {
+      setNavTab("chat")
+    }
+  }, [navTab, setNavTab])
 
   // Custom AI Actions slash menu state
   const [isSlashOpen, setIsSlashOpen] = useState(false)
@@ -99,6 +115,29 @@ export function ChatView() {
   // Filter available LLM providers from config
   const llmProviders = providersConfig.filter((p) => isLLMProviderConfig(p) && p.enabled)
 
+  // Auto-fallback if the current selected provider is not enabled/configured
+  useEffect(() => {
+    if (!activeSessionId && llmProviders.length > 0) {
+      const isCurrentProviderValid = llmProviders.some((p) => p.id === selectedModel.providerId)
+      if (!isCurrentProviderValid) {
+        const fallbackProvider = llmProviders[0]
+        if (fallbackProvider) {
+          const modelName = isLLMProviderConfig(fallbackProvider)
+            ? typeof fallbackProvider.model === "string"
+              ? fallbackProvider.model
+              : fallbackProvider.model.customModel || fallbackProvider.model.model
+            : fallbackProvider.id
+          const fallbackModel: SelectedModelConfig = {
+            providerId: fallbackProvider.id,
+            model: modelName,
+          }
+          setSelectedModel(fallbackModel)
+          void setLocalSelectedChatModel(fallbackModel)
+        }
+      }
+    }
+  }, [activeSessionId, llmProviders, selectedModel.providerId, setSelectedModel])
+
   // Auto load active tab content
   useEffect(() => {
     void getActiveTabContent().then(setActiveTab)
@@ -129,7 +168,23 @@ export function ChatView() {
     }
   }, [messageCount])
 
-  const handleNewChat = useCallback(() => {
+  const handleSelectModel = useCallback(
+    async (providerId: string, model: string) => {
+      const next: SelectedModelConfig = { providerId, model }
+      setSelectedModel(next)
+      await setLocalSelectedChatModel(next)
+      if (activeSessionId) {
+        await db.chatSession.update(activeSessionId, {
+          providerId,
+          model,
+          updatedAt: getTimestamp(),
+        })
+      }
+    },
+    [activeSessionId, setSelectedModel],
+  )
+
+  const handleNewChat = useCallback(async () => {
     if (isStreaming && abortControllerRef.current) {
       abortControllerRef.current.abort()
       setIsStreaming(false)
@@ -137,7 +192,9 @@ export function ChatView() {
     setActiveSessionId(null)
     setMessages([])
     setInput("")
-  }, [isStreaming, setActiveSessionId])
+    const savedModel = await getLocalSelectedChatModel()
+    setSelectedModel(savedModel)
+  }, [isStreaming, setActiveSessionId, setSelectedModel])
 
   const handleCopy = async (text: string, idx: number) => {
     await navigator.clipboard.writeText(text)
@@ -177,6 +234,8 @@ export function ChatView() {
       })
     } else {
       await db.chatSession.update(currentId, {
+        providerId: selectedModel.providerId,
+        model: selectedModel.model,
         messages: updatedMessages,
         updatedAt: getTimestamp(),
       })
@@ -373,12 +432,7 @@ export function ChatView() {
                 return (
                   <DropdownMenuItem
                     key={p.id}
-                    onClick={() =>
-                      setSelectedModel({
-                        providerId: p.id,
-                        model: modelName,
-                      })
-                    }
+                    onClick={() => void handleSelectModel(p.id, modelName)}
                     className="flex items-center justify-between"
                   >
                     <span className="truncate font-medium">{p.name || p.id}</span>
@@ -572,9 +626,9 @@ export function ChatView() {
 
       {/* History Drawer Modal */}
       <ChatHistoryDrawer
-        isOpen={isHistoryOpen}
+        isOpen={isHistoryVisible}
         currentSessionId={activeSessionId}
-        onClose={() => setIsHistoryOpen(false)}
+        onClose={handleCloseHistory}
         onSelectSession={(id) => setActiveSessionId(id)}
         onNewChat={handleNewChat}
       />

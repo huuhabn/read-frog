@@ -1,11 +1,12 @@
 import "@/utils/zod-config"
 import type { Config } from "@/types/config/config"
 import type { ThemeMode } from "@/types/config/theme"
+import type { SelectedModelConfig } from "@/utils/sidepanel/chat-model-storage"
 import { Provider as JotaiProvider, useAtomValue } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { configAtom } from "@/utils/atoms/config"
-import { sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
+import { selectedChatModelAtom, sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { APP_NAME } from "@/utils/constants/app"
 import { getLocalConfig } from "@/utils/config/storage"
@@ -13,6 +14,10 @@ import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { initI18n } from "@/utils/i18n"
 import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { renderPersistentReactRoot } from "@/utils/react-root"
+import {
+  DEFAULT_SELECTED_CHAT_MODEL,
+  getLocalSelectedChatModel,
+} from "@/utils/sidepanel/chat-model-storage"
 import { getLocalThemeMode } from "@/utils/theme"
 import { ChatView } from "./components/chat/chat-view"
 import { ReadView } from "./components/read/read-view"
@@ -29,7 +34,11 @@ function HydrateAtoms({
   initialValues,
   children,
 }: {
-  initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]
+  initialValues: [
+    [typeof configAtom, Config],
+    [typeof baseThemeModeAtom, ThemeMode],
+    [typeof selectedChatModelAtom, SelectedModelConfig],
+  ]
   children: React.ReactNode
 }) {
   useHydrateAtoms(initialValues)
@@ -59,13 +68,22 @@ async function initApp() {
 
   let config = DEFAULT_CONFIG
   let themeMode: ThemeMode = "system"
+  let selectedModel: SelectedModelConfig = DEFAULT_SELECTED_CHAT_MODEL
 
   try {
-    const [configValue, localThemeMode] = await Promise.all([getLocalConfig(), getLocalThemeMode()])
+    const [configValue, localThemeMode, localSelectedModel] = await Promise.all([
+      getLocalConfig(),
+      getLocalThemeMode(),
+      getLocalSelectedChatModel(),
+    ])
     if (configValue) config = configValue
     if (localThemeMode) themeMode = localThemeMode
+    if (localSelectedModel) selectedModel = localSelectedModel
   } catch (error) {
-    console.warn("[SidePanel] Failed to load config or theme from storage, using defaults:", error)
+    console.warn(
+      "[SidePanel] Failed to load config, theme, or selected model from storage, using defaults:",
+      error,
+    )
   }
 
   try {
@@ -81,6 +99,7 @@ async function initApp() {
         initialValues={[
           [configAtom, config],
           [baseThemeModeAtom, themeMode],
+          [selectedChatModelAtom, selectedModel],
         ]}
       >
         <ThemeProvider>
