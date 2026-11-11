@@ -53,7 +53,9 @@ export async function executeTranslate<TContext>(
   try {
     if (isNonAPIProvider(provider)) {
       const google = provider === "google-translate"
-      const sourceLang = (google ? toGoogleSourceCode : toMicrosoftSourceCode)(langConfig.sourceCode)
+      const sourceLang = (google ? toGoogleSourceCode : toMicrosoftSourceCode)(
+        langConfig.sourceCode,
+      )
       const targetLang = (google ? toGoogleLanguageCode : toMicrosoftLanguageCode)(
         langConfig.targetCode,
       )
@@ -72,10 +74,16 @@ export async function executeTranslate<TContext>(
     } else if (isPureAPIProvider(provider)) {
       const { sourceCode, targetCode } = langConfig
       if (provider === "deeplx") {
-        translatedText = await deeplxTranslate(preparedText, sourceCode, targetCode, providerConfig, {
-          textFormat: options?.textFormat,
-          signal: options?.signal,
-        })
+        translatedText = await deeplxTranslate(
+          preparedText,
+          sourceCode,
+          targetCode,
+          providerConfig,
+          {
+            textFormat: options?.textFormat,
+            signal: options?.signal,
+          },
+        )
       } else if (provider === "deepl") {
         translatedText = await deeplTranslate(text, sourceCode, targetCode, providerConfig, {
           textFormat: options?.textFormat,
