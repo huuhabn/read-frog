@@ -58,6 +58,14 @@ Học ngôn ngữ dễ hơn và sâu hơn ngay trong trình duyệt của bạn.
   - [🔊 Chuyển văn bản thành giọng nói (TTS)](#-chuyển-văn-bản-thành-giọng-nói-tts)
   - [📦 Yêu cầu theo lô](#-yêu-cầu-theo-lô)
   - [🤖 Hơn 20 nhà cung cấp AI](#-hơn-20-nhà-cung-cấp-ai)
+- [🧩 Quy trình & Kiến trúc xử lý Prompt](#-quy-trình--kiến-trúc-xử-lý-prompt)
+  - [Tổng quan kiến trúc](#tổng-quan-kiến-trúc)
+  - [Vòng đời pipeline xử lý prompt](#vòng-đời-pipeline-xử-lý-prompt)
+  - [Các Token hỗ trợ & Nội suy ngữ cảnh](#các-token-hỗ-trợ--nội-suy-ngữ-cảnh)
+  - [Tăng cường System Prompt & Chèn quy tắc](#tăng-cường-system-prompt--chèn-quy-tắc)
+  - [Bảo mật, Caching tất định & Bảo vệ Glossary](#bảo-mật-caching-tất-định--bảo-vệ-glossary)
+  - [Các ví dụ thực tế](#các-ví-dụ-thực-tế)
+  - [Hướng dẫn cho lập trình viên: Thêm prompt mới](#hướng-dẫn-cho-lập-trình-viên-thêm-prompt-mới)
 - [🤝 Đóng góp](#-đóng-góp)
 - [📜 Cấp phép thương mại](#-cấp-phép-thương-mại)
 - [❤️ Nhà tài trợ](#️-nhà-tài-trợ)
@@ -168,6 +176,297 @@ Hệ thống có cơ chế retry với exponential backoff và tự động fall
 Kết nối với hơn 20 nhà cung cấp AI qua Vercel AI SDK: OpenAI, DeepSeek, Anthropic Claude, Google Gemini, xAI Grok, Groq, Mistral, Ollama và nhiều hơn nữa. Bạn có thể cấu hình endpoint, API key và model cho từng nhà cung cấp.
 
 Ngoài ra còn có các lựa chọn dịch miễn phí như Google Translate, Microsoft Translate và DeepLX cho nhu cầu dịch cơ bản.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+## 🧩 Quy trình & Kiến trúc xử lý Prompt
+
+Workmate AI áp dụng pipeline xử lý prompt đa tầng để lắp ghép các prompt giàu ngữ cảnh, bảo toàn thẻ định danh DOM và công thức toán học, tự động chèn thuật ngữ glossary tương ứng, đồng thời tương tác với các nhà cung cấp LLM thông qua Vercel AI SDK.
+
+### Tổng quan kiến trúc
+
+```mermaid
+flowchart TD
+    A["Kích hoạt từ người dùng / Nội dung<br/>(Trang web, Phụ đề, Thanh công cụ chọn từ, Chat)"] --> B["Trình phân giải Prompt (Prompt Resolver)<br/>(Cấu hình & Khớp mẫu)"]
+    B --> C["Bộ thu thập ngữ cảnh (Context Aggregator)<br/>(Readability, Metadata, Glossary kích hoạt)"]
+    C --> D["Nội suy Token (Token Interpolation)<br/>({{targetLanguage}}, {{input}}, {{webTitle}}, ...)"]
+    D --> E["Tăng cường System Prompt<br/>(Quy tắc Batch, HTML Markers, Thẻ toán học)"]
+    E --> F["Tầng bảo mật & Chèn Glossary<br/>(Gắn sau token để chống hijack prompt)"]
+    F --> G["Tra cứu Cache tất định (Deterministic Cache)<br/>(In-Memory & Cache bộ nhớ mở rộng)"]
+    G -->|Trúng Cache| H["Trả về kết quả dịch đã lưu"]
+    G -->|Trượt Cache| I["Thực thi qua Vercel AI SDK<br/>(aiTranslate cùng Reasoning & Retries)"]
+    I --> J["Chuẩn hóa kết quả đầu ra<br/>(Loại bỏ &lt;think&gt;, Phân tích Sentinel, Làm sạch HTML)"]
+    J --> K["Lưu vào Cache & Chèn vào DOM"]
+```
+
+---
+
+### Vòng đời pipeline xử lý prompt
+
+Vòng đời của một prompt bao gồm 6 giai đoạn tuần tự nhằm đảm bảo độ tin cậy, chống tấn công prompt injection và tối ưu hóa bộ nhớ đệm:
+
+1. **Kích hoạt & Phân giải (Trigger & Resolution)**
+   - Yêu cầu dịch sẽ gọi hàm [`getTranslatePrompt`](file:///Users/huuha/dev/extensions/workmate-ai/src/utils/prompts/translate.ts) (cho trang web và vùng chọn) hoặc [`getSubtitlesTranslatePrompt`](file:///Users/huuha/dev/extensions/workmate-ai/src/utils/prompts/subtitles.ts) (cho phụ đề video).
+   - Trình phân giải kiểm tra ID prompt theo thứ tự ưu tiên:
+     - Registry prompt tích hợp sẵn (`BUILT_IN_PAGE_TRANSLATE_PROMPTS` hoặc `BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS` trong [`src/utils/constants/prompt.ts`](file:///Users/huuha/dev/extensions/workmate-ai/src/utils/constants/prompt.ts)).
+     - Các mẫu prompt do người dùng tự tạo trong Cài đặt (Options).
+     - Prompt mặc định của hệ thống (`DEFAULT_TRANSLATE_PROMPT_ID`).
+
+2. **Thu thập ngữ cảnh (Context Aggregation)**
+   - Thu thập thông tin trang: tiêu đề, mô tả, nội dung trích xuất bằng Readability và bản tóm tắt nội dung.
+   - Đối với phụ đề video, trích xuất tiêu đề video, mô tả và tóm tắt video.
+   - Đối với dịch vùng chọn, trích xuất đoạn văn bao quanh (`SelectionPromptContext`).
+   - Tìm kiếm các thuật ngữ glossary xuất hiện trong đoạn văn bản bằng thuật toán Aho-Corasick.
+
+3. **Nội suy Token (Token Interpolation)**
+   - Các biến giữ chỗ (như `{{targetLanguage}}`, `{{input}}`, `{{webTitle}}`) được thay thế bằng dữ liệu thực thi đã qua làm sạch qua hàm `replaceTokens`.
+   - Nếu metadata bị thiếu, hệ thống tự động điền giá trị dự phòng an toàn (ví dụ `"No title available"` qua `resolvePromptReplacementValue`).
+
+4. **Tăng cường System Prompt & Chèn quy tắc**
+   - **Dịch theo lô (Batch Translation)**: Khi ở chế độ batch, tự động bổ sung hướng dẫn phân tách dấu phân đoạn (`%%`) và quy tắc sentinel (`{{NO_TRANSLATION_NEEDED}}`).
+   - **Bảo vệ thuộc tính HTML**: Khi văn bản chứa thẻ đánh dấu (như `rf-id="..."`), hệ thống tự động chèn `HTML_ATTRIBUTE_MARKER_SYSTEM_PROMPT` nhằm yêu cầu LLM giữ nguyên vị trí thuộc tính trên phần tử HTML gốc.
+   - **Thẻ nguyên tử toán học (Inline Atoms)**: Khi văn bản có công thức (ví dụ `{{0}}`), chèn `INLINE_ATOM_TOKEN_SYSTEM_PROMPT`.
+   - **Hành động tùy chỉnh (Structured Output)**: Đối với các action trên thanh công cụ chọn từ, chèn `## Structured Output Contract` với định dạng trường YAML và ràng buộc JSON chặt chẽ.
+
+5. **Thứ tự bảo mật & Caching tất định**
+   - **Gắn Glossary sau khi thay token**: Các thuật ngữ glossary và ngữ cảnh đoạn văn luôn được nối vào system prompt **sau** khi đã hoàn tất việc thay thế token. Điều này ngăn chặn việc người dùng nhập thuật ngữ chứa chuỗi dạng `{{input}}` gây phá vỡ hoặc chiếm quyền điều khiển prompt.
+   - **Khóa Cache tất định**: Chỉ những thuật ngữ glossary thực sự xuất hiện trong đoạn văn mới được đưa vào prompt. Nếu không có thuật ngữ nào khớp, prompt sẽ giống hệt như khi không bật glossary, từ đó tối đa hóa tỷ lệ trúng cache giữa các trang và người dùng khác nhau.
+
+6. **Thực thi qua Vercel AI SDK & Chuẩn hóa**
+   - [`aiTranslate`](file:///Users/huuha/dev/extensions/workmate-ai/src/utils/host/translate/api/ai.ts) kích hoạt `generateText` thông qua Vercel AI SDK cùng các tùy chọn model và nhiệt độ (temperature).
+   - Tự động cắt bỏ các token suy luận (như khối `<think>...</think>` của DeepSeek-R1 hoặc các mô hình reasoning).
+   - Phát hiện dấu hiệu sentinel (`{{NO_TRANSLATION_NEEDED}}`) để chuyển đổi thành chuỗi rỗng hoặc bỏ qua dịch đoạn văn bản trùng ngôn ngữ đích.
+
+---
+
+### Các Token hỗ trợ & Nội suy ngữ cảnh
+
+| Token                | Phạm vi            | Mô tả / Nguồn gốc                                             |
+| :------------------- | :----------------- | :------------------------------------------------------------ |
+| `{{targetLanguage}}` | Trang web & Phụ đề | Tên ngôn ngữ đích (ví dụ `Tiếng Việt`, `English`, `Japanese`) |
+| `{{input}}`          | Trang web & Phụ đề | Đoạn văn bản hoặc nhóm văn bản đầu vào cần dịch               |
+| `{{webTitle}}`       | Trang web & Phụ đề | Tiêu đề trang web hiện tại hoặc tiêu đề video                 |
+| `{{webDescription}}` | Trang web & Phụ đề | Thẻ mô tả `<meta name="description">` hoặc mô tả video        |
+| `{{webContent}}`     | Trang web          | Nội dung bài viết chính được lọc qua Readability              |
+| `{{webSummary}}`     | Trang web          | Bản tóm tắt trang web được tạo để làm ngữ cảnh dịch           |
+| `{{videoSummary}}`   | Phụ đề             | Bản tóm tắt nội dung video                                    |
+| `{{selection}}`      | Hành động AI       | Văn bản chính xác được bôi đen                                |
+| `{{paragraphs}}`     | Hành động AI       | Đoạn văn xung quanh phần văn bản được bôi đen                 |
+| `{{webUrl}}`         | Hành động AI       | URL đầy đủ của trang web đang mở                              |
+
+---
+
+### Tăng cường System Prompt & Chèn quy tắc
+
+Workmate AI linh hoạt ghép thêm các quy tắc vào System Prompt tùy theo đặc tính của từng đoạn nội dung:
+
+```
+[System Prompt cơ sở (Tích hợp sẵn hoặc Người dùng tạo)]
+       │
+       ▼ (nếu ở chế độ batch)
+[Quy tắc phân tách đoạn (%%) & Quy tắc Sentinel]
+       │
+       ▼ (nếu chứa thẻ HTML có id)
+[Quy tắc bảo vệ thuộc tính HTML (rf-id)]
+       │
+       ▼ (nếu chứa công thức toán học)
+[Quy tắc bảo toàn Inline Atoms ({{0}})]
+       │
+       ▼ (Nội suy Token: {{targetLanguage}}, {{webTitle}}, v.v.)
+       │
+       ▼ (Giai đoạn gắn thêm sau khi thay token)
+[Khối thuật ngữ Glossary khớp thực tế]
+       │
+       ▼ (nếu có ngữ cảnh đoạn văn được chọn)
+[Khối đoạn văn bản bao quanh]
+       │
+       ▼ (nếu là hành động tùy chỉnh yêu cầu cấu trúc)
+[Hợp đồng đầu ra có cấu trúc JSON/YAML Contract]
+```
+
+---
+
+### Bảo mật, Caching tất định & Bảo vệ Glossary
+
+- **Chống tấn công Prompt Injection**: Các mục trong từ điển người dùng được xem là dữ liệu không tin cậy. Nhờ việc chỉ ghép glossary vào **sau** khi thay thế token, các chuỗi độc hại dạng `{{token}}` trong từ điển của người dùng sẽ không bao giờ được thực thi nội suy.
+- **Tiết kiệm tài nguyên Cache**: Khóa cache dịch được tạo trực tiếp từ mã băm của prompt hoàn chỉnh và văn bản đầu vào. Việc chỉ chèn các thuật ngữ glossary thực sự xuất hiện trong câu giúp các câu không chứa thuật ngữ vẫn trúng cache chung, giảm đáng kể chi phí gọi API.
+
+---
+
+### Các ví dụ thực tế
+
+#### Ví dụ 1: Dịch trang web theo lô có bảo toàn thẻ HTML & Glossary
+
+**Đoạn văn bản đầu vào**:
+
+```html
+<p>Deploy your models using <span rf-id="1">zero-shot prompt</span> configurations.</p>
+```
+
+**Thuật ngữ Glossary kích hoạt**: `zero-shot prompt` &rarr; `câu lệnh gợi ý zero-shot`  
+**Ngôn ngữ đích**: `Vietnamese`
+
+**System Prompt được ghép (trích đoạn)**:
+
+```markdown
+You are a professional Vietnamese native translator who needs to fluently translate text into Vietnamese.
+
+## Translation Rules
+
+1. Output only the translated content, without explanations or additional content.
+2. The returned translation must maintain exactly the same number of paragraphs and format as the original text.
+
+## Document Metadata for Context Awareness
+
+Webpage title: Next-Gen LLM Architectures
+Webpage summary: Overview of modern prompt strategies.
+
+## Protected HTML Marker Rules
+
+These mandatory rules override any conflicting instructions above:
+
+1. Within each input segment, preserve every `rf-id` attribute occurrence and its value exactly once in that segment's output.
+2. Never add, remove, change, duplicate, rename, renumber, or move a marker to another segment.
+3. Keep each marker on its original HTML element.
+
+## Glossary Terms
+
+Translate the following terms accurately according to the glossary:
+
+- "zero-shot prompt" -> "câu lệnh gợi ý zero-shot"
+```
+
+**Kết quả mô hình trả về**:
+
+```html
+<p>Triển khai mô hình của bạn bằng các cấu hình <span rf-id="1">câu lệnh gợi ý zero-shot</span>.</p>
+```
+
+---
+
+#### Ví dụ 2: Hành động AI trên vùng chọn với Structured Output Contract
+
+**Văn bản được chọn**: `"Spaced repetition produces significantly better long-term retention than massed practice."`  
+**Hành động AI**: `Trích xuất từ vựng & Phân tích`  
+**Cấu hình lược đồ đầu ra (Schema)**:
+
+- `keyTerm` (string): Thuật ngữ trọng tâm
+- `explanation` (string): Giải thích bằng ngôn ngữ đích
+- `cefrLevel` (string): Ước tính trình độ CEFR (A1-C2)
+
+**System Prompt Contract được tự động sinh ra**:
+
+```markdown
+Analyze the selected text for language learning.
+
+## Structured Output Contract
+
+Return exactly one JSON object and nothing else.
+
+### Required Keys and Types
+
+- key: "keyTerm"
+  type: string
+  nullable: true
+  description: |-
+  The main term or concept identified.
+- key: "explanation"
+  type: string
+  nullable: true
+  description: |-
+  Clear explanation in {{targetLanguage}}.
+- key: "cefrLevel"
+  type: string
+  nullable: true
+  description: |-
+  Estimated CEFR level (A1, A2, B1, B2, C1, C2).
+
+### Hard Requirements
+
+1. Include every required key exactly once.
+2. Do not add any extra keys.
+3. Use the exact key names shown above.
+4. Output valid JSON only. Use double quotes for keys and string values.
+5. Do not wrap the JSON in markdown or code fences.
+6. If a value is unknown, use null.
+```
+
+**Kết quả JSON nhận được và hiển thị trên giao diện**:
+
+```json
+{
+  "keyTerm": "Spaced repetition",
+  "explanation": "Phương pháp lặp lại ngắt quãng giúp ghi nhớ dài hạn hiệu quả.",
+  "cefrLevel": "B2"
+}
+```
+
+---
+
+#### Ví dụ 3: Dịch phụ đề có ngữ cảnh video
+
+**Metadata của video**: Tiêu đề `"MIT 6.S191: Convolutional Neural Networks"`, Tóm tắt `"Lecture covering feature maps, pooling layers, and kernels."`  
+**Câu phụ đề gốc**: `"Here we apply a 3x3 kernel across the feature map."`  
+**Ngôn ngữ đích**: `Tiếng Nhật`
+
+**Prompt gửi tới mô hình**:
+
+```
+Translate to Japanese:
+
+Here we apply a 3x3 kernel across the feature map.
+```
+
+**Kết quả sau xử lý**:
+Nhờ có tóm tắt ngữ cảnh video về học sâu/thị giác máy tính, mô hình nhận biết chính xác từ `"kernel"` phải dịch là `カーネル` và `"feature map"` là `特徴マップ` (thay vì các nghĩa thông dụng như hạt nhân ngô hoặc bản đồ địa lý), đồng thời giữ độ dài tương đương để đồng bộ nhịp hiển thị phụ đề.
+
+---
+
+### Hướng dẫn cho lập trình viên: Thêm prompt mới
+
+Để thêm một prompt dịch tích hợp sẵn hoặc tạo preset prompt mới:
+
+1. **Định nghĩa hằng số Prompt**  
+   Trong file [`src/utils/constants/prompt.ts`](file:///Users/huuha/dev/extensions/workmate-ai/src/utils/constants/prompt.ts), khai báo System Prompt và User Prompt:
+
+   ```typescript
+   export const MY_NEW_TRANSLATE_PROMPT_ID = "myNewPrompt"
+
+   export const MY_NEW_TRANSLATE_SYSTEM_PROMPT = `You are a specialist translator...`
+   export const MY_NEW_TRANSLATE_PROMPT = `Translate to {{targetLanguage}}:\n\n{{input}}`
+   ```
+
+2. **Đăng ký vào Built-In Registry**  
+   Thêm định nghĩa prompt vào `BUILT_IN_PAGE_TRANSLATE_PROMPTS` hoặc `BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS`:
+
+   ```typescript
+   export const BUILT_IN_PAGE_TRANSLATE_PROMPTS = {
+     [DEFAULT_TRANSLATE_PROMPT_ID]: { ... },
+     [MY_NEW_TRANSLATE_PROMPT_ID]: {
+       id: MY_NEW_TRANSLATE_PROMPT_ID,
+       systemPrompt: MY_NEW_TRANSLATE_SYSTEM_PROMPT,
+       prompt: MY_NEW_TRANSLATE_PROMPT,
+     },
+   }
+   ```
+
+3. **Cung cấp bản dịch hiển thị tên & mô tả**  
+   Trong [`src/components/prompt-configurator/built-in-prompts.ts`](file:///Users/huuha/dev/extensions/workmate-ai/src/components/prompt-configurator/built-in-prompts.ts), thêm case xử lý i18n trong hàm `getBuiltInPromptCopy`:
+
+   ```typescript
+   case MY_NEW_TRANSLATE_PROMPT_ID:
+     return {
+       name: i18n.t("options.translation.personalizedPrompts.builtInPrompts.myNewPrompt.name"),
+       description: i18n.t("options.translation.personalizedPrompts.builtInPrompts.myNewPrompt.description"),
+     }
+   ```
+
+4. **Thêm Unit Test kiểm thử**  
+   Bảo đảm cơ chế nội suy token và ghép prompt hoạt động ổn định bằng cách thêm test trong [`src/utils/constants/__tests__/prompt.test.ts`](file:///Users/huuha/dev/extensions/workmate-ai/src/utils/constants/__tests__/prompt.test.ts) và [`src/utils/prompts/__tests__/translate.test.ts`](file:///Users/huuha/dev/extensions/workmate-ai/src/utils/prompts/__tests__/translate.test.ts).
 
 <div align="right">
 

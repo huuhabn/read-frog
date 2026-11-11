@@ -8,22 +8,6 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 [Official Website](https://www.readfrog.app/en?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [All Features](https://www.readfrog.app/en/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Tutorial](https://www.readfrog.app/en/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Changelog][github-release-link] · [Blog](https://www.readfrog.app/en/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [vs Immersive Translate](https://www.readfrog.app/en/compare/immersive-translate?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en)
 
-<!-- SHIELD GROUP -->
-
-[![Latest Version badge][extension-release-shield]][github-release-link]
-[![Chrome Version badge][chrome-version-shield]][chrome-store-link]
-[![Edge Version badge][edge-version-shield]][edge-store-link]
-[![Firefox Version badge][firefox-version-shield]][firefox-store-link]<br/>
-[![Discord badge][discord-shield]][discord-link]
-[![Chrome Users badge][chrome-users-shield]][chrome-store-link]
-[![Edge Users badge][edge-users-shield]][edge-store-link]
-[![Firefox Users badge][firefox-users-shield]][firefox-store-link]<br/>
-[![Stars badge][star-history-shield]][star-history-link]
-[![Contributors badge][contributors-shield]][contributors-link]
-![Last Commit badge][last-commit-shield]
-[![Issues badge][issues-shield]][issues-link]<br/>
-[![Sponsor badge][sponsor-shield]][sponsor-link]
-
 </div>
 
 <details>
@@ -45,6 +29,14 @@ Master languages effortlessly and deeply with AI, right in your browser.
   - [🔊 Text-to-Speech (TTS)](#-text-to-speech-tts)
   - [📦 Batch Requests](#-batch-requests)
   - [🤖 20+ AI Providers](#-20-ai-providers)
+- [🧩 Prompt Processing Workflow & Architecture](#-prompt-processing-workflow--architecture)
+  - [Architecture Overview](#architecture-overview)
+  - [Prompt Pipeline Lifecycle](#prompt-pipeline-lifecycle)
+  - [Supported Tokens & Context Interpolation](#supported-tokens--context-interpolation)
+  - [System Prompt Augmentation & Rule Injection](#system-prompt-augmentation--rule-injection)
+  - [Security, Deterministic Caching & Glossary Protection](#security-deterministic-caching--glossary-protection)
+  - [Real-World Examples](#real-world-examples)
+  - [Developer Guide: Adding a New Prompt](#developer-guide-adding-a-new-prompt)
 - [🤝 Contribute](#-contribute)
   - [Contribute Code](#contribute-code)
 - [📜 Commercial License Grant](#-commercial-license-grant)
@@ -53,12 +45,6 @@ Master languages effortlessly and deeply with AI, right in your browser.
 <br/>
 
 </details>
-
-## 📺 Demo
-
-🔊 The player starts muted — turn the sound on.
-
-https://github.com/user-attachments/assets/c000c3e7-40af-4621-8a7f-72a685732c31
 
 ## 👋🏻 Getting Started & Join Our Community
 
@@ -73,33 +59,6 @@ Whether you are a user or a developer, Workmate AI will be an important part of 
 | Chrome  | [![Chrome Version badge][chrome-version-shield]][chrome-store-link]    | [Chrome Web Store][chrome-store-link] or [中国镜像][crxsoso-link] |
 | Edge    | [![Edge Version badge][edge-version-shield]][edge-store-link]          | [Microsoft Edge Addons][edge-store-link]                          |
 | Firefox | [![Firefox Version badge][firefox-version-shield]][firefox-store-link] | [Firefox Add-ons][firefox-store-link]                             |
-
-### Community
-
-| [![Discord badge][discord-shield-badge]][discord-link] | In Discord ask questions, and connect with developers.                                 |
-| :----------------------------------------------------- | :------------------------------------------------------------------------------------- |
-| [![WeChat badge][wechat-shield-badge]][wechat-link]    | If you are in mainland China, you can add the WeChat account to join the WeChat group. |
-
-> \[!IMPORTANT]
->
-> **⭐️ Star Us**, You will receive all release notifications from GitHub without any delay \~
-
-[![Star Workmate AI on GitHub][image-star]][github-star-link]
-
-<details>
-<summary>
-  <kbd>Star History</kbd>
-</summary>
-
-<a href="https://www.star-history.com/?type=timeline&repos=mengxi-ream%2Fread-frog">
- <picture>
-   <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&theme=dark&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
-   <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
-   <img alt="Star History Chart" src="https://api.star-history.com/chart?repos=mengxi-ream/read-frog&type=timeline&legend=top-left&sealed_token=vUW24BwE2sgnq-CzlWEAT6gnzZqNrXl9ai4A05Pc3CQcPGdBqbts3tq5VRWEerfrqVdonsJasb04WcKd5AKSSCjlsdj_TwyI3j9xytMG4FQNw7yXDe9IUA" />
- </picture>
-</a>
-
-</details>
 
 <div align="right">
 
@@ -231,51 +190,290 @@ Plus free translation options: Google Translate, Microsoft Translate, and DeepLX
 
 </div>
 
-## 🤝 Contribute
+## 🧩 Prompt Processing Workflow & Architecture
 
-Contributions of all types are more than welcome.
+Workmate AI uses a multi-stage prompt processing pipeline to assemble contextual prompts, protect DOM markers and mathematical atoms, dynamically inject glossary terms, and interface with LLM providers through the Vercel AI SDK.
 
-1. Promote Workmate AI to your friends and family.
-2. Report [issues][issues-link] and feedback.
-3. Contribute code.
+### Architecture Overview
 
-### Contribute Code
+```mermaid
+flowchart TD
+    A["User / Content Trigger<br/>(Page, Subtitles, Selection Toolbar, Chat)"] --> B["Prompt Resolver<br/>(Config & Pattern Matching)"]
+    B --> C["Context Aggregator<br/>(Readability, Metadata, Active Glossary)"]
+    C --> D["Token Interpolation<br/>({{targetLanguage}}, {{input}}, {{webTitle}}, ...)"]
+    D --> E["System Prompt Augmentation<br/>(Batch Rules, HTML Markers, Inline Atoms)"]
+    E --> F["Security Layer & Glossary Injection<br/>(Post-token append prevents prompt hijack)"]
+    F --> G["Deterministic Cache Lookup<br/>(In-Memory & Background Storage Cache)"]
+    G -->|Cache Hit| H["Return Cached Translation"]
+    G -->|Cache Miss| I["Vercel AI SDK Execution<br/>(aiTranslate with Reasoning & Retries)"]
+    I --> J["Output Normalization<br/>(Strip &lt;think&gt;, Parse Sentinels, Clean HTML)"]
+    J --> K["Cache Storage & DOM Injection"]
+```
 
-Project Structure: [DeepWiki](https://deepwiki.com/mengxi-ream/read-frog)
+---
 
-Ask AI to understand the project: [Dosu](https://app.dosu.dev/29569286-71ba-47dd-b038-c7ab1b9d0df7/documents)
+### Prompt Pipeline Lifecycle
 
-Check out the [Contribution Guide](https://www.readfrog.app/en/docs/contributing?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) for more details.
+The prompt lifecycle consists of 6 sequential phases designed for reliability, prompt injection safety, and caching efficiency:
 
-ReadFrog is dual-licensed under GPLv3 and a commercial license.
+1. **Trigger & Resolution**
+   - Translation requests invoke [`getTranslatePrompt`](./src/utils/prompts/translate.ts) (for web pages and selections) or [`getSubtitlesTranslatePrompt`](./src/utils/prompts/subtitles.ts) (for video subtitles).
+   - The resolver evaluates the configured prompt ID in order of priority:
+     - Built-in prompt registry (`BUILT_IN_PAGE_TRANSLATE_PROMPTS` or `BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS` in [`src/utils/constants/prompt.ts`](./src/utils/constants/prompt.ts)).
+     - User custom patterns configured in Options.
+     - Default prompt fallback (`DEFAULT_TRANSLATE_PROMPT_ID`).
 
-See [CONTRIBUTING.md](./CONTRIBUTING.md) for contributor licensing terms.
+2. **Context Aggregation**
+   - Webpage metadata is gathered: title, description, Readability-extracted content, and AI/document summaries.
+   - For video subtitles, video title, description, and summary are gathered.
+   - For selection translation, the surrounding paragraph (`SelectionPromptContext`) is captured.
+   - Glossary matches are searched using the Aho-Corasick algorithm against the user's active glossary.
 
-<a href="https://github.com/mengxi-ream/read-frog/graphs/contributors">
-  <table>
-    <tr>
-      <th colspan="2">
-        <br>
-        <img src="https://contrib.rocks/image?repo=mengxi-ream/read-frog" alt="Workmate AI contributors"><br>
-        <br>
-      </th>
-    </tr>
-    <!-- <tr>
-      <td>
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-recent-top-contributors/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=dark" width="373" height="auto">
-          <img alt="Top Contributors of mengxi-ream/read-frog - Last 28 days" src="https://next.ossinsight.io/widgets/official/compose-recent-top-contributors/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=light" width="373" height="auto">
-        </picture>
-      </td>
-      <td rowspan="2">
-        <picture>
-          <source media="(prefers-color-scheme: dark)" srcset="https://next.ossinsight.io/widgets/official/compose-last-28-days-stats/thumbnail.png?repo_id=967738751&image_size=4x7&color_scheme=dark" width="655" height="auto">
-          <img alt="Performance Stats of mengxi-ream/read-frog - Last 28 days" src="https://next.ossinsight.io/widgets/official/compose-last-28-days-stats/thumbnail.png?repo_id=967738751&image_size=auto&color_scheme=light" width="655" height="auto">
-        </picture>
-      </td>
-    </tr> -->
-  </table>
-</a>
+3. **Token Interpolation**
+   - Supported placeholders (e.g. `{{targetLanguage}}`, `{{input}}`, `{{webTitle}}`) are replaced with sanitized runtime values via `replaceTokens`.
+   - Empty metadata fields are safely substituted with descriptive fallbacks (e.g. `"No title available"` via `resolvePromptReplacementValue`).
+
+4. **System Prompt Augmentation & Rule Injection**
+   - **Batch Translation**: In batch mode, appends batch separator instructions (`%%`) and sentinel instructions (`{{NO_TRANSLATION_NEEDED}}`).
+   - **HTML Attribute Protection**: When input contains protected markers (e.g. `rf-id="..."`), injects `HTML_ATTRIBUTE_MARKER_SYSTEM_PROMPT` to enforce exact marker retention on original elements.
+   - **Inline Atom Tokens**: When input contains formula/atom placeholders (e.g. `{{0}}`), appends `INLINE_ATOM_TOKEN_SYSTEM_PROMPT`.
+   - **Custom Actions (Structured Output)**: For selection toolbar actions, appends `## Structured Output Contract` with a YAML field specification and rigid JSON output schema.
+
+5. **Security Ordering & Deterministic Caching**
+   - **Post-Replacement Glossary Injection**: Matched glossary terms and selection context are appended to the system prompt **after** token replacement has completed. This ensures user glossary terms containing `{{input}}` substrings cannot hijack or corrupt the prompt structure.
+   - **Deterministic Cache Key**: Only terms that actually match the current segment are appended. If no terms match, the prompt remains byte-identical to a request without glossary, preventing cache-miss explosion.
+
+6. **Execution via Vercel AI SDK & Normalization**
+   - [`aiTranslate`](./src/utils/host/translate/api/ai.ts) executes `generateText` using the Vercel AI SDK with provider-specific options and temperature.
+   - Reasoning tokens (e.g., `<think>...</think>` from DeepSeek-R1 or reasoning models) are automatically stripped before output parsing.
+   - Sentinel markers (`{{NO_TRANSLATION_NEEDED}}`) are detected and mapped to empty strings or skipped.
+
+---
+
+### Supported Tokens & Context Interpolation
+
+| Token                | Scope            | Source / Description                                            |
+| :------------------- | :--------------- | :-------------------------------------------------------------- |
+| `{{targetLanguage}}` | Page & Subtitles | Target language name (e.g. `English`, `Vietnamese`, `Japanese`) |
+| `{{input}}`          | Page & Subtitles | Source text segment or batch text to be translated              |
+| `{{webTitle}}`       | Page & Subtitles | Active document or video title                                  |
+| `{{webDescription}}` | Page & Subtitles | Page `<meta name="description">` or video description           |
+| `{{webContent}}`     | Page             | Main article body extracted via Readability                     |
+| `{{webSummary}}`     | Page             | Document summary generated for translation context              |
+| `{{videoSummary}}`   | Subtitles        | Summary of current video context                                |
+| `{{selection}}`      | Custom Actions   | Exact text selected by the user on the page                     |
+| `{{paragraphs}}`     | Custom Actions   | Surrounding paragraph(s) of the selection                       |
+| `{{webUrl}}`         | Custom Actions   | Full URL of the active tab                                      |
+
+---
+
+### System Prompt Augmentation & Rule Injection
+
+Workmate AI dynamically injects rules into the system prompt according to the features active on each segment:
+
+```
+[Base System Prompt (Built-in or Custom)]
+       │
+       ▼ (if isBatch)
+[Batch Separator (%%) & Sentinel Rules]
+       │
+       ▼ (if contains HTML markers)
+[Protected HTML Marker Rules (rf-id)]
+       │
+       ▼ (if contains inline formulas)
+[Inline Atom Token Rules ({{0}})]
+       │
+       ▼ (Token Replacement: {{targetLanguage}}, {{webTitle}}, etc.)
+       │
+       ▼ (Post-Token Appends)
+[Glossary Matched Terms Block]
+       │
+       ▼ (if selection context present)
+[Surrounding Passage Block]
+       │
+       ▼ (if custom action with structured output)
+[Structured Output JSON/YAML Contract]
+```
+
+---
+
+### Security, Deterministic Caching & Glossary Protection
+
+- **Prompt Injection Defense**: Glossary terms and user notes are treated as untrusted data. By appending glossary entries **after** token interpolation (`replaceTokens`), malicious or accidental `{{token}}` sequences in user glossaries can never execute token replacement.
+- **Cache Conservation**: The translation cache key is computed directly from the assembled prompt and input. Injecting only _matched_ glossary terms ensures paragraphs without glossary terms hit the generic cache, drastically minimizing API consumption across repeat visits.
+
+---
+
+### Real-World Examples
+
+#### Example 1: Webpage Batch Translation with Protected HTML & Glossary
+
+**Input segment**:
+
+```html
+<p>Deploy your models using <span rf-id="1">zero-shot prompt</span> configurations.</p>
+```
+
+**Active Glossary**: `zero-shot prompt` &rarr; `câu lệnh gợi ý zero-shot`  
+**Target Language**: `Vietnamese`
+
+**Assembled System Prompt (Snippet)**:
+
+```markdown
+You are a professional Vietnamese native translator who needs to fluently translate text into Vietnamese.
+
+## Translation Rules
+
+1. Output only the translated content, without explanations or additional content.
+2. The returned translation must maintain exactly the same number of paragraphs and format as the original text.
+
+## Document Metadata for Context Awareness
+
+Webpage title: Next-Gen LLM Architectures
+Webpage summary: Overview of modern prompt strategies.
+
+## Protected HTML Marker Rules
+
+These mandatory rules override any conflicting instructions above:
+
+1. Within each input segment, preserve every `rf-id` attribute occurrence and its value exactly once in that segment's output.
+2. Never add, remove, change, duplicate, rename, renumber, or move a marker to another segment.
+3. Keep each marker on its original HTML element.
+
+## Glossary Terms
+
+Translate the following terms accurately according to the glossary:
+
+- "zero-shot prompt" -> "câu lệnh gợi ý zero-shot"
+```
+
+**Model Output**:
+
+```html
+<p>Triển khai mô hình của bạn bằng các cấu hình <span rf-id="1">câu lệnh gợi ý zero-shot</span>.</p>
+```
+
+---
+
+#### Example 2: Selection Custom Action with Structured Output Contract
+
+**Selected text**: `"Spaced repetition produces significantly better long-term retention than massed practice."`  
+**Custom Action**: `Vocabulary & Analysis Extractor`  
+**Configured Output Schema**:
+
+- `keyTerm` (string): Core terminology
+- `explanation` (string): Plain language definition
+- `cefrLevel` (string): Estimated CEFR level (A1-C2)
+
+**Generated System Prompt Contract**:
+
+```markdown
+Analyze the selected text for language learning.
+
+## Structured Output Contract
+
+Return exactly one JSON object and nothing else.
+
+### Required Keys and Types
+
+- key: "keyTerm"
+  type: string
+  nullable: true
+  description: |-
+  The main term or concept identified.
+- key: "explanation"
+  type: string
+  nullable: true
+  description: |-
+  Clear explanation in {{targetLanguage}}.
+- key: "cefrLevel"
+  type: string
+  nullable: true
+  description: |-
+  Estimated CEFR level (A1, A2, B1, B2, C1, C2).
+
+### Hard Requirements
+
+1. Include every required key exactly once.
+2. Do not add any extra keys.
+3. Use the exact key names shown above.
+4. Output valid JSON only. Use double quotes for keys and string values.
+5. Do not wrap the JSON in markdown or code fences.
+6. If a value is unknown, use null.
+```
+
+**Parsed Result in UI**:
+
+```json
+{
+  "keyTerm": "Spaced repetition",
+  "explanation": "Phương pháp lặp lại ngắt quãng giúp ghi nhớ dài hạn hiệu quả.",
+  "cefrLevel": "B2"
+}
+```
+
+---
+
+#### Example 3: Subtitle Translation with Video Context Awareness
+
+**Video Metadata**: Title `"MIT 6.S191: Convolutional Neural Networks"`, Summary `"Lecture covering feature maps, pooling layers, and kernels."`  
+**Subtitle Cue**: `"Here we apply a 3x3 kernel across the feature map."`  
+**Target Language**: `Japanese`
+
+**User Prompt**:
+
+```
+Translate to Japanese:
+
+Here we apply a 3x3 kernel across the feature map.
+```
+
+**Assembled Result**:
+Because the video summary contextualizes the terminology as computer vision / machine learning, the LLM translates `"kernel"` as `カーネル` and `"feature map"` as `特徴マップ` (rather than culinary or generic interpretations), preserving natural subtitle timing length.
+
+---
+
+### Developer Guide: Adding a New Prompt
+
+To add a new built-in translation prompt or custom prompt preset:
+
+1. **Define the Prompt Constants**  
+   In [`src/utils/constants/prompt.ts`](./src/utils/constants/prompt.ts), add your system prompt and user prompt definitions:
+
+   ```typescript
+   export const MY_NEW_TRANSLATE_PROMPT_ID = "myNewPrompt"
+
+   export const MY_NEW_TRANSLATE_SYSTEM_PROMPT = `You are a specialist translator...`
+   export const MY_NEW_TRANSLATE_PROMPT = `Translate to {{targetLanguage}}:\n\n{{input}}`
+   ```
+
+2. **Register in Built-In Registry**  
+   Add the prompt definition to `BUILT_IN_PAGE_TRANSLATE_PROMPTS` or `BUILT_IN_SUBTITLE_TRANSLATE_PROMPTS`:
+
+   ```typescript
+   export const BUILT_IN_PAGE_TRANSLATE_PROMPTS = {
+     [DEFAULT_TRANSLATE_PROMPT_ID]: { ... },
+     [MY_NEW_TRANSLATE_PROMPT_ID]: {
+       id: MY_NEW_TRANSLATE_PROMPT_ID,
+       systemPrompt: MY_NEW_TRANSLATE_SYSTEM_PROMPT,
+       prompt: MY_NEW_TRANSLATE_PROMPT,
+     },
+   }
+   ```
+
+3. **Provide Localization Copies**  
+   In [`src/components/prompt-configurator/built-in-prompts.ts`](./src/components/prompt-configurator/built-in-prompts.ts), register the prompt name and description in `getBuiltInPromptCopy`:
+
+   ```typescript
+   case MY_NEW_TRANSLATE_PROMPT_ID:
+     return {
+       name: i18n.t("options.translation.personalizedPrompts.builtInPrompts.myNewPrompt.name"),
+       description: i18n.t("options.translation.personalizedPrompts.builtInPrompts.myNewPrompt.description"),
+     }
+   ```
+
+4. **Add Unit Tests**  
+   Verify token interpolation and prompt assembly by adding tests in [`src/utils/constants/__tests__/prompt.test.ts`](./src/utils/constants/__tests__/prompt.test.ts) and [`src/utils/prompts/__tests__/translate.test.ts`](./src/utils/prompts/__tests__/translate.test.ts).
 
 <div align="right">
 
