@@ -4,11 +4,11 @@ import type { ThemeMode } from "@/types/config/theme"
 import type { SelectedModelConfig } from "@/utils/sidepanel/chat-model-storage"
 import { Provider as JotaiProvider, useAtomValue } from "jotai"
 import { useHydrateAtoms } from "jotai/utils"
+import { browser } from "#imports"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { configAtom } from "@/utils/atoms/config"
 import { selectedChatModelAtom, sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
-import { APP_NAME } from "@/utils/constants/app"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { initI18n } from "@/utils/i18n"
@@ -62,7 +62,29 @@ function SidePanelShell() {
   )
 }
 
+function setupSidePanelConnection() {
+  try {
+    void browser.windows
+      ?.getCurrent?.()
+      .then((currentWindow) => {
+        const windowId = currentWindow?.id
+        const portName =
+          typeof windowId === "number"
+            ? `side-panel-connection:${windowId}`
+            : "side-panel-connection"
+        browser.runtime.connect({ name: portName })
+      })
+      .catch(() => {
+        browser.runtime.connect({ name: "side-panel-connection" })
+      })
+  } catch (error) {
+    console.warn("[SidePanel] Failed to establish connection port:", error)
+  }
+}
+
 async function initApp() {
+  setupSidePanelConnection()
+
   const root = document.getElementById("root")!
   root.className = "h-screen w-screen overflow-hidden bg-background text-base antialiased"
 

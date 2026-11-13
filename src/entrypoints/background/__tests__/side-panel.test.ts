@@ -315,4 +315,118 @@ describe("background side panel", () => {
       api: sidebarAction,
     })
   })
+
+  it("toggles the side panel when the toolbar action icon is clicked", async () => {
+    let actionClickListener: ((tab: { id?: number; windowId?: number }) => Promise<void>) | null =
+      null
+    const sidePanel = {
+      close: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+      open: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    }
+
+    setupSidePanelMessageHandler({
+      extensionBrowser: {
+        action: {
+          onClicked: {
+            addListener: vi.fn<(...args: any[]) => any>((listener) => {
+              actionClickListener = listener
+            }),
+          },
+        },
+        sidePanel,
+      } as any,
+      registerMessageHandler: vi.fn<(...args: any[]) => any>(),
+    })
+
+    expect(actionClickListener).not.toBeNull()
+
+    // 1st click: opens side panel
+    await actionClickListener!({ id: 101, windowId: 789 })
+    expect(sidePanel.open).toHaveBeenCalledWith({ windowId: 789 })
+    expect(sidePanel.close).not.toHaveBeenCalled()
+
+    // 2nd click: closes side panel
+    await actionClickListener!({ id: 101, windowId: 789 })
+    expect(sidePanel.close).toHaveBeenCalledWith({ windowId: 789 })
+  })
+
+  it("queries the active tab if tab.windowId is missing on action click", async () => {
+    let actionClickListener: ((tab: { id?: number; windowId?: number }) => Promise<void>) | null =
+      null
+    const sidePanel = {
+      open: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    }
+    const query = vi.fn<(...args: any[]) => any>().mockResolvedValue([{ id: 102, windowId: 999 }])
+
+    setupSidePanelMessageHandler({
+      extensionBrowser: {
+        action: {
+          onClicked: {
+            addListener: vi.fn<(...args: any[]) => any>((listener) => {
+              actionClickListener = listener
+            }),
+          },
+        },
+        sidePanel,
+        tabs: { query },
+      } as any,
+      registerMessageHandler: vi.fn<(...args: any[]) => any>(),
+    })
+
+    await actionClickListener!({ id: 102 })
+    expect(query).toHaveBeenCalledWith({ active: true, currentWindow: true })
+    expect(sidePanel.open).toHaveBeenCalledWith({ windowId: 999 })
+  })
+
+  it("tracks side panel lifecycle via runtime port connection and disconnect", async () => {
+    let portConnectListener: ((port: any) => void) | null = null
+    const registeredMessageHandlers = new Map<string, any>()
+    const sidePanel = {
+      close: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+      open: vi.fn<(...args: any[]) => any>().mockResolvedValue(undefined),
+    }
+
+    setupSidePanelMessageHandler({
+      extensionBrowser: {
+        runtime: {
+          onConnect: {
+            addListener: vi.fn<(...args: any[]) => any>((listener) => {
+              portConnectListener = listener
+            }),
+          },
+        },
+        sidePanel,
+      } as any,
+      registerMessageHandler: ((type: string, handler: any) => {
+        registeredMessageHandlers.set(type, handler)
+      }) as any,
+    })
+
+    expect(portConnectListener).not.toBeNull()
+
+    // Simulate sidepanel connecting on open
+    let disconnectListener: (() => void) | null = null
+    const mockPort = {
+      name: "side-panel-connection:456",
+      onDisconnect: {
+        addListener: vi.fn<(...args: any[]) => any>((listener) => {
+          disconnectListener = listener
+        }),
+      },
+    }
+    portConnectListener!(mockPort)
+
+    const handler = registeredMessageHandlers.get("toggleSidePanel")
+    // Now panel is tracked as open, so calling toggle should close it
+    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: true, action: "closed" })
+    expect(sidePanel.close).toHaveBeenCalledWith({ windowId: 456 })
+
+    // Simulate user closing sidepanel via Chrome's native X button (disconnects port)
+    expect(disconnectListener).not.toBeNull()
+    disconnectListener!()
+
+    // Now panel is tracked as closed, so calling toggle should open it
+    await expect(handler(senderWindowMessage)).resolves.toEqual({ ok: true, action: "opened" })
+    expect(sidePanel.open).toHaveBeenCalledWith({ windowId: 456 })
+  })
 })

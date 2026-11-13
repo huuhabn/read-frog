@@ -92,17 +92,16 @@ export function ReadView() {
           providerId: selectedModel.providerId,
           providerConfig:
             matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          instructions: systemInstruction,
           messages: [
-            {
-              role: "system",
-              content: systemInstruction,
-            },
             {
               role: "user",
               content: `Tiêu đề: ${activeTab.title || ""}\nURL: ${activeTab.url || ""}\nNội dung bài viết:\n${activeTab.pageText}`,
             },
           ],
           temperature: 0.3,
+          sourceFeature: `Sidepanel Read (${mode})`,
+          url: activeTab.url,
         },
         {
           signal: controller.signal,

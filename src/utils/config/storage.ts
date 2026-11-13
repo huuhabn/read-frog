@@ -2,34 +2,58 @@ import type { Config } from "@/types/config/config"
 import type { ConfigMeta, ConfigValueAndMeta } from "@/types/config/meta"
 import { storage } from "#imports"
 import { configSchema } from "@/types/config/config"
+import {
+  isExtensionContextAlive,
+  isExtensionContextInvalidatedError,
+} from "@/utils/error/extension-context"
 import { createLogger } from "@/utils/logging/logger"
 import { CONFIG_SCHEMA_VERSION, CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
 
 const log = createLogger("config/storage")
 
 export async function getLocalConfig() {
-  const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
-  if (!config) {
-    log.warn("No config found in storage")
+  if (!isExtensionContextAlive()) {
     return null
   }
-  const parsedConfig = configSchema.safeParse(config)
-  if (!parsedConfig.success) {
-    log.error("Config is invalid, using default config")
-    return DEFAULT_CONFIG
+  try {
+    const config = await storage.getItem<Config>(`local:${CONFIG_STORAGE_KEY}`)
+    if (!config) {
+      log.warn("No config found in storage")
+      return null
+    }
+    const parsedConfig = configSchema.safeParse(config)
+    if (!parsedConfig.success) {
+      log.error("Config is invalid, using default config")
+      return DEFAULT_CONFIG
+    }
+    return parsedConfig.data
+  } catch (error) {
+    if (isExtensionContextInvalidatedError(error)) {
+      return null
+    }
+    throw error
   }
-  return parsedConfig.data
 }
 
 export async function setLocalConfig(config: Config) {
+  if (!isExtensionContextAlive()) {
+    return
+  }
   const parsedConfig = configSchema.safeParse(config)
   if (!parsedConfig.success) {
     throw new Error("Config is invalid")
   }
-  await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, parsedConfig.data)
-  await storage.setMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, {
-    lastModifiedAt: Date.now(),
-  })
+  try {
+    await storage.setItem<Config>(`local:${CONFIG_STORAGE_KEY}`, parsedConfig.data)
+    await storage.setMeta<Partial<ConfigMeta>>(`local:${CONFIG_STORAGE_KEY}`, {
+      lastModifiedAt: Date.now(),
+    })
+  } catch (error) {
+    if (isExtensionContextInvalidatedError(error)) {
+      return
+    }
+    throw error
+  }
 }
 
 export async function getLocalConfigAndMeta(): Promise<ConfigValueAndMeta> {

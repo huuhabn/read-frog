@@ -1,7 +1,7 @@
 import { IconChevronRight } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
 import { browser } from "#imports"
-import readFrogLogo from "@/assets/icons/read-frog.png"
+import readFrogLogo from "@/assets/icons/logo.png"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { getSelectionContextMenuItems } from "@/utils/context-menu"
 import { i18n } from "@/utils/i18n"

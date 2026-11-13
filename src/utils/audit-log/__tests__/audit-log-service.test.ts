@@ -1,6 +1,7 @@
 import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import {
+  cleanupLegacyAuditLogs,
   clearAllAuditLogs,
   deleteAuditLog,
   pruneAuditLogs,
@@ -38,6 +39,9 @@ vi.mock("@/utils/db/dexie/db", () => {
       clear: vi.fn<() => Promise<void>>().mockImplementation(async () => {
         mockState.logs = []
       }),
+      toArray: vi
+        .fn<() => Promise<AuditLogItem[]>>()
+        .mockImplementation(async () => [...mockState.logs]),
       count: vi.fn<() => Promise<number>>().mockImplementation(async () => mockState.logs.length),
       bulkDelete: vi.fn<(ids: string[]) => Promise<void>>().mockImplementation(async (ids) => {
         const idSet = new Set(ids)
@@ -256,5 +260,107 @@ describe("audit-log-service", () => {
     // Old log should be deleted due to > 30 days, and among recent ones only 1 remains due to maxLogs = 1
     expect(mockState.logs).toHaveLength(1)
     expect(mockState.logs[0]?.id).toBe("recent-2")
+  })
+
+  it("records log with structured messages, url, tokenUsage and rawPayload", async () => {
+    const id = await recordAuditLog({
+      sourceFeature: "Sidepanel Chat",
+      url: "https://example.com/article",
+      providerId: "openai",
+      providerType: "llm",
+      model: "gpt-4o",
+      prompt: "User question",
+      messages: [
+        { role: "user", content: "User question" },
+        { role: "assistant", content: "AI response" },
+      ],
+      tokenUsage: { promptTokens: 10, completionTokens: 20, totalTokens: 30 },
+      latencyMs: 250,
+      status: "success",
+      rawPayload: { custom: "data" },
+    })
+
+    expect(id).toBeDefined()
+    expect(mockState.logs).toHaveLength(1)
+    expect(mockState.logs[0]?.url).toBe("https://example.com/article")
+    expect(mockState.logs[0]?.messages).toHaveLength(2)
+    expect(mockState.logs[0]?.tokenUsage?.totalTokens).toBe(30)
+    expect(mockState.logs[0]?.rawPayload).toEqual({ custom: "data" })
+  })
+
+  it("cleans up legacy audit logs without messages for LLM providers", async () => {
+    mockState.logs = [
+      {
+        id: "legacy-1",
+        createdAt: new Date(),
+        sourceFeature: "Old Chat",
+        providerId: "openai",
+        providerType: "llm",
+        prompt: "legacy prompt",
+        latencyMs: 100,
+        status: "success",
+      },
+      {
+        id: "new-1",
+        createdAt: new Date(),
+        sourceFeature: "New Chat",
+        providerId: "openai",
+        providerType: "llm",
+        prompt: "new prompt",
+        messages: [{ role: "user", content: "new prompt" }],
+        latencyMs: 100,
+        status: "success",
+      },
+      {
+        id: "translation-1",
+        createdAt: new Date(),
+        sourceFeature: "Page Translation",
+        providerId: "google",
+        providerType: "translation",
+        prompt: "text",
+        latencyMs: 50,
+        status: "success",
+      },
+    ]
+
+    const deletedCount = await cleanupLegacyAuditLogs()
+    expect(deletedCount).toBe(1)
+    expect(mockState.logs).toHaveLength(2)
+    expect(mockState.logs.map((l) => l.id)).toEqual(["new-1", "translation-1"])
+  })
+
+  it("searches audit logs by messages content and url", async () => {
+    mockState.logs = [
+      {
+        id: "log-url",
+        createdAt: new Date(),
+        sourceFeature: "Chat",
+        url: "https://special-domain.com",
+        providerId: "openai",
+        providerType: "llm",
+        prompt: "test",
+        latencyMs: 100,
+        status: "success",
+      },
+      {
+        id: "log-msg",
+        createdAt: new Date(),
+        sourceFeature: "Chat",
+        providerId: "openai",
+        providerType: "llm",
+        prompt: "test",
+        messages: [{ role: "user", content: "unique search term in message" }],
+        latencyMs: 100,
+        status: "success",
+      },
+    ]
+
+    const resultUrl = await queryAuditLogs({ searchQuery: "special-domain" })
+    expect(resultUrl.items).toHaveLength(1)
+    expect(resultUrl.items[0]?.id).toBe("log-url")
+
+    const resultMsg = await queryAuditLogs({ searchQuery: "unique search term" })
+    expect(resultMsg.items).toHaveLength(1)
+    expect(resultMsg.items[0]?.id).toBe("log-msg")
   })
 })

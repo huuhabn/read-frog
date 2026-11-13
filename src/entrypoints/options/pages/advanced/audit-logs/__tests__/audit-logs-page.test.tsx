@@ -34,6 +34,7 @@ vi.mock("@/utils/audit-log/audit-log-service", () => ({
   clearAllAuditLogs: vi.fn<() => Promise<void>>().mockImplementation(async () => {
     mockState.logs = []
   }),
+  cleanupLegacyAuditLogs: vi.fn<() => Promise<number>>().mockResolvedValue(0),
 }))
 
 vi.mock("@/utils/i18n", () => ({

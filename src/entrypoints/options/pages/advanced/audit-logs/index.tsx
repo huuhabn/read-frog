@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
+  cleanupLegacyAuditLogs,
   clearAllAuditLogs,
   deleteAuditLog,
   queryAuditLogs,
@@ -78,6 +79,12 @@ export function AuditLogsPage() {
   const handleClearAll = async () => {
     setIsLoading(true)
     await clearAllAuditLogs()
+    setRefreshTrigger((k) => k + 1)
+  }
+
+  const handleCleanupLegacy = async () => {
+    setIsLoading(true)
+    await cleanupLegacyAuditLogs()
     setRefreshTrigger((k) => k + 1)
   }
 
@@ -197,6 +204,37 @@ export function AuditLogsPage() {
               {i18n.t("options.advanced.auditLogs.totalCount", [String(totalCount)])}
             </span>
 
+            {/* Cleanup Legacy Dialog */}
+            {totalCount > 0 && (
+              <AlertDialog>
+                <AlertDialogTrigger
+                  render={
+                    <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
+                      <Icon icon="tabler:broom" className="size-3.5 text-amber-500" />
+                      <span>Dọn dẹp log cũ</span>
+                    </Button>
+                  }
+                />
+                <AlertDialogContent>
+                  <AlertDialogHeader>
+                    <AlertDialogTitle>Dọn dẹp các log cũ?</AlertDialogTitle>
+                    <AlertDialogDescription>
+                      Thao tác này sẽ xóa các bản ghi log cũ không có cấu trúc messages đầy đủ để
+                      chuẩn hóa cơ sở dữ liệu. Bạn có chắc chắn muốn tiếp tục?
+                    </AlertDialogDescription>
+                  </AlertDialogHeader>
+                  <AlertDialogFooter>
+                    <AlertDialogCancel>
+                      {i18n.t("options.advanced.auditLogs.cancel")}
+                    </AlertDialogCancel>
+                    <AlertDialogAction onClick={() => void handleCleanupLegacy()}>
+                      Xác nhận dọn dẹp
+                    </AlertDialogAction>
+                  </AlertDialogFooter>
+                </AlertDialogContent>
+              </AlertDialog>
+            )}
+
             {/* Clear All Dialog */}
             {totalCount > 0 && (
               <AlertDialog>
@@ -257,6 +295,7 @@ export function AuditLogsPage() {
                     <th className="px-3 py-2.5 text-right">
                       {i18n.t("options.advanced.auditLogs.latency")}
                     </th>
+                    <th className="px-3 py-2.5 text-center">Tokens</th>
                     <th className="px-3 py-2.5 text-center">
                       {i18n.t("options.advanced.auditLogs.status")}
                     </th>
@@ -279,9 +318,16 @@ export function AuditLogsPage() {
                           }).format(new Date(log.createdAt))}
                         </td>
                         <td className="px-3 py-2.5 whitespace-nowrap">
-                          <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-foreground">
-                            {log.sourceFeature}
-                          </span>
+                          <div className="flex items-center gap-1.5">
+                            <span className="rounded bg-muted px-1.5 py-0.5 text-[10px] font-medium text-foreground">
+                              {log.sourceFeature}
+                            </span>
+                            {log.url && (
+                              <span title={log.url} className="text-muted-foreground/70">
+                                <Icon icon="tabler:world" className="size-3" />
+                              </span>
+                            )}
+                          </div>
                         </td>
                         <td className="px-3 py-2.5 whitespace-nowrap">
                           <div className="flex flex-col">
@@ -298,6 +344,19 @@ export function AuditLogsPage() {
                         </td>
                         <td className="px-3 py-2.5 text-right font-mono text-[11px] whitespace-nowrap text-muted-foreground">
                           {log.latencyMs} ms
+                        </td>
+                        <td className="px-3 py-2.5 text-center font-mono text-[11px] whitespace-nowrap text-muted-foreground">
+                          {log.tokenUsage?.totalTokens !== undefined ? (
+                            <Badge
+                              variant="secondary"
+                              className="px-1.5 py-0 font-mono text-[10px] font-normal"
+                              title={`Prompt: ${log.tokenUsage.promptTokens ?? "-"} | Completion: ${log.tokenUsage.completionTokens ?? "-"}`}
+                            >
+                              {log.tokenUsage.totalTokens}
+                            </Badge>
+                          ) : (
+                            <span className="text-muted-foreground/40">-</span>
+                          )}
                         </td>
                         <td className="px-3 py-2.5 text-center whitespace-nowrap">
                           <Badge

@@ -4,6 +4,10 @@ import {
   ANALYTICS_ENABLED_STORAGE_KEY,
   DEFAULT_ANALYTICS_ENABLED,
 } from "@/utils/constants/analytics"
+import {
+  isExtensionContextAlive,
+  isExtensionContextInvalidatedError,
+} from "@/utils/error/extension-context"
 import { createLogger } from "@/utils/logging/logger"
 import { storageAdapter } from "./storage-adapter"
 
@@ -29,18 +33,34 @@ export const analyticsEnabledAtom = atom(
 )
 
 baseAnalyticsEnabledAtom.onMount = (setAtom) => {
+  if (!isExtensionContextAlive()) return () => {}
+
   void storageAdapter
     .get(ANALYTICS_ENABLED_STORAGE_KEY, DEFAULT_ANALYTICS_ENABLED, analyticsEnabledSchema)
     .then(setAtom)
+    .catch((error) => {
+      if (!isExtensionContextInvalidatedError(error)) {
+        log.warn("Failed to load analytics preference", { error })
+      }
+    })
 
   const unwatch = storageAdapter.watch<boolean>(ANALYTICS_ENABLED_STORAGE_KEY, setAtom)
 
   const handleVisibilityChange = () => {
+    if (!isExtensionContextAlive()) {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      return
+    }
     if (document.visibilityState === "visible") {
       log.debug("baseAnalyticsEnabledAtom reloaded on visibility change")
       void storageAdapter
         .get(ANALYTICS_ENABLED_STORAGE_KEY, DEFAULT_ANALYTICS_ENABLED, analyticsEnabledSchema)
         .then(setAtom)
+        .catch((error) => {
+          if (!isExtensionContextInvalidatedError(error)) {
+            log.warn("Failed to refresh analytics preference", { error })
+          }
+        })
     }
   }
   document.addEventListener("visibilitychange", handleVisibilityChange)

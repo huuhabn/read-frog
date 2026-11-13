@@ -8,7 +8,7 @@ import {
   IconX,
 } from "@tabler/icons-react"
 import { useAtomValue } from "jotai"
-import readFrogLogo from "@/assets/icons/read-frog.png"
+import readFrogLogo from "@/assets/icons/logo.png"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"

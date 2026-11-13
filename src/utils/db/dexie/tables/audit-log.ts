@@ -1,5 +1,10 @@
 import { Entity } from "dexie"
 
+export interface AuditLogMessage {
+  role: string
+  content: unknown
+}
+
 export interface AuditLogTokenUsage {
   promptTokens?: number
   completionTokens?: number
@@ -10,12 +15,14 @@ export interface AuditLogItem {
   id: string
   createdAt: Date
   sourceFeature: string
+  url?: string
   providerId: string
   providerName?: string
   providerType: "llm" | "translation" | "other"
   model?: string
   systemPrompt?: string
   prompt: string
+  messages?: AuditLogMessage[]
   parameters?: Record<string, unknown>
   responseOutput?: string
   thinking?: string
@@ -23,6 +30,7 @@ export interface AuditLogItem {
   status: "success" | "error" | "aborted"
   errorMessage?: string
   tokenUsage?: AuditLogTokenUsage
+  rawPayload?: Record<string, unknown>
 }
 
 export default class AuditLog extends Entity implements AuditLogItem {
@@ -31,6 +39,8 @@ export default class AuditLog extends Entity implements AuditLogItem {
   createdAt!: Date
 
   sourceFeature!: string
+
+  url?: string
 
   providerId!: string
 
@@ -43,6 +53,8 @@ export default class AuditLog extends Entity implements AuditLogItem {
   systemPrompt?: string
 
   prompt!: string
+
+  messages?: AuditLogMessage[]
 
   parameters?: Record<string, unknown>
 
@@ -57,4 +69,6 @@ export default class AuditLog extends Entity implements AuditLogItem {
   errorMessage?: string
 
   tokenUsage?: AuditLogTokenUsage
+
+  rawPayload?: Record<string, unknown>
 }

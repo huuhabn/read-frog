@@ -21,6 +21,7 @@ import type {
   ThinkingSnapshot,
 } from "@/types/background-stream"
 import type { TranslateProviderConfig } from "@/types/config/provider"
+import type { AuditLogMessage, AuditLogTokenUsage } from "@/utils/db/dexie/tables/audit-log"
 import type { ErrorAction } from "@/utils/error-action"
 import {
   HostedAiNoteSuggestionObjectSchema,
@@ -505,6 +506,80 @@ function getStreamFinishReason(part: Record<string, unknown>): string | undefine
   return typeof part.finishReason === "string" ? part.finishReason : undefined
 }
 
+function getStreamUsage(part: Record<string, unknown>): AuditLogTokenUsage | undefined {
+  const usage = part.usage
+  if (usage && typeof usage === "object") {
+    const u = usage as Record<string, unknown>
+    const promptTokens =
+      typeof u.promptTokens === "number"
+        ? u.promptTokens
+        : typeof u.inputTokens === "number"
+          ? u.inputTokens
+          : undefined
+    const completionTokens =
+      typeof u.completionTokens === "number"
+        ? u.completionTokens
+        : typeof u.outputTokens === "number"
+          ? u.outputTokens
+          : undefined
+    const totalTokens =
+      typeof u.totalTokens === "number"
+        ? u.totalTokens
+        : promptTokens !== undefined || completionTokens !== undefined
+          ? (promptTokens ?? 0) + (completionTokens ?? 0)
+          : undefined
+
+    if (promptTokens !== undefined || completionTokens !== undefined || totalTokens !== undefined) {
+      return { promptTokens, completionTokens, totalTokens }
+    }
+  }
+  return undefined
+}
+
+function extractStructuredMessages(payload: {
+  prompt?: string
+  messages?: unknown[]
+}): AuditLogMessage[] | undefined {
+  if (Array.isArray(payload.messages) && payload.messages.length > 0) {
+    return payload.messages.map((m) => {
+      if (m && typeof m === "object" && "content" in m) {
+        const record = m as { role?: unknown; content: unknown }
+        return {
+          role: typeof record.role === "string" ? record.role : "user",
+          content: record.content,
+        }
+      }
+      return {
+        role: "user",
+        content: m,
+      }
+    })
+  }
+  if (payload.prompt) {
+    return [{ role: "user", content: payload.prompt }]
+  }
+  return undefined
+}
+
+function extractPromptSummary(payload: { prompt?: string; messages?: unknown[] }): string {
+  if (payload.prompt) return payload.prompt
+  if (Array.isArray(payload.messages)) {
+    return payload.messages
+      .map((m) => {
+        if (m && typeof m === "object" && "content" in m) {
+          const record = m as { role?: unknown; content: unknown }
+          const role = typeof record.role === "string" ? record.role : "user"
+          const content =
+            typeof record.content === "string" ? record.content : JSON.stringify(record.content)
+          return `${role}: ${content}`
+        }
+        return typeof m === "string" ? m : JSON.stringify(m)
+      })
+      .join("\n\n")
+  }
+  return ""
+}
+
 /**
  * Reasoning is over once the answer starts coming out, so the first output delta
  * closes the thinking phase. Models that emit no reasoning at all never send
@@ -531,6 +606,7 @@ async function consumeTextPartStream(
   options: {
     onChunk?: StreamRuntimeOptions<BackgroundTextStreamSnapshot>["onChunk"]
     signal?: AbortSignal
+    onUsage?: (usage: AuditLogTokenUsage | undefined) => void
   },
 ): Promise<BackgroundTextStreamSnapshot> {
   const { onChunk, signal } = options
@@ -584,6 +660,7 @@ async function consumeTextPartStream(
       case "finish": {
         hasFinish = true
         finishReason = getStreamFinishReason(part)
+        options.onUsage?.(getStreamUsage(part))
         break
       }
       case "error": {
@@ -611,6 +688,7 @@ async function consumeStructuredObjectPartStream<TOutput extends Record<string, 
     objectSchema: z.ZodType<TOutput>
     onChunk?: StreamRuntimeOptions<BackgroundStructuredObjectStreamSnapshot>["onChunk"]
     signal?: AbortSignal
+    onUsage?: (usage: AuditLogTokenUsage | undefined) => void
   },
 ): Promise<BackgroundStreamSnapshot<TOutput>> {
   const { objectSchema, onChunk, signal } = options
@@ -669,6 +747,7 @@ async function consumeStructuredObjectPartStream<TOutput extends Record<string, 
       case "finish": {
         hasFinish = true
         finishReason = getStreamFinishReason(part)
+        options.onUsage?.(getStreamUsage(part))
         break
       }
       case "error": {
@@ -698,6 +777,38 @@ async function consumeStructuredObjectPartStream<TOutput extends Record<string, 
   }
 }
 
+function normalizePromptInstructionsAndMessages(streamParams: {
+  instructions?: string
+  messages?: unknown
+}) {
+  let instructions = streamParams.instructions
+  let messages = streamParams.messages as Array<{ role?: string; content?: unknown }> | undefined
+
+  if (Array.isArray(messages)) {
+    const systemParts: string[] = []
+    const nonSystemMessages: Array<{ role?: string; content?: unknown }> = []
+
+    for (const msg of messages) {
+      if (msg && typeof msg === "object" && "role" in msg && msg.role === "system") {
+        if (typeof msg.content === "string") {
+          systemParts.push(msg.content)
+        } else if (msg.content) {
+          systemParts.push(JSON.stringify(msg.content))
+        }
+      } else {
+        nonSystemMessages.push(msg)
+      }
+    }
+
+    if (systemParts.length > 0) {
+      instructions = [instructions, ...systemParts].filter(Boolean).join("\n\n")
+      messages = nonSystemMessages
+    }
+  }
+
+  return { instructions, messages }
+}
+
 async function createLocalTextPartStream(
   serializablePayload: Extract<BackgroundStreamTextSerializablePayload, { providerKind: "local" }>,
   options: StreamRuntimeOptions<BackgroundTextStreamSnapshot> = {},
@@ -710,18 +821,23 @@ async function createLocalTextPartStream(
   } = serializablePayload
   const { signal, onError } = options
 
+  const { instructions, messages } = normalizePromptInstructionsAndMessages(streamTextParams)
+
   const model = providerConfig
     ? getLanguageModelForConfig(providerConfig)
     : await getModelById(providerId)
   const result = streamText({
+    allowSystemInMessages: true,
     ...(streamTextParams as Parameters<typeof streamText>[0]),
+    ...(instructions !== undefined ? { instructions } : {}),
+    ...(messages !== undefined ? { messages } : {}),
     ...(providerConfig ? buildLocalGenerateTextParams(providerConfig) : {}),
     model,
     abortSignal: signal,
     onError: ({ error }) => {
       onError?.(error)
     },
-  })
+  } as Parameters<typeof streamText>[0])
 
   return result.stream
 }
@@ -804,53 +920,124 @@ export async function generateTextForProviderRef(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  if (providerRef.kind === "system") {
-    const partStream = await createHostedTextPartStream(
-      {
-        providerKind: "system",
-        providerId: providerRef.providerId,
-        modelTier: providerRef.modelTier,
-        requestId,
-        hostedFeature: requireHostedFeature(hostedFeature),
+  const startTime = performance.now()
+  let status: "success" | "error" | "aborted" = "success"
+  let errorMessage: string | undefined
+  let outputText = ""
+  let capturedUsage: AuditLogTokenUsage | undefined
+
+  try {
+    if (providerRef.kind === "system") {
+      const partStream = await createHostedTextPartStream(
+        {
+          providerKind: "system",
+          providerId: providerRef.providerId,
+          modelTier: providerRef.modelTier,
+          requestId,
+          hostedFeature: requireHostedFeature(hostedFeature),
+          instructions,
+          prompt,
+        },
+        signal,
+      )
+      const snapshot = await consumeTextPartStream(partStream, {
+        signal,
+        onUsage: (u) => {
+          capturedUsage = u
+        },
+      })
+      outputText = snapshot.output.trim()
+      return outputText
+    }
+
+    // Local text generation needs a real LLM: pure translate providers (DeepLX,
+    // Google, Microsoft) have no model to prompt. The payload type already says
+    // LLM, but the wire is a trust boundary — a pre-update content script can
+    // still send a translate-only ref — so re-widen and check for real.
+    const localConfig = providerRef.config as TranslateProviderConfig
+    if (!isLLMProviderConfig(localConfig)) {
+      throw new BackgroundStreamError(
+        "invalid_request",
+        `Provider "${localConfig.id}" cannot generate text`,
+      )
+    }
+
+    // Built from the config the ref carries, not looked up by id: every other
+    // parameter below already comes from the ref, so re-reading storage would
+    // pair a model from the current row with reasoning/temperature/providerOptions
+    // computed from the snapshot the caller captured — and would fail outright
+    // for a row deleted from another tab while the config was already in hand.
+    const model = getLanguageModelForConfig(providerRef.config)
+    const result = await generateText({
+      model,
+      instructions,
+      prompt,
+      // maxRetries: 0 — retries belong to the RequestQueue, which meters them
+      // against the token bucket; ai-sdk's hidden default (2) would issue extra
+      // HTTP attempts invisible to the rate limiter.
+      maxRetries: maxRetries ?? 0,
+      abortSignal: signal,
+      ...buildLocalGenerateTextParams(providerRef.config),
+    })
+    outputText = result.text.trim()
+    if (result.usage) {
+      capturedUsage = {
+        promptTokens: result.usage.inputTokens,
+        completionTokens: result.usage.outputTokens,
+        totalTokens: result.usage.totalTokens,
+      }
+    }
+    return outputText
+  } catch (error) {
+    if (signal?.aborted || (error as Error)?.name === "AbortError") {
+      status = "aborted"
+    } else {
+      status = "error"
+      errorMessage = (error as Error)?.message || String(error)
+    }
+    throw error
+  } finally {
+    const providerId =
+      providerRef.kind === "system" ? providerRef.providerId : providerRef.config.id
+    const modelName =
+      providerRef.kind === "system"
+        ? undefined
+        : typeof providerRef.config.model === "object"
+          ? providerRef.config.model?.customModel || providerRef.config.model?.model
+          : providerRef.config?.model
+
+    const featureName =
+      providerRef.kind === "system"
+        ? hostedFeature || "Hosted Text Generation"
+        : "Local Text Generation"
+
+    void recordAuditLog({
+      sourceFeature: featureName,
+      providerId,
+      providerType: "llm",
+      model: modelName,
+      systemPrompt: instructions,
+      prompt,
+      messages: [{ role: "user", content: prompt }],
+      tokenUsage: capturedUsage,
+      responseOutput: outputText,
+      latencyMs: Math.round(performance.now() - startTime),
+      status,
+      errorMessage,
+      rawPayload: {
+        sourceFeature: featureName,
+        providerId,
+        model: modelName,
         instructions,
         prompt,
+        tokenUsage: capturedUsage,
+        responseOutput: outputText,
+        latencyMs: Math.round(performance.now() - startTime),
+        status,
+        errorMessage,
       },
-      signal,
-    )
-    const snapshot = await consumeTextPartStream(partStream, { signal })
-    return snapshot.output.trim()
+    })
   }
-
-  // Local text generation needs a real LLM: pure translate providers (DeepLX,
-  // Google, Microsoft) have no model to prompt. The payload type already says
-  // LLM, but the wire is a trust boundary — a pre-update content script can
-  // still send a translate-only ref — so re-widen and check for real.
-  const localConfig = providerRef.config as TranslateProviderConfig
-  if (!isLLMProviderConfig(localConfig)) {
-    throw new BackgroundStreamError(
-      "invalid_request",
-      `Provider "${localConfig.id}" cannot generate text`,
-    )
-  }
-
-  // Built from the config the ref carries, not looked up by id: every other
-  // parameter below already comes from the ref, so re-reading storage would
-  // pair a model from the current row with reasoning/temperature/providerOptions
-  // computed from the snapshot the caller captured — and would fail outright
-  // for a row deleted from another tab while the config was already in hand.
-  const model = getLanguageModelForConfig(providerRef.config)
-  const { text } = await generateText({
-    model,
-    instructions,
-    prompt,
-    // maxRetries: 0 — retries belong to the RequestQueue, which meters them
-    // against the token bucket; ai-sdk's hidden default (2) would issue extra
-    // HTTP attempts invisible to the rate limiter.
-    maxRetries: maxRetries ?? 0,
-    abortSignal: signal,
-    ...buildLocalGenerateTextParams(providerRef.config),
-  })
-  return text.trim()
 }
 
 export async function runStreamTextInBackground(
@@ -867,6 +1054,7 @@ export async function runStreamTextInBackground(
   let status: "success" | "error" | "aborted" = "success"
   let errorMessage: string | undefined
   let finalSnapshot: BackgroundTextStreamSnapshot | undefined
+  let capturedUsage: AuditLogTokenUsage | undefined
 
   try {
     const partStream =
@@ -877,6 +1065,9 @@ export async function runStreamTextInBackground(
     finalSnapshot = await consumeTextPartStream(partStream, {
       onChunk,
       signal,
+      onUsage: (u) => {
+        capturedUsage = u
+      },
     })
     return finalSnapshot
   } catch (error) {
@@ -888,22 +1079,8 @@ export async function runStreamTextInBackground(
     }
     throw error
   } finally {
-    let promptStr = serializablePayload.prompt || ""
-    if (!promptStr && Array.isArray(serializablePayload.messages)) {
-      promptStr = serializablePayload.messages
-        .map((m) => {
-          if (m && typeof m === "object" && "content" in m) {
-            const role = "role" in m ? String((m as { role: unknown }).role) : "user"
-            const content =
-              typeof (m as { content: unknown }).content === "string"
-                ? (m as { content: string }).content
-                : JSON.stringify((m as { content: unknown }).content)
-            return `${role}: ${content}`
-          }
-          return typeof m === "string" ? m : JSON.stringify(m)
-        })
-        .join("\n\n")
-    }
+    const promptStr = extractPromptSummary(serializablePayload)
+    const structuredMessages = extractStructuredMessages(serializablePayload)
 
     const providerConfigObj =
       serializablePayload.providerKind === "local"
@@ -918,27 +1095,64 @@ export async function runStreamTextInBackground(
         : providerConfigObj?.model
 
     const featureName =
-      serializablePayload.providerKind === "system"
+      serializablePayload.sourceFeature ||
+      (serializablePayload.providerKind === "system"
         ? serializablePayload.hostedFeature
-        : "AI Stream"
+        : "AI Stream")
+
+    const rawPayload: Record<string, unknown> = {
+      sourceFeature: featureName,
+      url: serializablePayload.url,
+      providerId: serializablePayload.providerId,
+      model: modelName,
+      instructions: serializablePayload.instructions,
+      prompt: serializablePayload.prompt,
+      messages: serializablePayload.messages,
+      parameters: {
+        temperature: serializablePayload.temperature,
+        topP: serializablePayload.topP,
+        maxTokens: serializablePayload.maxOutputTokens,
+        frequencyPenalty: serializablePayload.frequencyPenalty,
+        presencePenalty: serializablePayload.presencePenalty,
+        seed: serializablePayload.seed,
+        stopSequences: serializablePayload.stopSequences,
+        reasoning: serializablePayload.reasoning,
+        providerOptions: serializablePayload.providerOptions,
+      },
+      responseOutput: finalSnapshot?.output,
+      thinking: finalSnapshot?.thinking?.text,
+      tokenUsage: capturedUsage,
+      latencyMs: Math.round(performance.now() - startTime),
+      status,
+      errorMessage,
+    }
 
     void recordAuditLog({
       sourceFeature: featureName,
+      url: serializablePayload.url,
       providerId: serializablePayload.providerId,
       providerType: "llm",
       model: modelName,
       systemPrompt: serializablePayload.instructions,
       prompt: promptStr,
+      messages: structuredMessages,
       parameters: {
         temperature: serializablePayload.temperature,
         topP: serializablePayload.topP,
         maxTokens: serializablePayload.maxOutputTokens,
+        frequencyPenalty: serializablePayload.frequencyPenalty,
+        presencePenalty: serializablePayload.presencePenalty,
+        seed: serializablePayload.seed,
+        stopSequences: serializablePayload.stopSequences,
+        reasoning: serializablePayload.reasoning,
       },
+      tokenUsage: capturedUsage,
       responseOutput: finalSnapshot?.output,
       thinking: finalSnapshot?.thinking?.text,
       latencyMs: Math.round(performance.now() - startTime),
       status,
       errorMessage,
+      rawPayload,
     })
   }
 }
@@ -953,9 +1167,14 @@ async function createLocalStructuredObjectPartStream<TOutput extends Record<stri
   const { providerId, outputSchema: _outputSchema, ...streamParams } = serializablePayload
   const { signal, onError } = options
 
+  const { instructions, messages } = normalizePromptInstructionsAndMessages(streamParams)
+
   const model = await getModelById(providerId)
   const result = streamText({
+    allowSystemInMessages: true,
     ...(streamParams as Parameters<typeof streamText>[0]),
+    ...(instructions !== undefined ? { instructions } : {}),
+    ...(messages !== undefined ? { messages } : {}),
     model,
     output: Output.object({
       schema: objectSchema,
@@ -964,7 +1183,7 @@ async function createLocalStructuredObjectPartStream<TOutput extends Record<stri
     onError: ({ error }) => {
       onError?.(error)
     },
-  })
+  } as Parameters<typeof streamText>[0])
 
   return result.stream
 }
@@ -1011,16 +1230,87 @@ export async function runStructuredObjectStreamInBackground(
     throw new DOMException("stream aborted", "AbortError")
   }
 
-  const objectSchema = createStructuredObjectSchema(serializablePayload.outputSchema)
-  const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
-    ? await createHostedStructuredObjectPartStream(serializablePayload, signal)
-    : await createLocalStructuredObjectPartStream(serializablePayload, objectSchema, options)
+  const startTime = performance.now()
+  let status: "success" | "error" | "aborted" = "success"
+  let errorMessage: string | undefined
+  let finalSnapshot: BackgroundStructuredObjectStreamSnapshot | undefined
+  let capturedUsage: AuditLogTokenUsage | undefined
 
-  return consumeStructuredObjectPartStream(partStream, {
-    objectSchema,
-    onChunk,
-    signal,
-  })
+  try {
+    const objectSchema = createStructuredObjectSchema(serializablePayload.outputSchema)
+    const partStream = isBuiltInAiProviderId(serializablePayload.providerId)
+      ? await createHostedStructuredObjectPartStream(serializablePayload, signal)
+      : await createLocalStructuredObjectPartStream(serializablePayload, objectSchema, options)
+
+    finalSnapshot = await consumeStructuredObjectPartStream(partStream, {
+      objectSchema,
+      onChunk,
+      signal,
+      onUsage: (u) => {
+        capturedUsage = u
+      },
+    })
+    return finalSnapshot
+  } catch (error) {
+    if (signal?.aborted || (error as Error)?.name === "AbortError") {
+      status = "aborted"
+    } else {
+      status = "error"
+      errorMessage = (error as Error)?.message || String(error)
+    }
+    throw error
+  } finally {
+    const promptStr = extractPromptSummary(serializablePayload)
+    const structuredMessages = extractStructuredMessages(serializablePayload)
+    const featureName = serializablePayload.sourceFeature || "Structured Output Stream"
+
+    const rawPayload: Record<string, unknown> = {
+      sourceFeature: featureName,
+      url: serializablePayload.url,
+      providerId: serializablePayload.providerId,
+      instructions: serializablePayload.instructions,
+      prompt: serializablePayload.prompt,
+      messages: serializablePayload.messages,
+      outputSchema: serializablePayload.outputSchema,
+      parameters: {
+        temperature: serializablePayload.temperature,
+        topP: serializablePayload.topP,
+        maxTokens: serializablePayload.maxOutputTokens,
+      },
+      responseOutput: finalSnapshot?.output
+        ? JSON.stringify(finalSnapshot.output, null, 2)
+        : undefined,
+      thinking: finalSnapshot?.thinking?.text,
+      tokenUsage: capturedUsage,
+      latencyMs: Math.round(performance.now() - startTime),
+      status,
+      errorMessage,
+    }
+
+    void recordAuditLog({
+      sourceFeature: featureName,
+      url: serializablePayload.url,
+      providerId: serializablePayload.providerId,
+      providerType: "llm",
+      systemPrompt: serializablePayload.instructions,
+      prompt: promptStr,
+      messages: structuredMessages,
+      parameters: {
+        temperature: serializablePayload.temperature,
+        topP: serializablePayload.topP,
+        maxTokens: serializablePayload.maxOutputTokens,
+      },
+      tokenUsage: capturedUsage,
+      responseOutput: finalSnapshot?.output
+        ? JSON.stringify(finalSnapshot.output, null, 2)
+        : undefined,
+      thinking: finalSnapshot?.thinking?.text,
+      latencyMs: Math.round(performance.now() - startTime),
+      status,
+      errorMessage,
+      rawPayload,
+    })
+  }
 }
 
 async function createHostedNoteSuggestionPartStream(

@@ -4,6 +4,7 @@ import { dequal } from "dequal"
 import { atom } from "jotai"
 import { selectAtom } from "jotai/utils"
 import { configSchema } from "@/types/config/config"
+import { isExtensionContextAlive } from "@/utils/error/extension-context"
 import { CONFIG_STORAGE_KEY, DEFAULT_CONFIG } from "../constants/config"
 import { storageAdapter } from "./storage-adapter"
 
@@ -71,18 +72,19 @@ configAtom.onMount = (setAtom) => {
 
   async function refresh() {
     if (reading) return
+    if (!isExtensionContextAlive()) return
     reading = true
     try {
       while (requested) {
-        if (!active) return
+        if (!active || !isExtensionContextAlive()) return
         await writeQueue
-        if (!active) return
+        if (!active || !isExtensionContextAlive()) return
         if (pendingWrites > 0) continue
         requested = false
         const readGeneration = generation
         const readVersion = writeVersion
         const value = await storageAdapter.get(CONFIG_STORAGE_KEY, DEFAULT_CONFIG, configSchema)
-        if (!active) return
+        if (!active || !isExtensionContextAlive()) return
         if (readGeneration !== generation || readVersion !== writeVersion || pendingWrites > 0) {
           requested = true
           continue
@@ -97,6 +99,7 @@ configAtom.onMount = (setAtom) => {
   }
 
   const requestRefresh = () => {
+    if (!isExtensionContextAlive()) return
     generation++
     requested = true
     void refresh()
@@ -104,6 +107,10 @@ configAtom.onMount = (setAtom) => {
   refreshListeners.add(requestRefresh)
   const unwatch = storageAdapter.watch<Config>(CONFIG_STORAGE_KEY, requestRefresh)
   const onVisibilityChange = () => {
+    if (!isExtensionContextAlive()) {
+      document.removeEventListener("visibilitychange", onVisibilityChange)
+      return
+    }
     if (document.visibilityState === "visible") requestRefresh()
   }
   document.addEventListener("visibilitychange", onVisibilityChange)

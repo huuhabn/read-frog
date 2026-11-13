@@ -1,6 +1,7 @@
 import type { LanguageTag } from "@read-frog/definitions"
 import { atom } from "jotai"
 import { normalizeDetectedCode } from "@/utils/config/languages"
+import { isExtensionContextAlive } from "@/utils/error/extension-context"
 import { createLogger } from "@/utils/logging/logger"
 import { DEFAULT_DETECTED_CODE } from "../constants/config"
 import { onMessage, sendMessage } from "../message"
@@ -20,7 +21,10 @@ export const detectedCodeAtom = atom(
 
 // onMount on base atom - gets triggered when derived atom subscribes
 baseDetectedCodeAtom.onMount = (setAtom: (newValue: LanguageTag) => void) => {
+  if (!isExtensionContextAlive()) return () => {}
+
   const refreshDetectedCode = () => {
+    if (!isExtensionContextAlive()) return
     void sendMessage("getDetectedCode", undefined)
       .then((detectedCode) => setAtom(normalizeDetectedCode(detectedCode)))
       .catch((error) => {
@@ -36,6 +40,10 @@ baseDetectedCodeAtom.onMount = (setAtom: (newValue: LanguageTag) => void) => {
   })
 
   const handleVisibilityChange = () => {
+    if (!isExtensionContextAlive()) {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      return
+    }
     if (document.visibilityState === "visible") {
       log.debug("detectedCodeAtom reloaded on visibility change")
       refreshDetectedCode()

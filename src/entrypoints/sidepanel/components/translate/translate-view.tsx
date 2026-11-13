@@ -79,17 +79,15 @@ export function TranslateView() {
           providerId: selectedModel.providerId,
           providerConfig:
             matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          instructions: `Bạn là chuyên gia dịch thuật xuất sắc. Hãy dịch văn bản của người dùng sang ${targetLang.name} một cách tự nhiên, chuẩn xác, lưu loát và giữ đúng giọng điệu. Chỉ trả về bản dịch hoàn chỉnh, không thêm lời chào hay giải thích thừa.`,
           messages: [
-            {
-              role: "system",
-              content: `Bạn là chuyên gia dịch thuật xuất sắc. Hãy dịch văn bản của người dùng sang ${targetLang.name} một cách tự nhiên, chuẩn xác, lưu loát và giữ đúng giọng điệu. Chỉ trả về bản dịch hoàn chỉnh, không thêm lời chào hay giải thích thừa.`,
-            },
             {
               role: "user",
               content: sourceText,
             },
           ],
           temperature: 0.3,
+          sourceFeature: `Sidepanel Translate (${targetLang.name})`,
         },
         {
           signal: controller.signal,

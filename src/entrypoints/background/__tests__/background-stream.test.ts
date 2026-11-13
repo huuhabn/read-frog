@@ -781,6 +781,40 @@ describe("background-stream", () => {
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
   })
 
+  it("normalizes system role messages into instructions and sets allowSystemInMessages", async () => {
+    getModelByIdMock.mockResolvedValue("mock-model")
+    streamTextMock.mockReturnValue({
+      stream: (async function* () {
+        yield { type: "text-delta", text: "Answer" }
+        yield { type: "finish", finishReason: "stop" }
+      })(),
+    })
+    const { handleStreamTextPort } = await import("../background-stream")
+    const mockPort = createMockPort("stream-text")
+    handleStreamTextPort(mockPort.port as never)
+    await mockPort.emitMessage({
+      type: "start",
+      streamRequestId: "req-system-message-extract",
+      payload: {
+        providerKind: "local",
+        providerId: "openai-default",
+        instructions: "Base instruction",
+        messages: [
+          { role: "system", content: "Extra page context" },
+          { role: "user", content: "Summarize this page" },
+        ],
+      },
+    })
+
+    expect(streamTextMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        allowSystemInMessages: true,
+        instructions: "Base instruction\n\nExtra page context",
+        messages: [{ role: "user", content: "Summarize this page" }],
+      }),
+    )
+  })
+
   it("uses the supplied local snapshot for both the model and its generation settings", async () => {
     const providerConfig = {
       ...DEFAULT_PROVIDER_CONFIG.openai,

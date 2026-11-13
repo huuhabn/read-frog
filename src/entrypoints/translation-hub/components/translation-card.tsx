@@ -126,6 +126,7 @@ export function TranslationCard({
                 hostedFeature: "pageTranslation",
                 instructions: systemPrompt,
                 prompt,
+                sourceFeature: "Translation Hub",
               },
               { signal: abortController.signal },
             )

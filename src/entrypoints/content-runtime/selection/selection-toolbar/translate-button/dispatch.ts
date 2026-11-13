@@ -147,6 +147,8 @@ export async function translateWithTextStream({
       providerOptions,
       reasoning,
       temperature,
+      sourceFeature: "Selection Toolbar Translate",
+      url: typeof window !== "undefined" ? window.location?.href : undefined,
     },
     {
       signal: abortController.signal,
@@ -235,6 +237,8 @@ export async function translateWithHostedTextStream({
       hostedFeature: "selectionTranslation",
       instructions: systemPrompt,
       prompt,
+      sourceFeature: "Selection Toolbar Translate",
+      url: typeof window !== "undefined" ? window.location?.href : undefined,
     },
     {
       signal: abortController.signal,

@@ -83,11 +83,10 @@ export function WriteView() {
           providerId: selectedModel.providerId,
           providerConfig:
             matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
-          messages: [
-            { role: "system", content: instruction },
-            { role: "user", content: inputText },
-          ],
+          instructions: instruction,
+          messages: [{ role: "user", content: inputText }],
           temperature: 0.5,
+          sourceFeature: `Sidepanel Write (${action})`,
         },
         {
           signal: controller.signal,

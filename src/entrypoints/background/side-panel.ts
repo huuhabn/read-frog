@@ -266,6 +266,57 @@ export function setupSidePanelMessageHandler({
 
   registerMessageHandler("toggleSidePanel", toggleHandler)
 
+  const action = (extensionBrowser as any).action
+  if (typeof action?.onClicked?.addListener === "function") {
+    action.onClicked.addListener(async (tab: { id?: number; windowId?: number }) => {
+      try {
+        let windowId = tab?.windowId
+        if (typeof windowId !== "number") {
+          const [activeTab] = await extensionBrowser.tabs.query({
+            active: true,
+            currentWindow: true,
+          })
+          windowId = activeTab?.windowId
+        }
+        if (typeof windowId === "number") {
+          await toggleHandler({
+            data: { source: "extension-user-action" },
+            sender: { tab: { windowId, id: tab?.id } },
+          })
+        }
+      } catch (error) {
+        log.error("Failed to toggle side panel on action click", { error })
+      }
+    })
+  }
+
+  const runtime = (extensionBrowser as any).runtime
+  if (typeof runtime?.onConnect?.addListener === "function") {
+    runtime.onConnect.addListener((port: any) => {
+      if (typeof port?.name === "string" && port.name.startsWith("side-panel-connection")) {
+        const parts = port.name.split(":")
+        const parsedWindowId = parts.length > 1 ? Number(parts[1]) : undefined
+
+        const bindWindowState = (winId: number) => {
+          windowState.markOpened({ windowId: winId })
+          port.onDisconnect?.addListener?.(() => {
+            windowState.markClosed({ windowId: winId })
+          })
+        }
+
+        if (typeof parsedWindowId === "number" && !Number.isNaN(parsedWindowId)) {
+          bindWindowState(parsedWindowId)
+        } else if (typeof extensionBrowser.windows?.getCurrent === "function") {
+          void extensionBrowser.windows.getCurrent().then((currentWindow) => {
+            if (typeof currentWindow?.id === "number") {
+              bindWindowState(currentWindow.id)
+            }
+          })
+        }
+      }
+    })
+  }
+
   const commands = (extensionBrowser as any).commands
   if (typeof commands?.onCommand?.addListener === "function") {
     commands.onCommand.addListener(async (command: string) => {

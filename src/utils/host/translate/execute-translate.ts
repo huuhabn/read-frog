@@ -111,11 +111,15 @@ export async function executeTranslate<TContext>(
     throw err
   } finally {
     if (!isLLMProviderConfig(providerConfig)) {
+      const currentUrl = typeof window !== "undefined" ? window.location?.href : undefined
+      const sourceFeature = options?.isBatch ? "Batch Translation" : "Page Translation"
       void recordAuditLog({
-        sourceFeature: options?.isBatch ? "Batch Translation" : "Page Translation",
+        sourceFeature,
+        url: currentUrl,
         providerId: providerConfig.id,
         providerType: "translation",
         prompt: preparedText,
+        messages: [{ role: "user", content: preparedText }],
         parameters: {
           sourceLang: langConfig.sourceCode,
           targetLang: langConfig.targetCode,
@@ -124,6 +128,21 @@ export async function executeTranslate<TContext>(
         latencyMs: Math.round(performance.now() - startTime),
         status,
         errorMessage,
+        rawPayload: {
+          sourceFeature,
+          url: currentUrl,
+          providerId: providerConfig.id,
+          providerType: "translation",
+          prompt: preparedText,
+          parameters: {
+            sourceLang: langConfig.sourceCode,
+            targetLang: langConfig.targetCode,
+          },
+          responseOutput: finalResult,
+          latencyMs: Math.round(performance.now() - startTime),
+          status,
+          errorMessage,
+        },
       })
     }
   }

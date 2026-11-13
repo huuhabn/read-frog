@@ -61,6 +61,35 @@ export async function clearAllAuditLogs(): Promise<void> {
   await db.auditLog.clear()
 }
 
+/**
+ * Deletes legacy logs that do not have structured messages or are missing new schema data.
+ * For LLM providers, if messages is missing or empty, it is considered legacy.
+ */
+export async function cleanupLegacyAuditLogs(): Promise<number> {
+  try {
+    const allLogs = await db.auditLog.toArray()
+    const legacyKeys: string[] = []
+
+    for (const log of allLogs) {
+      if (
+        log.providerType === "llm" &&
+        (!Array.isArray(log.messages) || log.messages.length === 0)
+      ) {
+        legacyKeys.push(log.id)
+      }
+    }
+
+    if (legacyKeys.length > 0) {
+      await db.auditLog.bulkDelete(legacyKeys)
+    }
+
+    return legacyKeys.length
+  } catch (error) {
+    console.error("[AuditLog] Failed to cleanup legacy audit logs:", error)
+    return 0
+  }
+}
+
 export interface QueryAuditLogsOptions {
   searchQuery?: string
   providerId?: string
@@ -97,7 +126,15 @@ export async function queryAuditLogs(
       const outputMatch = item.responseOutput?.toLowerCase().includes(q)
       const modelMatch = item.model?.toLowerCase().includes(q)
       const featureMatch = item.sourceFeature?.toLowerCase().includes(q)
-      return promptMatch || outputMatch || modelMatch || featureMatch
+      const urlMatch = item.url?.toLowerCase().includes(q)
+      const messagesMatch = Array.isArray(item.messages)
+        ? item.messages.some((m) =>
+            typeof m.content === "string"
+              ? m.content.toLowerCase().includes(q)
+              : JSON.stringify(m.content).toLowerCase().includes(q),
+          )
+        : false
+      return promptMatch || outputMatch || modelMatch || featureMatch || urlMatch || messagesMatch
     })
   }
 

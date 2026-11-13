@@ -1,13 +1,34 @@
 import type { JSONValue } from "ai"
 import type { AISDKReasoning, LLMProviderConfig } from "@/types/config/provider"
 import { resolveModelId } from "@/utils/providers/model-id"
-import { getProviderOptionsWithOverride } from "@/utils/providers/options"
+import {
+  getProviderOptionsWithOverride,
+  getRecommendedProviderOptions,
+} from "@/utils/providers/options"
 import { getTopLevelReasoning } from "@/utils/providers/reasoning"
 
 export interface LocalGenerateTextParams {
   reasoning: AISDKReasoning | undefined
   temperature: number | undefined
   providerOptions: Record<string, Record<string, JSONValue>> | undefined
+}
+
+function resolveReasoningForModel(
+  provider: string,
+  modelName: string | undefined,
+  reasoning: AISDKReasoning | undefined,
+): AISDKReasoning | undefined {
+  if (provider === "google" && reasoning === "none" && modelName) {
+    const recommended = getRecommendedProviderOptions(modelName)
+    const thinkingConfig = recommended?.thinkingConfig as { thinkingLevel?: string } | undefined
+    if (thinkingConfig?.thinkingLevel === "minimal") {
+      return "minimal"
+    }
+    if (thinkingConfig?.thinkingLevel === "low") {
+      return "low"
+    }
+  }
+  return reasoning
 }
 
 /**
@@ -19,8 +40,9 @@ export interface LocalGenerateTextParams {
  * it.
  */
 export function buildLocalGenerateTextParams(config: LLMProviderConfig): LocalGenerateTextParams {
-  const reasoning = getTopLevelReasoning(config)
+  const rawReasoning = getTopLevelReasoning(config)
   const modelName = resolveModelId(config.model)
+  const reasoning = resolveReasoningForModel(config.provider, modelName, rawReasoning)
 
   return {
     reasoning,

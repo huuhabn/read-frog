@@ -1,6 +1,10 @@
 import type { ThemeMode } from "@/types/config/theme"
 import { atom } from "jotai"
 import { DEFAULT_THEME_MODE, themeModeSchema } from "@/types/config/theme"
+import {
+  isExtensionContextAlive,
+  isExtensionContextInvalidatedError,
+} from "@/utils/error/extension-context"
 import { createLogger } from "@/utils/logging/logger"
 import { THEME_STORAGE_KEY } from "../constants/config"
 import { storageAdapter } from "./storage-adapter"
@@ -26,17 +30,34 @@ export const themeModeAtom = atom(
 )
 
 baseThemeModeAtom.onMount = (setAtom: (newValue: ThemeMode) => void) => {
+  if (!isExtensionContextAlive()) return () => {}
+
   void storageAdapter
     .get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema)
     .then(setAtom)
+    .catch((error) => {
+      if (!isExtensionContextInvalidatedError(error)) {
+        log.warn("Failed to load theme preference", { error })
+      }
+    })
+
   const unwatch = storageAdapter.watch<ThemeMode>(THEME_STORAGE_KEY, setAtom)
 
   const handleVisibilityChange = () => {
+    if (!isExtensionContextAlive()) {
+      document.removeEventListener("visibilitychange", handleVisibilityChange)
+      return
+    }
     if (document.visibilityState === "visible") {
       log.debug("baseThemeModeAtom reloaded on visibility change")
       void storageAdapter
         .get<ThemeMode>(THEME_STORAGE_KEY, DEFAULT_THEME_MODE, themeModeSchema)
         .then(setAtom)
+        .catch((error) => {
+          if (!isExtensionContextInvalidatedError(error)) {
+            log.warn("Failed to refresh theme preference", { error })
+          }
+        })
     }
   }
   document.addEventListener("visibilitychange", handleVisibilityChange)

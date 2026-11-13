@@ -13,6 +13,7 @@ import {
   Square,
 } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { browser } from "#imports"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
@@ -23,7 +24,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
 import { Textarea } from "@/components/ui/base-ui/textarea"
-import { isLLMProviderConfig } from "@/types/config/provider"
+import { isLLMProviderConfig, type LLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
   activeChatSessionIdAtom,
@@ -38,7 +39,11 @@ import {
   setLocalSelectedChatModel,
   type SelectedModelConfig,
 } from "@/utils/sidepanel/chat-model-storage"
-import { getActiveTabContent, type ActiveTabContent } from "@/utils/sidepanel/page-context"
+import {
+  getActiveTabContent,
+  isRestrictedUrl,
+  type ActiveTabContent,
+} from "@/utils/sidepanel/page-context"
 import { cn } from "@/utils/styles/utils"
 import { ChatHistoryDrawer } from "./chat-history-drawer"
 import { filterCustomAIActions, type CustomAIAction } from "./custom-ai-actions"
@@ -83,6 +88,7 @@ export function ChatView() {
   const [slashQuery, setSlashQuery] = useState("")
   const [selectedActionIndex, setSelectedActionIndex] = useState(0)
 
+  const loadedSessionIdRef = useRef<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
@@ -138,17 +144,50 @@ export function ChatView() {
     }
   }, [activeSessionId, llmProviders, selectedModel.providerId, setSelectedModel])
 
-  // Auto load active tab content
+  // Auto load active tab content and listen to tab changes
   useEffect(() => {
-    void getActiveTabContent().then(setActiveTab)
-  }, [])
+    let isSubscribed = true
+
+    const updateTabContent = () => {
+      void getActiveTabContent(true).then((content) => {
+        if (isSubscribed && content) {
+          setActiveTab(content)
+          if (content.url && !isRestrictedUrl(content.url)) {
+            setUsePageContext(true)
+          }
+        }
+      })
+    }
+
+    updateTabContent()
+
+    const handleActivated = () => {
+      updateTabContent()
+    }
+
+    const handleUpdated = (_tabId: number, changeInfo: { status?: string; url?: string }) => {
+      if (changeInfo.status === "complete" || changeInfo.url) {
+        updateTabContent()
+      }
+    }
+
+    browser.tabs?.onActivated?.addListener(handleActivated)
+    browser.tabs?.onUpdated?.addListener(handleUpdated)
+
+    return () => {
+      isSubscribed = false
+      browser.tabs?.onActivated?.removeListener(handleActivated)
+      browser.tabs?.onUpdated?.removeListener(handleUpdated)
+    }
+  }, [setUsePageContext])
 
   // Load existing session messages
   useEffect(() => {
     let isSubscribed = true
-    if (activeSessionId) {
+    if (activeSessionId && loadedSessionIdRef.current !== activeSessionId) {
       void db.chatSession.get(activeSessionId).then((session) => {
         if (isSubscribed && session) {
+          loadedSessionIdRef.current = activeSessionId
           setMessages(session.messages || [])
           if (session.providerId && session.model) {
             setSelectedModel({ providerId: session.providerId, model: session.model })
@@ -189,6 +228,7 @@ export function ChatView() {
       abortControllerRef.current.abort()
       setIsStreaming(false)
     }
+    loadedSessionIdRef.current = null
     setActiveSessionId(null)
     setMessages([])
     setInput("")
@@ -203,10 +243,72 @@ export function ChatView() {
   }
 
   const handleSend = async (customPrompt?: string) => {
-    const textToSend = (customPrompt || input).trim()
-    if (!textToSend || isStreaming) return
+    const rawText = (customPrompt || input).trim()
+    if (!rawText || isStreaming) return
 
     setInput("")
+
+    const isQuickPrompt = QUICK_PROMPTS.includes(rawText)
+
+    // Ensure we have fresh tab content for quick prompts or when context is needed
+    let tab = activeTab
+    if (isQuickPrompt || !tab?.pageText) {
+      const freshTab = await getActiveTabContent(true)
+      if (freshTab) {
+        tab = freshTab
+        setActiveTab(freshTab)
+      }
+    }
+
+    const isRestricted = !tab?.url || isRestrictedUrl(tab.url)
+
+    // If user clicks a quick prompt to summarize this page, but there's only restricted/settings pages
+    if (isQuickPrompt && isRestricted) {
+      let currentId = activeSessionId
+      if (!currentId) {
+        currentId = crypto.randomUUID()
+        loadedSessionIdRef.current = currentId
+        setActiveSessionId(currentId)
+      }
+
+      const userMsg: ChatMessageItem = {
+        id: crypto.randomUUID(),
+        role: "user",
+        content: rawText,
+        createdAt: getTimestamp(),
+      }
+      const assistantMsg: ChatMessageItem = {
+        id: crypto.randomUUID(),
+        role: "assistant",
+        content: `⚠️ Không thể lấy nội dung từ trang cài đặt extension hoặc trang nội bộ trình duyệt (${tab?.url || "chrome://"}). Vui lòng mở hoặc chuyển sang một trang web thông thường (http/https) để sử dụng tính năng tóm tắt này.`,
+        createdAt: getTimestamp(),
+      }
+      const finalMsgs = [...messages, userMsg, assistantMsg]
+      setMessages(finalMsgs)
+
+      if (currentId) {
+        await db.chatSession.put({
+          id: currentId,
+          title: rawText.slice(0, 35),
+          providerId: selectedModel.providerId,
+          model: selectedModel.model,
+          messages: finalMsgs,
+          createdAt: getTimestamp(),
+          updatedAt: getTimestamp(),
+        })
+      }
+      return
+    }
+
+    if (isQuickPrompt && tab?.url && !isRestricted) {
+      setUsePageContext(true)
+    }
+
+    // Attach target page info to user prompt if it's a quick action
+    const textToSend =
+      isQuickPrompt && tab?.url && !isRestricted
+        ? `${rawText}\n\n*Nguồn: [${tab.title || tab.url}](${tab.url})*`
+        : rawText
 
     const userMessage: ChatMessageItem = {
       id: crypto.randomUUID(),
@@ -222,10 +324,11 @@ export function ChatView() {
     let currentId = activeSessionId
     if (!currentId) {
       currentId = crypto.randomUUID()
+      loadedSessionIdRef.current = currentId
       setActiveSessionId(currentId)
       await db.chatSession.add({
         id: currentId,
-        title: textToSend.slice(0, 35),
+        title: rawText.slice(0, 35),
         providerId: selectedModel.providerId,
         model: selectedModel.model,
         messages: updatedMessages,
@@ -251,27 +354,55 @@ export function ChatView() {
     setMessages([...updatedMessages, assistantMessage])
     setIsStreaming(true)
 
-    // Build LLM messages
+    // Build LLM messages and system instructions
     const formattedMessages: Array<{ role: string; content: string }> = []
 
-    if (usePageContext && activeTab?.pageText) {
-      formattedMessages.push({
-        role: "system",
-        content: `Ngữ cảnh từ trang web người dùng đang xem:\nTiêu đề: ${activeTab.title || ""}\nURL: ${activeTab.url || ""}\nNội dung trang:\n${activeTab.pageText}\n${activeTab.selectedText ? `\nĐoạn văn bản bôi đen: ${activeTab.selectedText}` : ""}\nHãy trả lời dựa trên ngữ cảnh trang web này nếu có liên quan.`,
-      })
+    const shouldIncludeContext =
+      (usePageContext || isQuickPrompt) && tab?.url && !isRestrictedUrl(tab.url)
+
+    let instructions: string | undefined = undefined
+    if (shouldIncludeContext && tab) {
+      instructions = `Ngữ cảnh từ trang web người dùng đang xem:
+Tiêu đề: ${tab.title || "Không có tiêu đề"}
+URL: ${tab.url}
+${tab.pageText ? `Nội dung trang:\n${tab.pageText}` : ""}
+${tab.selectedText ? `\nĐoạn văn bản bôi đen:\n${tab.selectedText}` : ""}
+Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và URL của trang web trên.`
     }
 
     for (const msg of updatedMessages) {
-      formattedMessages.push({
-        role: msg.role,
-        content: msg.content,
-      })
+      if (msg.role === "system") {
+        instructions = instructions ? `${instructions}\n\n${msg.content}` : msg.content
+      } else {
+        formattedMessages.push({
+          role: msg.role,
+          content: msg.content,
+        })
+      }
     }
 
     const controller = new AbortController()
     abortControllerRef.current = controller
 
     const matchedProvider = llmProviders.find((p) => p.id === selectedModel.providerId)
+    const effectiveProviderConfig =
+      matchedProvider && isLLMProviderConfig(matchedProvider)
+        ? ({
+            ...matchedProvider,
+            model:
+              typeof matchedProvider.model === "object"
+                ? {
+                    ...matchedProvider.model,
+                    model: selectedModel.model || matchedProvider.model.model,
+                    customModel:
+                      matchedProvider.model.customModel !== null &&
+                      selectedModel.model !== matchedProvider.model.model
+                        ? selectedModel.model
+                        : matchedProvider.model.customModel,
+                  }
+                : selectedModel.model || matchedProvider.model,
+          } as LLMProviderConfig)
+        : undefined
 
     let accumulatedText = ""
 
@@ -280,10 +411,12 @@ export function ChatView() {
         {
           providerKind: "local",
           providerId: selectedModel.providerId,
-          providerConfig:
-            matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          providerConfig: effectiveProviderConfig,
+          instructions,
           messages: formattedMessages,
           temperature: 0.7,
+          sourceFeature: "Sidepanel Chat",
+          url: activeTab?.url,
         },
         {
           signal: controller.signal,
@@ -295,6 +428,13 @@ export function ChatView() {
               const last = next[next.length - 1]
               if (last?.role === "assistant") {
                 next[next.length - 1] = { ...last, content: chunk }
+              } else {
+                next.push({
+                  id: assistantMessage.id,
+                  role: "assistant",
+                  content: chunk,
+                  createdAt: assistantMessage.createdAt,
+                })
               }
               return next
             })
@@ -305,14 +445,22 @@ export function ChatView() {
       if ((err as Error)?.name === "AbortError") {
         console.info("Chat generation stopped by user")
       } else {
-        const errMessage =
+        const rawErrMessage =
           (err as Error)?.message || "Lỗi kết nối AI Provider. Vui lòng kiểm tra API Key."
-        accumulatedText += `\n\n*(Lỗi: ${errMessage})*`
+        const formattedErr = `*(Lỗi: ${rawErrMessage})*`
+        accumulatedText = accumulatedText ? `${accumulatedText}\n\n${formattedErr}` : formattedErr
         setMessages((prev) => {
           const next = [...prev]
           const last = next[next.length - 1]
           if (last?.role === "assistant") {
             next[next.length - 1] = { ...last, content: accumulatedText }
+          } else {
+            next.push({
+              id: assistantMessage.id,
+              role: "assistant",
+              content: accumulatedText,
+              createdAt: assistantMessage.createdAt,
+            })
           }
           return next
         })
@@ -321,12 +469,24 @@ export function ChatView() {
       setIsStreaming(false)
       abortControllerRef.current = null
 
-      // Final save to Dexie
+      // Final save to Dexie and state sync
+      const finalContent = accumulatedText || "Không nhận được phản hồi."
       const finalAssistant: ChatMessageItem = {
         ...assistantMessage,
-        content: accumulatedText || "Không nhận được phản hồi.",
+        content: finalContent,
       }
       const finalMessages = [...updatedMessages, finalAssistant]
+
+      setMessages((prev) => {
+        const next = [...prev]
+        const last = next[next.length - 1]
+        if (last?.role === "assistant") {
+          next[next.length - 1] = { ...last, content: finalContent }
+          return next
+        }
+        return finalMessages
+      })
+
       if (currentId) {
         await db.chatSession.update(currentId, {
           messages: finalMessages,
@@ -515,7 +675,20 @@ export function ChatView() {
                       <p className="whitespace-pre-wrap">{msg.content}</p>
                     ) : (
                       <div className="group/msg relative">
-                        <MarkdownRenderer content={msg.content} />
+                        {msg.content ? (
+                          <MarkdownRenderer content={msg.content} />
+                        ) : isStreaming && idx === messages.length - 1 ? (
+                          <div className="flex items-center gap-1.5 py-1 text-muted-foreground">
+                            <span className="size-1.5 animate-pulse rounded-full bg-primary" />
+                            <span className="size-1.5 animate-pulse rounded-full bg-primary [animation-delay:200ms]" />
+                            <span className="size-1.5 animate-pulse rounded-full bg-primary [animation-delay:400ms]" />
+                            <span className="ml-1 text-[11px]">Đang suy nghĩ...</span>
+                          </div>
+                        ) : (
+                          <span className="text-[11px] text-muted-foreground italic">
+                            Không có phản hồi
+                          </span>
+                        )}
                         {msg.content && (
                           <div className="mt-2 flex items-center justify-end gap-1 pt-1 opacity-0 transition-opacity group-hover/msg:opacity-100">
                             <Button
@@ -548,21 +721,36 @@ export function ChatView() {
         <div className="flex items-center justify-between border-t border-border/40 bg-muted/20 px-3 py-1.5 text-[11px]">
           <div className="flex min-w-0 items-center gap-1.5">
             <Globe className="size-3.5 shrink-0 text-muted-foreground" />
-            <span className="truncate text-muted-foreground">{activeTab.title}</span>
+            <span className="truncate text-muted-foreground" title={activeTab.url}>
+              {activeTab.title}
+            </span>
           </div>
           <button
             type="button"
-            onClick={() => setUsePageContext(!usePageContext)}
-            className="cursor-pointer"
+            onClick={() => {
+              if (!isRestrictedUrl(activeTab.url)) {
+                setUsePageContext(!usePageContext)
+              }
+            }}
+            disabled={isRestrictedUrl(activeTab.url)}
+            className="cursor-pointer disabled:cursor-not-allowed"
           >
             <Badge
-              variant={usePageContext ? "default" : "outline"}
+              variant={usePageContext && !isRestrictedUrl(activeTab.url) ? "default" : "outline"}
               className={cn(
-                "h-5 cursor-pointer text-[10px] transition-colors",
-                usePageContext ? "bg-primary text-primary-foreground" : "text-muted-foreground",
+                "h-5 text-[10px] transition-colors",
+                isRestrictedUrl(activeTab.url)
+                  ? "border-dashed text-muted-foreground opacity-60"
+                  : usePageContext
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground",
               )}
             >
-              {usePageContext ? "Tab Context: On" : "Tab Context: Off"}
+              {isRestrictedUrl(activeTab.url)
+                ? "Trang nội bộ"
+                : usePageContext
+                  ? "Tab Context: On"
+                  : "Tab Context: Off"}
             </Badge>
           </button>
         </div>

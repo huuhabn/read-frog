@@ -167,6 +167,8 @@ export async function requestVideoSummary(
           hostedFeature: "videoSubtitles" as const,
           instructions: systemPrompt,
           prompt,
+          sourceFeature: "Video Summary",
+          url: typeof window !== "undefined" ? window.location?.href : undefined,
         }
       : {
           providerKind: "local",
@@ -174,6 +176,8 @@ export async function requestVideoSummary(
           providerConfig: providerRef.config,
           instructions: systemPrompt,
           prompt,
+          sourceFeature: "Video Summary",
+          url: typeof window !== "undefined" ? window.location?.href : undefined,
         }
 
   const snapshot = await streamBackgroundText(payload, {

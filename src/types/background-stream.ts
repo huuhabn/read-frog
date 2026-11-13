@@ -25,6 +25,8 @@ interface BaseBackgroundStreamSerializablePayload {
   stopSequences?: string[]
   reasoning?: AISDKReasoning
   providerOptions?: Record<string, Record<string, JSONValue>>
+  sourceFeature?: string
+  url?: string
 }
 
 /** The hosted features that stream plain text through the `stream-text` port. */
