@@ -152,12 +152,33 @@ export function insertTextIntoElement(el: HTMLElement, text: string): boolean {
     // Method D: Direct DOM node appending
     try {
       const targetLine = (el.querySelector("div[id^='input_line_']") as HTMLElement) || el
-      const br = targetLine.querySelector("br")
-      if (br && targetLine.childNodes.length === 1) {
-        br.remove()
+      if (
+        (el.classList.contains("is-empty") ||
+          el.classList.contains("empty") ||
+          !el.innerText?.trim()) &&
+        targetLine === el
+      ) {
+        el.innerHTML = ""
+      } else {
+        const br = targetLine.querySelector("br")
+        if (br && targetLine.childNodes.length === 1) {
+          br.remove()
+        }
       }
       const textNode = document.createTextNode(text)
       targetLine.appendChild(textNode)
+
+      try {
+        const range = document.createRange()
+        range.selectNodeContents(targetLine)
+        range.collapse(false)
+        const sel = window.getSelection()
+        if (sel) {
+          sel.removeAllRanges()
+          sel.addRange(range)
+        }
+      } catch {}
+
       dispatchInputEvents()
       return true
     } catch {

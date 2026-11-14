@@ -57,9 +57,12 @@ export class TelegramChatAdapter implements IChatAdapter {
     if (success && options?.autoSend) {
       // Retry send over multiple ticks so Teact has time to update state from record to send button
       const timeouts = [150, 400, 800]
+      let sent = false
       timeouts.forEach((delay) => {
         setTimeout(() => {
-          this.submitSend()
+          if (!sent) {
+            sent = this.submitSend()
+          }
         }, delay)
       })
     }
@@ -163,7 +166,11 @@ export class TelegramChatAdapter implements IChatAdapter {
 
       // Stable deterministic ID
       const id =
-        el.getAttribute("data-mid") || el.getAttribute("data-message-id") || `tg-msg-${index}`
+        el.getAttribute("data-mid") ||
+        el.getAttribute("data-message-id") ||
+        el.getAttribute("data-msg-id") ||
+        el.id ||
+        `tg-msg-${index}`
 
       const tsAttr = el.getAttribute("data-timestamp")
       const timestamp = tsAttr ? Number(tsAttr) * 1000 : Date.now()

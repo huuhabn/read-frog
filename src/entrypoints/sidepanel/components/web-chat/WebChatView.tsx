@@ -41,6 +41,7 @@ export function WebChatView() {
   const [sessionTone, setSessionTone] = useState<WebChatTone | null>(null)
   const [autoReplyMode, setAutoReplyMode] = useState<WebChatAutoReplyMode>("none")
   const [isAutoReplying, setIsAutoReplying] = useState(false)
+  const isAutoReplyingRef = useRef(false)
   const lastRepliedMessageIdRef = useRef<string | null>(null)
 
   const effectiveModel = sessionModel ?? webChatConfig?.providerId ?? ""
@@ -145,7 +146,7 @@ export function WebChatView() {
     let isSubscribed = true
 
     const checkAndAutoReply = async () => {
-      if (isAutoReplying || !isSubscribed) return
+      if (isAutoReplyingRef.current || !isSubscribed) return
       const tabInfo = await getActiveTabInfo(true)
       if (!tabInfo?.id || !isSubscribed) return
 
@@ -162,6 +163,7 @@ export function WebChatView() {
         lastMsg.content.trim().length > 0
       ) {
         lastRepliedMessageIdRef.current = lastMsg.id
+        isAutoReplyingRef.current = true
         setIsAutoReplying(true)
         try {
           if (data.room) setRoom(data.room)
@@ -199,6 +201,7 @@ export function WebChatView() {
             setSecondaryResult(undefined)
           }
         } finally {
+          isAutoReplyingRef.current = false
           if (isSubscribed) {
             setIsAutoReplying(false)
           }
@@ -214,14 +217,7 @@ export function WebChatView() {
       isSubscribed = false
       clearInterval(interval)
     }
-  }, [
-    autoReplyMode,
-    isAutoReplying,
-    effectiveLang,
-    effectiveTone,
-    effectiveModel,
-    webChatConfig?.rules,
-  ])
+  }, [autoReplyMode, effectiveLang, effectiveTone, effectiveModel, webChatConfig?.rules])
 
   const handleActionSelect = async (action: WebChatActionType) => {
     setActiveAction(action)
