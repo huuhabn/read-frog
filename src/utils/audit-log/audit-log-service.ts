@@ -1,7 +1,9 @@
 import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { getLocalConfig } from "@/utils/config/storage"
+import { BUILT_IN_AI_PROVIDER_IDS } from "@/utils/constants/provider-ids"
 import { db } from "@/utils/db/dexie/db"
 import { sendMessage } from "@/utils/message"
+import { getBuiltInAiProviderName } from "@/utils/providers/provider-registry"
 
 export type AuditLogEntryInput = Omit<AuditLogItem, "id" | "createdAt">
 
@@ -20,9 +22,18 @@ export async function recordAuditLog(entry: AuditLogEntryInput): Promise<string 
       window.location.protocol.startsWith("chrome-extension") ||
       window.location.protocol.startsWith("moz-extension")
 
+    const providerName =
+      entry.providerName ??
+      (BUILT_IN_AI_PROVIDER_IDS.includes(
+        entry.providerId as (typeof BUILT_IN_AI_PROVIDER_IDS)[number],
+      )
+        ? getBuiltInAiProviderName(entry.providerId as (typeof BUILT_IN_AI_PROVIDER_IDS)[number])
+        : config.providersConfig?.find((provider) => provider.id === entry.providerId)?.name)
+    const normalizedEntry = { ...entry, providerName }
+
     if (!isExtensionContext) {
       try {
-        return await sendMessage("recordAuditLogEntry", entry)
+        return await sendMessage("recordAuditLogEntry", normalizedEntry)
       } catch (err) {
         console.warn("[AuditLog] Failed to forward audit log to background:", err)
         return null
@@ -31,7 +42,7 @@ export async function recordAuditLog(entry: AuditLogEntryInput): Promise<string 
 
     const id = crypto.randomUUID()
     const item: AuditLogItem = {
-      ...entry,
+      ...normalizedEntry,
       id,
       createdAt: new Date(),
     }

@@ -124,7 +124,7 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
               <span className="font-medium text-foreground">
                 {i18n.t("options.advanced.auditLogs.provider")}:{" "}
               </span>
-              {log.providerId} {log.model ? `(${log.model})` : ""}
+              {log.providerName || log.providerId} {log.model ? `(${log.model})` : ""}
             </div>
             {log.url && (
               <div className="flex max-w-full items-center gap-1 truncate">

@@ -80,7 +80,7 @@ export function LlmFeatureStatusList({
         </span>
       ))}
       <Link
-        to={buildSectionLink("/api-providers", "feature-providers")}
+        to={buildSectionLink("/providers", "feature-providers")}
         className={cn(buttonVariants({ variant: "outline", size: "xs" }), "mt-1")}
       >
         {i18n.t("options.apiProviders.featureProviders.chooseProvider")}

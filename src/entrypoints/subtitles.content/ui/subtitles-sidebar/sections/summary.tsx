@@ -107,9 +107,7 @@ export function SummarySection() {
               size="sm"
               onClick={() =>
                 void sendMessage("openPage", {
-                  url: browser.runtime.getURL(
-                    "/options.html#/api-providers?section=feature-providers",
-                  ),
+                  url: browser.runtime.getURL("/options.html#/providers?section=feature-providers"),
                   active: true,
                 })
               }

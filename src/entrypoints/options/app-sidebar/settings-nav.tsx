@@ -20,8 +20,8 @@ export function SettingsNav() {
         <SidebarMenu>
           <SidebarMenuItem>
             <SidebarMenuButton
-              render={<Link to="/api-providers" />}
-              isActive={pathname === "/api-providers" || pathname === "/"}
+              render={<Link to="/providers" />}
+              isActive={pathname === "/providers" || pathname === "/"}
               tooltip={i18n.t("options.apiProviders.title")}
             >
               <Icon icon="tabler:api" />

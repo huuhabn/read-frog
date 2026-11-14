@@ -12,7 +12,7 @@ import {
   getProviderItemName,
 } from "@/utils/constants/providers"
 import { i18n } from "@/utils/i18n"
-import { selectedProviderIdAtom } from "./atoms"
+import { isProviderEditorOpenAtom, selectedProviderIdAtom } from "./atoms"
 import { addProvider } from "./utils"
 
 export default function AddProviderDialog({ onClose }: { onClose: () => void }) {
@@ -20,6 +20,7 @@ export default function AddProviderDialog({ onClose }: { onClose: () => void }) 
   const requestNavigation = useSetAtom(requestEditorNavigationAtom)
   const setProvidersConfig = useSetAtom(configFieldsAtomMap.providersConfig)
   const setSelectedProviderId = useSetAtom(selectedProviderIdAtom)
+  const setIsEditorOpen = useSetAtom(isProviderEditorOpenAtom)
 
   const handleAddProvider = async (providerType: APIProviderTypes) => {
     await requestNavigation(async () => {
@@ -29,6 +30,7 @@ export default function AddProviderDialog({ onClose }: { onClose: () => void }) 
         setProvidersConfig,
         setSelectedProviderId,
       )
+      setIsEditorOpen(true)
       onClose()
     })
   }

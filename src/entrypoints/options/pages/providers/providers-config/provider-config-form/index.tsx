@@ -202,11 +202,13 @@ function EditableProviderConfig({ providerConfig }: { providerConfig: APIProvide
         delete={handleDelete}
       >
         <ProviderEditor.Form>
-          <EntityEditor.Root>
-            <EntityEditor.Body>
+          <EntityEditor.Root className="border-0 bg-transparent p-0 shadow-none">
+            <EntityEditor.Body className="gap-5">
               <ProviderEditor.ConfigHeader />
-              <ProviderEditor.NameField />
-              <ProviderEditor.DescriptionField />
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <ProviderEditor.NameField />
+                <ProviderEditor.DescriptionField />
+              </div>
               <ProviderEditor.ConnectionFields />
               <ProviderEditor.ProviderSpecificFields />
               {hasTranslationModelFields && <ProviderEditor.TranslationModelFields />}
@@ -219,7 +221,7 @@ function EditableProviderConfig({ providerConfig }: { providerConfig: APIProvide
               )}
               {hasAdvancedFields && <ProviderEditor.AdvancedFields />}
             </EntityEditor.Body>
-            <EntityEditor.Footer>
+            <EntityEditor.Footer className="mt-8 border-t pt-4">
               <ProviderEditor.DuplicateButton />
               <ProviderEditor.DeleteButton />
             </EntityEditor.Footer>

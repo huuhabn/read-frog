@@ -79,6 +79,8 @@ function FeatureProviderItem({ featureKey }: { featureKey: FeatureKey }) {
 
   return (
     <ConfigItem
+      orientation="vertical"
+      className="flex flex-col justify-between rounded-xl border bg-card p-4 transition-colors hover:border-primary/40"
       title={
         <FeatureProviderTitle providerConfig={providerConfig}>
           {i18n.t(getFeatureLabelI18nKey(featureKey))}
@@ -86,14 +88,16 @@ function FeatureProviderItem({ featureKey }: { featureKey: FeatureKey }) {
       }
       description={i18n.t(getFeatureDescriptionI18nKey(featureKey))}
     >
-      <ProviderSelector
-        providers={providers}
-        value={providerId}
-        onChange={setProviderId}
-        triggerSize="sm"
-        placeholder={i18n.t("options.apiProviders.featureProviders.chooseProvider")}
-        selectContentProps={SELECT_CONTENT_PROPS}
-      />
+      <div className="w-full pt-1">
+        <ProviderSelector
+          providers={providers}
+          value={providerId}
+          onChange={setProviderId}
+          triggerSize="sm"
+          placeholder={i18n.t("options.apiProviders.featureProviders.chooseProvider")}
+          selectContentProps={SELECT_CONTENT_PROPS}
+        />
+      </div>
     </ConfigItem>
   )
 }
@@ -104,6 +108,8 @@ function CustomActionProviderItems() {
   return actions.map((action) => (
     <ConfigItem
       key={action.id}
+      orientation="vertical"
+      className="flex flex-col justify-between rounded-xl border bg-card p-4 transition-colors hover:border-primary/40"
       title={
         <FeatureProviderTitle providerConfig={getProviderConfig(action)}>
           {action.name}
@@ -111,14 +117,16 @@ function CustomActionProviderItems() {
       }
       description={toSystemPromptPreview(action)}
     >
-      <ProviderSelector
-        providers={providers}
-        value={action.providerId}
-        onChange={(id) => setActionProviderId(action.id, id)}
-        triggerSize="sm"
-        selectContentProps={SELECT_CONTENT_PROPS}
-        placeholder={i18n.t("options.selectionToolbar.customActions.form.selectProvider")}
-      />
+      <div className="w-full pt-1">
+        <ProviderSelector
+          providers={providers}
+          value={action.providerId}
+          onChange={(id) => setActionProviderId(action.id, id)}
+          triggerSize="sm"
+          selectContentProps={SELECT_CONTENT_PROPS}
+          placeholder={i18n.t("options.selectionToolbar.customActions.form.selectProvider")}
+        />
+      </div>
     </ConfigItem>
   ))
 }
@@ -128,6 +136,7 @@ export function FeatureProvidersConfig() {
     <ConfigSection
       id="feature-providers"
       title={i18n.t("options.apiProviders.featureProviders.title")}
+      contentClassName="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch"
     >
       {FEATURE_KEYS.map((featureKey) => (
         <FeatureProviderItem key={featureKey} featureKey={featureKey} />

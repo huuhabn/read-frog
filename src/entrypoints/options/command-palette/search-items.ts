@@ -186,28 +186,28 @@ export const SEARCH_ITEMS: SearchItem[] = [
   // Providers page
   {
     sectionId: "provider-config",
-    route: "/api-providers",
+    route: "/providers",
     titleKey: "options.apiProviders.configTitle",
     descriptionKey: "options.apiProviders.description",
     pageKey: "options.apiProviders.title",
   },
   {
     sectionId: "feature-providers",
-    route: "/api-providers",
+    route: "/providers",
     titleKey: "options.apiProviders.featureProviders.title",
     descriptionKey: "options.apiProviders.featureProviders.description",
     pageKey: "options.apiProviders.title",
   },
   {
     sectionId: "language-detection",
-    route: "/api-providers",
+    route: "/providers",
     titleKey: "options.apiProviders.languageDetection.title",
     descriptionKey: "options.apiProviders.languageDetection.description",
     pageKey: "options.apiProviders.title",
   },
   {
     sectionId: "ai-content-aware",
-    route: "/api-providers",
+    route: "/providers",
     titleKey: "options.apiProviders.aiContentAware.title",
     descriptionKey: "options.apiProviders.aiContentAware.description",
     pageKey: "options.apiProviders.title",

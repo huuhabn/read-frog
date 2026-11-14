@@ -18,6 +18,11 @@ export const highlightedProviderFieldAtom = atom<"apiKey" | null>(null)
  */
 export const PROVIDER_FIELD_HIGHLIGHT_DURATION_MS = 2700
 
+/**
+ * Controls whether the slide-over Sheet editor from the right is open.
+ */
+export const isProviderEditorOpenAtom = atom<boolean>(false)
+
 const internalSelectedProviderIdAtom = atom<string | undefined>(undefined)
 
 export const selectedProviderIdAtom = atom(

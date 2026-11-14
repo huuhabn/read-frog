@@ -51,19 +51,19 @@ describe("navigation", () => {
 describe("provider config routes", () => {
   it("addresses a provider by id", () => {
     expect(buildProviderConfigRoute("provider-1")).toBe(
-      "/api-providers?section=provider-config&provider=provider-1",
+      "/providers?section=provider-config&provider=provider-1",
     )
   })
 
   it("addresses a provider by type", () => {
     expect(buildProviderTypeConfigRoute("openai")).toBe(
-      "/api-providers?section=provider-config&providerType=openai",
+      "/providers?section=provider-config&providerType=openai",
     )
   })
 
   it("asks for the API key highlight only when requested", () => {
     expect(buildProviderTypeConfigRoute("openai", { highlightApiKey: true })).toBe(
-      "/api-providers?section=provider-config&providerType=openai&highlight=apiKey",
+      "/providers?section=provider-config&providerType=openai&highlight=apiKey",
     )
     expect(buildProviderConfigRoute("provider-1", { highlightApiKey: false })).not.toContain(
       "highlight",

@@ -29,7 +29,7 @@ export function ConfigHeader({
   const shouldShowSponsorCTA = sponsorReferUrl && !hasAPIKey
 
   return (
-    <div className="flex items-start justify-between">
+    <div className="flex items-center justify-between border-b pr-8 pb-3">
       <a
         href={providerWebsiteUrl}
         className="flex items-center gap-2"
@@ -41,7 +41,7 @@ export function ConfigHeader({
           name={getProviderItemName(providerType)}
           size="base"
           className="group hover:cursor-pointer"
-          textClassName="font-medium group-hover:text-link"
+          textClassName="text-base font-semibold group-hover:text-link"
         />
       </a>
       {shouldShowSponsorCTA ? (
@@ -57,7 +57,7 @@ export function ConfigHeader({
         tutorialUrl && (
           <a
             href={tutorialUrl}
-            className="text-xs text-link hover:opacity-90"
+            className="text-xs font-medium text-link hover:opacity-90"
             target="_blank"
             rel="noreferrer"
           >

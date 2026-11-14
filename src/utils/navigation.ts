@@ -38,7 +38,7 @@ function buildProviderConfigRouteFrom(
   if (options?.highlightApiKey) {
     params.set(HIGHLIGHT_QUERY_PARAM, API_KEY_HIGHLIGHT_VALUE)
   }
-  return `/api-providers?${params.toString()}`
+  return `/providers?${params.toString()}`
 }
 
 /**
