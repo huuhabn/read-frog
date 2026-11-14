@@ -1085,6 +1085,81 @@ options:
         outputSchemaRequired: Thêm ít nhất một trường đầu ra
         fieldKeyRequired: Tên trường là bắt buộc
         duplicateFieldKey: Tên trường phải là duy nhất
+  upwork:
+    title: Trợ lý Upwork
+    pageDescription: Cấu hình thông tin hồ sơ, quy tắc và bộ chọn DOM để tự động viết Cover Letter khi xem việc trên Upwork.
+    enable:
+      title: Kích hoạt Upwork Quick Actions
+      description: Hiển thị gợi ý nhanh viết Proposal khi bạn đang mở trang chi tiết việc làm trên Upwork (upwork.com/jobs/*).
+    profileSection:
+      title: Thông tin hồ sơ (Profile Facts)
+      description: AI chỉ được sử dụng các dữ kiện có trong profile này, không tự bịa đặt kinh nghiệm.
+      titleField: Nội dung Profile & Kinh nghiệm
+      descriptionField: Liệt kê kỹ năng chính, kinh nghiệm, dự án tiêu biểu, chứng chỉ hoặc điểm mạnh của bạn. Càng chi tiết, Cover Letter càng thuyết phục và chuẩn xác.
+      placeholder: |-
+        Ví dụ:
+        - 5 năm kinh nghiệm WordPress, PHP, JavaScript, CSS/Tailwind.
+        - Đã xây dựng hơn 30 website eCommerce, chuyên tối ưu Core Web Vitals và fix bug giao diện.
+        - Khả năng giao tiếp tiếng Anh tốt, phản hồi nhanh theo múi giờ US/EU.
+    parametersSection:
+      title: Cấu hình Proposal
+      description: Thiết lập độ dài, giọng điệu và các quy tắc khi tạo Cover Letter.
+      wordCountTitle: Độ dài mục tiêu (Số từ)
+      wordCountDesc: Khoảng 150 - 250 từ là độ dài tối ưu cho Upwork Proposal.
+      translateLangTitle: Ngôn ngữ dịch nội dung
+      translateLangDesc: Dịch mô tả công việc, câu hỏi screening và prompt sang cùng một ngôn ngữ trước khi gửi cho AI.
+      translateProviderTitle: Nhà cung cấp dịch
+      translateProviderDesc: Bộ máy dịch được sử dụng để chuyển đổi ngôn ngữ nội dung.
+      translateProviderAuto: Tự động (Nhà cung cấp mặc định)
+      toneTitle: Giọng điệu (Tone)
+      toneDesc: Phong cách hành văn của Cover Letter.
+      tones:
+        professional: Chuyên nghiệp (Professional)
+        concise: Ngắn gọn, súc tích (Concise)
+        friendly: Thân thiện (Friendly)
+        enthusiastic: Nhiệt tình, hào hứng (Enthusiastic)
+      rulesTitle: Quy tắc bắt buộc (Rules)
+      rulesDesc: "Các nguyên tắc AI cần tuân thủ (ví dụ: không chào hỏi sáo rỗng, trả lời thẳng vào câu hỏi screening, không đề cập rate)."
+      rulesPlaceholder: |-
+        Ví dụ:
+        - Chỉ dùng facts trong profile, tuyệt đối không bịa đặt kinh nghiệm.
+        - Trả lời đầy đủ tất cả câu hỏi screening của khách hàng.
+        - Câu đầu tiên đi thẳng vào giải pháp cho vấn đề của job.
+      examplesTitle: Ví dụ mẫu (Few-shot Examples)
+      examplesDesc: Các mẫu Cover Letter mà bạn từng trúng thầu hoặc phong cách bạn thích để AI học theo.
+      examplesPlaceholder: Dán các mẫu Cover Letter tốt nhất của bạn tại đây để AI tham khảo cách viết...
+    selectorsSection:
+      title: CSS Selectors (Bóc tách & Tự động điền)
+      description: Các bộ chọn DOM để extension tìm nội dung bài đăng và ô nhập proposal trên Upwork.
+      jobDetailsSelectorTitle: Selector Job Description
+      jobDetailsSelectorDesc: Selector CSS để tìm phần mô tả công việc.
+      screeningQuestionsSelectorTitle: Selector Screening Questions
+      screeningQuestionsSelectorDesc: Selector CSS để tìm danh sách câu hỏi sàng lọc của khách hàng.
+      coverLetterInputSelectorTitle: Selector Cover Letter Input
+      coverLetterInputSelectorDesc: Selector CSS cho ô textarea nhập Cover Letter khi bấm nút 'Fill vào Upwork'.
+    translateLangs:
+      original: Không dịch (Giữ nguyên)
+      en: Tiếng Anh (English)
+      vi: Tiếng Việt
+      zhCN: Tiếng Trung giản thể
+      ja: Tiếng Nhật
+      ko: Tiếng Hàn
+      fr: Tiếng Pháp
+      de: Tiếng Đức
+      es: Tiếng Tây Ban Nha
+      ru: Tiếng Nga
+    sidepanel:
+      quickActionLabel: Upwork Job Actions
+      coverLetter: Viết Cover Letter
+      analyzeJob: Phân tích Job
+      fillIntoUpwork: Fill vào Upwork
+      filledSuccess: Đã điền!
+      copiedSuccess: Đã copy!
+      viewOriginal: Xem bản gốc
+      viewTranslated: Xem bản dịch
+      translating: Đang dịch nội dung...
+      translateTo: Dịch sang
+      translateProvider: Nhà cung cấp dịch
   advanced:
     title: Nâng cao
     pageDescription: Những thiết lập mạnh mẽ nhưng không dùng đến hằng ngày.

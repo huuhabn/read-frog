@@ -38,6 +38,9 @@ const InputTranslationPage = lazy(() =>
 const TextToSpeechPage = lazy(() =>
   import("./pages/text-to-speech").then((module) => ({ default: module.TextToSpeechPage })),
 )
+const UpworkSettingsPage = lazy(() =>
+  import("./pages/upwork").then((module) => ({ default: module.UpworkSettingsPage })),
+)
 const GlossaryPage = lazy(() =>
   import("./pages/advanced/glossary").then((module) => ({ default: module.GlossaryPage })),
 )
@@ -141,6 +144,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/context-menu": ContextMenuPage,
   "/input-translation": InputTranslationPage,
   "/tts": TextToSpeechPage,
+  "/upwork": UpworkSettingsPage,
   "/advanced": AdvancedRedirect,
   "/help-and-community": HelpAndCommunityPage,
   "/advanced/glossary": GlossaryPage,

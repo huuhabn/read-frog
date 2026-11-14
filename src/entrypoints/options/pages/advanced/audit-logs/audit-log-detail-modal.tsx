@@ -4,7 +4,7 @@ import { useMemo, useState } from "react"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/base-ui/dialog"
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/base-ui/sheet"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
@@ -61,14 +61,17 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
   const rawJsonContent = JSON.stringify(log.rawPayload ?? log, null, 2)
 
   return (
-    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="flex max-h-[88vh] max-w-3xl flex-col gap-4 overflow-hidden p-6">
-        <DialogHeader className="border-b border-border/60 pb-3">
-          <div className="flex flex-wrap items-center justify-between gap-2">
-            <DialogTitle className="flex items-center gap-2 text-base font-semibold">
+    <Sheet open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      <SheetContent
+        side="right"
+        className="flex h-full w-full flex-col gap-4 overflow-hidden p-6 sm:max-w-2xl data-[side=right]:sm:max-w-2xl"
+      >
+        <SheetHeader className="border-b border-border/60 p-0 pb-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 pr-6">
+            <SheetTitle className="flex items-center gap-2 text-base font-semibold">
               <Icon icon="tabler:file-text" className="size-5 text-primary" />
               <span>{i18n.t("options.advanced.auditLogs.detailTitle")}</span>
-            </DialogTitle>
+            </SheetTitle>
             <div className="flex flex-wrap items-center gap-1.5">
               <Badge
                 variant={
@@ -132,7 +135,7 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
               </div>
             )}
           </div>
-        </DialogHeader>
+        </SheetHeader>
 
         <div className="flex-1 space-y-4 overflow-y-auto pr-1 text-xs">
           {/* Error Message if present */}
@@ -419,7 +422,7 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
             )}
           </div>
         </div>
-      </DialogContent>
-    </Dialog>
+      </SheetContent>
+    </Sheet>
   )
 }

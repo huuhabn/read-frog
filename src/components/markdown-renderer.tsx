@@ -31,16 +31,16 @@ const MARKDOWN_COMPONENTS: Components = {
     </h4>
   ),
   p: ({ children }) => (
-    <p className="mt-3 mb-3 text-sm leading-relaxed text-slate-700 first:mt-0 dark:text-slate-300">
+    <p className="mt-3 mb-3 text-sm leading-relaxed [overflow-wrap:anywhere] break-words text-slate-700 first:mt-0 dark:text-slate-300">
       {children}
     </p>
   ),
   ul: ({ children }) => <ul className="mt-3 mb-3 space-y-2 first:mt-0">{children}</ul>,
   ol: ({ children }) => <ol className="mt-3 mb-3 space-y-2 first:mt-0">{children}</ol>,
   li: ({ children }) => (
-    <li className="flex items-start text-sm text-slate-700 dark:text-slate-300">
+    <li className="flex min-w-0 items-start text-sm text-slate-700 dark:text-slate-300">
       <span className="mt-2 mr-3 h-1.5 w-1.5 flex-shrink-0 rounded-full bg-slate-400 dark:bg-slate-500"></span>
-      <span className="flex-1">{children}</span>
+      <span className="min-w-0 flex-1 [overflow-wrap:anywhere] break-words">{children}</span>
     </li>
   ),
   strong: ({ children }) => (
@@ -53,6 +53,23 @@ const MARKDOWN_COMPONENTS: Components = {
       {children}
     </em>
   ),
+  pre: ({ children }) => (
+    <pre className="mt-3 mb-3 max-w-full overflow-x-auto rounded bg-muted/60 p-2.5 font-mono text-xs text-foreground first:mt-0">
+      {children}
+    </pre>
+  ),
+  code: ({ children, className }) => (
+    <code
+      className={`rounded bg-muted/60 px-1 py-0.5 font-mono text-xs break-all ${className || ""}`}
+    >
+      {children}
+    </code>
+  ),
+  table: ({ children }) => (
+    <div className="mt-3 mb-3 max-w-full overflow-x-auto">
+      <table className="w-full text-xs">{children}</table>
+    </div>
+  ),
   blockquote: ({ children }) => (
     <blockquote className="mt-3 mb-3 rounded-r border-l-4 border-blue-500 bg-blue-50 py-2 pl-4 text-slate-700 italic first:mt-0 dark:bg-blue-900/20 dark:text-slate-300">
       {children}
@@ -62,7 +79,9 @@ const MARKDOWN_COMPONENTS: Components = {
 
 export function MarkdownRenderer({ content, className = "" }: MarkdownRendererProps) {
   return (
-    <div className={`markdown-content ${className}`}>
+    <div
+      className={`markdown-content max-w-full min-w-0 [overflow-wrap:anywhere] break-words ${className}`}
+    >
       <ReactMarkdown components={MARKDOWN_COMPONENTS}>{content}</ReactMarkdown>
     </div>
   )

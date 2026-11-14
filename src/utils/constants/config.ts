@@ -8,6 +8,7 @@ import type { PageTranslateRange } from "@/types/config/translate"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
 import { DEFAULT_AUDIT_LOG_CONFIG } from "@/types/config/audit-log"
 import { DEFAULT_SIDE_PANEL_SHORTCUT_KEY } from "@/types/config/side-panel"
+import { DEFAULT_UPWORK_CONFIG } from "@/types/config/upwork"
 import {
   buildDictionaryActionLayout,
   buildImproveWritingActionLayout,
@@ -364,6 +365,7 @@ export const DEFAULT_CONFIG: Config = {
     shortcut: DEFAULT_SIDE_PANEL_SHORTCUT_KEY,
   },
   auditLog: { ...DEFAULT_AUDIT_LOG_CONFIG },
+  upwork: { ...DEFAULT_UPWORK_CONFIG },
 }
 
 /**

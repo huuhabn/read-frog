@@ -1232,6 +1232,81 @@ options:
         outputSchemaRequired: Add at least one output field
         fieldKeyRequired: Field name is required
         duplicateFieldKey: Field names must be unique
+  upwork:
+    title: Upwork Assistant
+    pageDescription: Configure profile facts, proposal rules, and DOM selectors to generate cover letters and answer screening questions.
+    enable:
+      title: Enable Upwork Quick Actions
+      description: Show quick proposal actions when viewing Upwork job posts (upwork.com/jobs/*).
+    profileSection:
+      title: Freelancer Profile Facts
+      description: AI must strictly use facts listed in this profile and never invent experience.
+      titleField: Profile & Experience
+      descriptionField: List your skills, projects, certifications, and strengths. The more detail, the more accurate the proposal.
+      placeholder: |-
+        Example:
+        - 5 years of experience with React, TypeScript, Next.js, Node.js.
+        - Built over 30 web applications, specializing in performance optimization and UI fixes.
+        - Strong English communication skills and fast turnaround.
+    parametersSection:
+      title: Proposal Settings
+      description: Configure word count, tone, and specific rules for cover letter generation.
+      wordCountTitle: Target Word Count
+      wordCountDesc: Around 150 - 250 words is optimal for Upwork proposals.
+      translateLangTitle: Unified Content Language
+      translateLangDesc: Translate job description, screening questions, and prompt into a unified language before sending to AI.
+      translateProviderTitle: Translation Provider
+      translateProviderDesc: The translation engine used to translate content.
+      translateProviderAuto: Auto (Default Provider)
+      toneTitle: Tone
+      toneDesc: The writing style and tone for the proposal.
+      tones:
+        professional: Professional
+        concise: Concise
+        friendly: Friendly
+        enthusiastic: Enthusiastic
+      rulesTitle: Mandatory Rules
+      rulesDesc: "Rules the AI must follow (e.g., no generic fluff, answer screening questions directly, don't mention rates)."
+      rulesPlaceholder: |-
+        Example:
+        - Only use facts from the profile; never invent experience.
+        - Answer every client screening question thoroughly.
+        - Start directly with the solution to the client's problem.
+      examplesTitle: Few-Shot Examples
+      examplesDesc: Past winning cover letters or examples of your preferred style for the AI to reference.
+      examplesPlaceholder: Paste your best cover letters here for reference...
+    selectorsSection:
+      title: DOM Selectors
+      description: CSS selectors used to extract job post details and fill the proposal form on Upwork.
+      jobDetailsSelectorTitle: Job Description Selector
+      jobDetailsSelectorDesc: CSS selector to locate the job description element.
+      screeningQuestionsSelectorTitle: Screening Questions Selector
+      screeningQuestionsSelectorDesc: CSS selector to locate the client's screening questions.
+      coverLetterInputSelectorTitle: Cover Letter Input Selector
+      coverLetterInputSelectorDesc: CSS selector for the proposal textarea when using 'Fill into Upwork'.
+    translateLangs:
+      original: Don't translate (Original)
+      en: English
+      vi: Vietnamese
+      zhCN: Simplified Chinese
+      ja: Japanese
+      ko: Korean
+      fr: French
+      de: German
+      es: Spanish
+      ru: Russian
+    sidepanel:
+      quickActionLabel: Upwork Job Actions
+      coverLetter: Write Cover Letter
+      analyzeJob: Analyze Job
+      fillIntoUpwork: Fill into Upwork
+      filledSuccess: Filled!
+      copiedSuccess: Copied!
+      viewOriginal: Original
+      viewTranslated: Translated
+      translating: Translating...
+      translateTo: Translate to
+      translateProvider: Translation Provider
   advanced:
     title: Advanced
     pageDescription: Powerful settings that are not part of the everyday path.

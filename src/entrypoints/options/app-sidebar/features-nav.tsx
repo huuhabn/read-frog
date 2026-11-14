@@ -184,6 +184,17 @@ export function FeaturesNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
+              render={<Link to="/upwork" />}
+              isActive={pathname === "/upwork"}
+              tooltip="Upwork"
+            >
+              <Icon icon="tabler:briefcase" />
+              <span>Upwork</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
               render={
                 <a
                   href={browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH)}

@@ -5,6 +5,8 @@ export interface ChatMessageItem {
   role: "user" | "assistant" | "system"
   content: string
   createdAt: Date
+  originalContent?: string
+  translatedContent?: string
 }
 
 export default class ChatSession extends Entity {

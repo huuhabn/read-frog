@@ -33,6 +33,7 @@ import { siteRulesConfigSchema } from "./site-rules"
 import { videoSubtitlesSchema } from "./subtitles"
 import { translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
+import { upworkConfigSchema } from "./upwork"
 // Language schema
 const languageSchema = z.object({
   sourceCode: storedLanguageTagSchema.or(z.literal("auto")),
@@ -217,6 +218,7 @@ export const configSchema = z
     glossary: glossaryConfigSchema,
     sidePanel: sidePanelSchema,
     auditLog: auditLogConfigSchema,
+    upwork: upworkConfigSchema,
   })
   .superRefine((data, ctx) => {
     for (const featureKey of FEATURE_KEYS) {
