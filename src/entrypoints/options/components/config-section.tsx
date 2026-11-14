@@ -4,6 +4,7 @@ import { cn } from "@/utils/styles/utils"
 export interface ConfigSectionProps {
   id?: string
   title: ReactNode
+  action?: ReactNode
   children: ReactNode
   className?: string
   contentClassName?: string
@@ -13,6 +14,7 @@ export interface ConfigSectionProps {
 export function ConfigSection({
   id,
   title,
+  action,
   children,
   className,
   contentClassName,
@@ -20,11 +22,15 @@ export function ConfigSection({
 }: ConfigSectionProps) {
   return (
     <section id={id} className={cn("w-full", className)}>
-      <h2
-        className={cn("mb-4 border-b pb-3 text-base font-medium text-foreground", titleClassName)}
+      <div
+        className={cn(
+          "mb-4 flex flex-wrap items-center justify-between gap-3 border-b pb-3",
+          titleClassName,
+        )}
       >
-        {title}
-      </h2>
+        <h2 className="text-base font-medium text-foreground">{title}</h2>
+        {action && <div>{action}</div>}
+      </div>
       <div className={cn("flex w-full flex-col gap-6", contentClassName)}>{children}</div>
     </section>
   )

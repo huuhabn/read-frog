@@ -1,8 +1,8 @@
 import type { APIProviderConfig } from "@/types/config/provider"
+import { Icon } from "@iconify/react"
 import { useSelector } from "@tanstack/react-store"
 import { useAtom } from "jotai"
 import { useEffect, useState } from "react"
-import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 import { highlightedProviderFieldAtom, PROVIDER_FIELD_HIGHLIGHT_DURATION_MS } from "../atoms"
@@ -13,7 +13,6 @@ import { withForm } from "./form"
 export const APIKeyField = withForm({
   ...{ defaultValues: {} as APIProviderConfig },
   render: function Render({ form }) {
-    // const providerConfig = form.state.values
     const [showAPIKey, setShowAPIKey] = useState(false)
     const providerConfig = useSelector(form.store, (state) => state.values)
     const [highlightedField, setHighlightedField] = useAtom(highlightedProviderFieldAtom)
@@ -38,28 +37,24 @@ export const APIKeyField = withForm({
     return (
       <form.AppField name="apiKey">
         {(field) => (
-          <div className="flex flex-col gap-2">
-            <field.InputFieldAutoSave
-              label="API Key"
-              labelAfter={<GetAPIKeyButton providerType={providerType} />}
-              labelExtra={<ConnectionTestButton providerConfig={providerConfig} />}
-              type={showAPIKey ? "text" : "password"}
-              className={cn(isHighlighted && "animate-ring-flash")}
-            />
-            <div className="mt-0.5 flex items-center space-x-2">
-              <Checkbox
-                id={`apiKey-${providerConfig.id}`}
-                checked={showAPIKey}
-                onCheckedChange={(checked) => setShowAPIKey(checked)}
-              />
-              <label
-                htmlFor={`apiKey-${providerConfig.id}`}
-                className="text-sm leading-none font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+          <field.InputFieldAutoSave
+            label="API Key"
+            labelAfter={<GetAPIKeyButton providerType={providerType} />}
+            labelExtra={<ConnectionTestButton providerConfig={providerConfig} />}
+            type={showAPIKey ? "text" : "password"}
+            className={cn(isHighlighted && "animate-ring-flash")}
+            trailingAction={
+              <button
+                type="button"
+                className="flex size-6 cursor-pointer items-center justify-center rounded text-muted-foreground transition-colors hover:text-foreground focus:outline-hidden"
+                onClick={() => setShowAPIKey((prev) => !prev)}
+                title={i18n.t("options.apiProviders.apiKey.showAPIKey")}
+                aria-label={i18n.t("options.apiProviders.apiKey.showAPIKey")}
               >
-                {i18n.t("options.apiProviders.apiKey.showAPIKey")}
-              </label>
-            </div>
-          </div>
+                <Icon icon={showAPIKey ? "tabler:eye-off" : "tabler:eye"} className="size-4" />
+              </button>
+            }
+          />
         )}
       </form.AppField>
     )

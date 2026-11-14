@@ -10,7 +10,6 @@ import ProviderIcon from "@/components/provider-icon"
 import { useTheme } from "@/components/providers/theme-provider"
 import { SortableList } from "@/components/sortable-list"
 import { Badge } from "@/components/ui/base-ui/badge"
-import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
 import { Sheet, SheetContent } from "@/components/ui/base-ui/sheet"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
@@ -198,35 +197,32 @@ function ProviderCardList() {
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-4">
-        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-          <DialogTrigger
-            render={
-              <Button
-                variant="outline"
-                className="h-auto rounded-xl border-dashed border-accent bg-accent/8 p-3 hover:bg-accent/14 dark:border-accent dark:bg-accent/12 dark:hover:bg-accent/20"
-                onClick={() => setIsAddDialogOpen(true)}
-              />
-            }
-          >
-            <div className="flex items-center gap-2">
-              <Icon icon="tabler:plus" className="size-4" />
-              <span className="text-sm font-medium">
-                {i18n.t("options.apiProviders.addProvider")}
-              </span>
-            </div>
-          </DialogTrigger>
-          <AddProviderDialog onClose={() => setIsAddDialogOpen(false)} />
-        </Dialog>
-      </div>
-
-      <SortableList
-        layout="grid"
-        list={apiProvidersConfig}
-        setList={handleReorder}
-        className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
-        renderItem={(providerConfig) => <ProviderCard providerConfig={providerConfig} />}
-      />
+      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+        <SortableList
+          layout="grid"
+          list={apiProvidersConfig}
+          setList={handleReorder}
+          className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+          renderItem={(providerConfig) => <ProviderCard providerConfig={providerConfig} />}
+          footer={
+            <DialogTrigger
+              render={
+                <button
+                  type="button"
+                  className="flex min-h-[50px] cursor-pointer items-center justify-center gap-2 rounded-xl border border-dashed border-accent bg-accent/8 p-3 text-muted-foreground transition-colors hover:border-primary/50 hover:bg-accent/14 hover:text-foreground dark:border-accent dark:bg-accent/12 dark:hover:bg-accent/20"
+                  onClick={() => setIsAddDialogOpen(true)}
+                >
+                  <Icon icon="tabler:plus" className="size-4 shrink-0" />
+                  <span className="text-sm font-medium">
+                    {i18n.t("options.apiProviders.addProvider")}
+                  </span>
+                </button>
+              }
+            />
+          }
+        />
+        <AddProviderDialog onClose={() => setIsAddDialogOpen(false)} />
+      </Dialog>
 
       <BuiltInProviderSection />
     </div>

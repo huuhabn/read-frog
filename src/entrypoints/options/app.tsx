@@ -56,7 +56,6 @@ const AuditLogsPage = lazy(() =>
   import("./pages/advanced/audit-logs").then((module) => ({ default: module.AuditLogsPage })),
 )
 
-/** Advanced has no page of its own; its group's only entry is the glossary. */
 function AdvancedRedirect() {
   return <Navigate to="/advanced/glossary" replace />
 }

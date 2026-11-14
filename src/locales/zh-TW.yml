@@ -315,6 +315,7 @@ options:
       title: 功能提供者
       description: 為每個功能選擇使用的提供者
       chooseProvider: 選擇提供者
+      applyToAll: 套用到全部
       features:
         pageTranslation: 網頁翻譯
         selectionTranslation: 選取文字翻譯

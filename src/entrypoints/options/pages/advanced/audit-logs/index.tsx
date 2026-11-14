@@ -17,9 +17,16 @@ import {
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
 import { Input } from "@/components/ui/base-ui/input"
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/base-ui/select"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
-  cleanupLegacyAuditLogs,
   clearAllAuditLogs,
   deleteAuditLog,
   queryAuditLogs,
@@ -79,12 +86,6 @@ export function AuditLogsPage() {
   const handleClearAll = async () => {
     setIsLoading(true)
     await clearAllAuditLogs()
-    setRefreshTrigger((k) => k + 1)
-  }
-
-  const handleCleanupLegacy = async () => {
-    setIsLoading(true)
-    await cleanupLegacyAuditLogs()
     setRefreshTrigger((k) => k + 1)
   }
 
@@ -164,29 +165,55 @@ export function AuditLogsPage() {
             </div>
 
             {/* Status Filter */}
-            <select
+            <Select<"all" | "success" | "error" | "aborted">
               value={statusFilter}
-              onChange={(e) => handleStatusChange(e.target.value as typeof statusFilter)}
-              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-hidden"
+              onValueChange={(val) => {
+                if (val) handleStatusChange(val)
+              }}
             >
-              <option value="all">{i18n.t("options.advanced.auditLogs.filterStatusAll")}</option>
-              <option value="success">{i18n.t("options.advanced.auditLogs.statusSuccess")}</option>
-              <option value="error">{i18n.t("options.advanced.auditLogs.statusError")}</option>
-              <option value="aborted">{i18n.t("options.advanced.auditLogs.statusAborted")}</option>
-            </select>
+              <SelectTrigger className="h-8 bg-background text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">
+                    {i18n.t("options.advanced.auditLogs.filterStatusAll")}
+                  </SelectItem>
+                  <SelectItem value="success">
+                    {i18n.t("options.advanced.auditLogs.statusSuccess")}
+                  </SelectItem>
+                  <SelectItem value="error">
+                    {i18n.t("options.advanced.auditLogs.statusError")}
+                  </SelectItem>
+                  <SelectItem value="aborted">
+                    {i18n.t("options.advanced.auditLogs.statusAborted")}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
             {/* Type Filter */}
-            <select
+            <Select<"all" | "llm" | "translation">
               value={typeFilter}
-              onChange={(e) => handleTypeChange(e.target.value as typeof typeFilter)}
-              className="h-8 rounded-md border border-border bg-background px-2 text-xs text-foreground focus:ring-1 focus:ring-primary focus:outline-hidden"
+              onValueChange={(val) => {
+                if (val) handleTypeChange(val)
+              }}
             >
-              <option value="all">{i18n.t("options.advanced.auditLogs.filterTypeAll")}</option>
-              <option value="llm">AI / LLM</option>
-              <option value="translation">
-                {i18n.t("options.advanced.auditLogs.typeTranslation")}
-              </option>
-            </select>
+              <SelectTrigger className="h-8 bg-background text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectGroup>
+                  <SelectItem value="all">
+                    {i18n.t("options.advanced.auditLogs.filterTypeAll")}
+                  </SelectItem>
+                  <SelectItem value="llm">AI / LLM</SelectItem>
+                  <SelectItem value="translation">
+                    {i18n.t("options.advanced.auditLogs.typeTranslation")}
+                  </SelectItem>
+                </SelectGroup>
+              </SelectContent>
+            </Select>
 
             <Button
               size="icon"
@@ -203,37 +230,6 @@ export function AuditLogsPage() {
             <span className="text-xs text-muted-foreground">
               {i18n.t("options.advanced.auditLogs.totalCount", [String(totalCount)])}
             </span>
-
-            {/* Cleanup Legacy Dialog */}
-            {totalCount > 0 && (
-              <AlertDialog>
-                <AlertDialogTrigger
-                  render={
-                    <Button variant="outline" size="sm" className="h-8 gap-1.5 text-xs">
-                      <Icon icon="tabler:broom" className="size-3.5 text-amber-500" />
-                      <span>Dọn dẹp log cũ</span>
-                    </Button>
-                  }
-                />
-                <AlertDialogContent>
-                  <AlertDialogHeader>
-                    <AlertDialogTitle>Dọn dẹp các log cũ?</AlertDialogTitle>
-                    <AlertDialogDescription>
-                      Thao tác này sẽ xóa các bản ghi log cũ không có cấu trúc messages đầy đủ để
-                      chuẩn hóa cơ sở dữ liệu. Bạn có chắc chắn muốn tiếp tục?
-                    </AlertDialogDescription>
-                  </AlertDialogHeader>
-                  <AlertDialogFooter>
-                    <AlertDialogCancel>
-                      {i18n.t("options.advanced.auditLogs.cancel")}
-                    </AlertDialogCancel>
-                    <AlertDialogAction onClick={() => void handleCleanupLegacy()}>
-                      Xác nhận dọn dẹp
-                    </AlertDialogAction>
-                  </AlertDialogFooter>
-                </AlertDialogContent>
-              </AlertDialog>
-            )}
 
             {/* Clear All Dialog */}
             {totalCount > 0 && (
@@ -310,7 +306,11 @@ export function AuditLogsPage() {
                     const isError = log.status === "error"
 
                     return (
-                      <tr key={log.id} className="transition-colors hover:bg-muted/30">
+                      <tr
+                        key={log.id}
+                        className="cursor-pointer transition-colors hover:bg-muted/40"
+                        onClick={() => handleViewDetail(log)}
+                      >
                         <td className="px-3 py-2.5 font-mono text-[11px] whitespace-nowrap text-muted-foreground">
                           {new Intl.DateTimeFormat(undefined, {
                             dateStyle: "short",
@@ -372,12 +372,18 @@ export function AuditLogsPage() {
                           </Badge>
                         </td>
                         <td className="px-3 py-2.5 text-right whitespace-nowrap">
-                          <div className="flex items-center justify-end gap-1">
+                          <div
+                            className="flex items-center justify-end gap-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
                             <Button
                               size="icon"
                               variant="ghost"
                               className="size-7"
-                              onClick={() => handleViewDetail(log)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                handleViewDetail(log)
+                              }}
                               title={i18n.t("options.advanced.auditLogs.viewDetail")}
                             >
                               <Icon icon="tabler:eye" className="size-4" />
@@ -386,7 +392,10 @@ export function AuditLogsPage() {
                               size="icon"
                               variant="ghost"
                               className="size-7 text-muted-foreground hover:text-destructive"
-                              onClick={() => void handleDelete(log.id)}
+                              onClick={(e) => {
+                                e.stopPropagation()
+                                void handleDelete(log.id)
+                              }}
                               title={i18n.t("options.advanced.auditLogs.delete")}
                             >
                               <Icon icon="tabler:trash" className="size-4" />

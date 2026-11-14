@@ -314,6 +314,7 @@ options:
       title: Özellik sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin
       chooseProvider: Sağlayıcı seç
+      applyToAll: Tümüne uygula
       features:
         pageTranslation: Sayfa çevirisi
         selectionTranslation: Seçim araç çubuğu çevirisi

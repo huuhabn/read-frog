@@ -1,6 +1,7 @@
 import { useSelector } from "@tanstack/react-store"
 import { Field, FieldError, FieldLabel } from "@/components/ui/base-ui/field"
 import { Input } from "@/components/ui/base-ui/input"
+import { cn } from "@/utils/styles/utils"
 import { useFieldContext } from "./form-context"
 import { useAutosaveContext } from "./use-autosave"
 
@@ -8,11 +9,13 @@ export function InputFieldAutoSave({
   label,
   labelAfter,
   labelExtra,
+  trailingAction,
   type,
   onChange,
   onBlur,
   onCompositionStart,
   onCompositionEnd,
+  className,
   ...props
 }: {
   label: React.ReactNode
@@ -22,6 +25,7 @@ export function InputFieldAutoSave({
    */
   labelAfter?: React.ReactNode
   labelExtra?: React.ReactNode
+  trailingAction?: React.ReactNode
 } & React.InputHTMLAttributes<HTMLInputElement>) {
   const autosave = useAutosaveContext()
   const field = useFieldContext<string | number | undefined>()
@@ -51,30 +55,38 @@ export function InputFieldAutoSave({
         </div>
         {labelExtra}
       </div>
-      <Input
-        {...props}
-        id={field.name}
-        type={type}
-        value={field.state.value ?? ""}
-        onBlur={(event) => {
-          field.handleBlur()
-          onBlur?.(event)
-          void autosave.flush()
-        }}
-        onCompositionStart={(event) => {
-          autosave.beginComposition(field.name)
-          onCompositionStart?.(event)
-        }}
-        onCompositionEnd={(event) => {
-          const value = event.currentTarget.value
-          autosave.endComposition(field.name, () => {
-            updateValue(value)
-            onCompositionEnd?.(event)
-          })
-        }}
-        onChange={handleChange}
-        aria-invalid={hasError}
-      />
+      <div className="relative">
+        <Input
+          {...props}
+          id={field.name}
+          type={type}
+          value={field.state.value ?? ""}
+          className={cn(trailingAction && "pr-8", className)}
+          onBlur={(event) => {
+            field.handleBlur()
+            onBlur?.(event)
+            void autosave.flush()
+          }}
+          onCompositionStart={(event) => {
+            autosave.beginComposition(field.name)
+            onCompositionStart?.(event)
+          }}
+          onCompositionEnd={(event) => {
+            const value = event.currentTarget.value
+            autosave.endComposition(field.name, () => {
+              updateValue(value)
+              onCompositionEnd?.(event)
+            })
+          }}
+          onChange={handleChange}
+          aria-invalid={hasError}
+        />
+        {trailingAction && (
+          <div className="absolute top-1/2 right-1 flex -translate-y-1/2 items-center">
+            {trailingAction}
+          </div>
+        )}
+      </div>
       <FieldError>
         {errors.map((error) => (typeof error === "string" ? error : error?.message)).join(", ")}
       </FieldError>

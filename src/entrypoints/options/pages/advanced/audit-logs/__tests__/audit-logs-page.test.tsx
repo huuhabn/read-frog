@@ -109,4 +109,20 @@ describe("AuditLogsPage", () => {
       expect(screen.getByText("Hello response")).toBeDefined()
     })
   })
+
+  it("opens detail modal when clicking on a row", async () => {
+    render(<AuditLogsPage />)
+
+    await waitFor(() => {
+      expect(screen.getByText("Hello world prompt")).toBeDefined()
+    })
+
+    const promptCell = screen.getByText("Hello world prompt")
+    fireEvent.click(promptCell)
+
+    await waitFor(() => {
+      expect(screen.getByText("options.advanced.auditLogs.detailTitle")).toBeDefined()
+      expect(screen.getByText("Hello response")).toBeDefined()
+    })
+  })
 })

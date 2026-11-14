@@ -314,6 +314,7 @@ options:
       title: Провайдеры функций
       description: Выберите провайдера для каждой функции
       chooseProvider: Выбрать провайдера
+      applyToAll: Применить ко всем
       features:
         pageTranslation: Перевод страницы
         selectionTranslation: Перевод выделения

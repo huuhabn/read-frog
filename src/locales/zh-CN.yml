@@ -315,6 +315,7 @@ options:
       title: 功能提供商
       description: 为每个功能选择使用的提供商
       chooseProvider: 选择提供商
+      applyToAll: 应用于全部
       features:
         pageTranslation: 网页翻译
         selectionTranslation: 划词翻译

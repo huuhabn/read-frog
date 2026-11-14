@@ -315,6 +315,7 @@ options:
       title: Feature providers
       description: Choose which provider to use for each feature
       chooseProvider: Choose a provider
+      applyToAll: Apply to all
       features:
         pageTranslation: Page translation
         selectionTranslation: Selection toolbar translation
@@ -356,7 +357,7 @@ options:
     gluedWildcard: A "*" has to stand for a whole part of the address, like *.example.com or example.*
     unsupported: Workmate AI cannot match this address. Ports and schemes other than http and https are not supported.
   preference:
-    title: Preferences
+    title: Settings
     pageDescription: Set how Workmate AI looks, where it runs, and how your config is synced and backed up.
     appearanceAndLanguage:
       title: Appearance & language

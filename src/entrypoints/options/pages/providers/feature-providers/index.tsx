@@ -2,18 +2,31 @@ import type { ReactNode } from "react"
 import type { ProviderConfig } from "@/types/config/provider"
 import type { SelectionToolbarCustomAction } from "@/types/config/selection-toolbar"
 import type { FeatureKey } from "@/utils/constants/feature-providers"
+import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
+import { useAtomValue, useSetAtom } from "jotai"
+import { useMemo } from "react"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { SetApiKeyWarning } from "@/components/llm-providers/set-api-key-warning"
 import {
   useCustomActionProviders,
   useFeatureProvider,
 } from "@/components/llm-providers/use-feature-providers"
+import { useHostedAiProviderOptions } from "@/components/llm-providers/use-hosted-ai-provider-options"
+import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
 import {
+  buildFeatureProviderPatch,
   FEATURE_KEYS,
+  FEATURE_PROVIDER_DEFS,
   getFeatureDescriptionI18nKey,
   getFeatureLabelI18nKey,
 } from "@/utils/constants/feature-providers"
+import { getSelectionToolbarActions, patchSelectionToolbarAction } from "@/utils/custom-actions"
 import { i18n } from "@/utils/i18n"
+import {
+  doesProviderSupportsCapability,
+  getSelectableProvidersForCapability,
+} from "@/utils/providers/provider-registry"
+import { providerSupportsTranslationOnlyMode } from "@/utils/providers/translation-only-gate"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
 import { SELECT_CONTENT_PROPS } from "../../../components/select-content-props"
@@ -79,8 +92,8 @@ function FeatureProviderItem({ featureKey }: { featureKey: FeatureKey }) {
 
   return (
     <ConfigItem
-      orientation="vertical"
-      className="flex flex-col justify-between rounded-xl border bg-card p-4 transition-colors hover:border-primary/40"
+      orientation="horizontal"
+      className="flex-nowrap items-center justify-between gap-4 rounded-xl border bg-card p-4 transition-colors hover:border-primary/40 [&>div:first-child]:min-w-0 [&>div:first-child]:flex-1 [&>div:last-child]:w-[180px] [&>div:last-child]:min-w-[160px] [&>div:last-child]:shrink-0 sm:[&>div:last-child]:w-[200px]"
       title={
         <FeatureProviderTitle providerConfig={providerConfig}>
           {i18n.t(getFeatureLabelI18nKey(featureKey))}
@@ -88,12 +101,13 @@ function FeatureProviderItem({ featureKey }: { featureKey: FeatureKey }) {
       }
       description={i18n.t(getFeatureDescriptionI18nKey(featureKey))}
     >
-      <div className="w-full pt-1">
+      <div className="w-full">
         <ProviderSelector
           providers={providers}
           value={providerId}
           onChange={setProviderId}
           triggerSize="sm"
+          className="w-full"
           placeholder={i18n.t("options.apiProviders.featureProviders.chooseProvider")}
           selectContentProps={SELECT_CONTENT_PROPS}
         />
@@ -108,8 +122,8 @@ function CustomActionProviderItems() {
   return actions.map((action) => (
     <ConfigItem
       key={action.id}
-      orientation="vertical"
-      className="flex flex-col justify-between rounded-xl border bg-card p-4 transition-colors hover:border-primary/40"
+      orientation="horizontal"
+      className="flex-nowrap items-center justify-between gap-4 rounded-xl border bg-card p-4 transition-colors hover:border-primary/40 [&>div:first-child]:min-w-0 [&>div:first-child]:flex-1 [&>div:last-child]:w-[180px] [&>div:last-child]:min-w-[160px] [&>div:last-child]:shrink-0 sm:[&>div:last-child]:w-[200px]"
       title={
         <FeatureProviderTitle providerConfig={getProviderConfig(action)}>
           {action.name}
@@ -117,12 +131,13 @@ function CustomActionProviderItems() {
       }
       description={toSystemPromptPreview(action)}
     >
-      <div className="w-full pt-1">
+      <div className="w-full">
         <ProviderSelector
           providers={providers}
           value={action.providerId}
           onChange={(id) => setActionProviderId(action.id, id)}
           triggerSize="sm"
+          className="w-full"
           selectContentProps={SELECT_CONTENT_PROPS}
           placeholder={i18n.t("options.selectionToolbar.customActions.form.selectProvider")}
         />
@@ -131,11 +146,102 @@ function CustomActionProviderItems() {
   ))
 }
 
+function AllFeatureProvidersSelector() {
+  const config = useAtomValue(configAtom)
+  const setConfig = useSetAtom(writeConfigAtom)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+
+  const baseProviders = useMemo(() => {
+    const translateProviders = getSelectableProvidersForCapability(
+      "pageTranslation",
+      providersConfig,
+    )
+    const llmProviders = getSelectableProvidersForCapability("customAction", providersConfig)
+    const map = new Map<string, ProviderSelectorOption>()
+    for (const p of [...translateProviders, ...llmProviders]) {
+      map.set(p.id, p)
+    }
+    return Array.from(map.values())
+  }, [providersConfig])
+
+  const providers = useHostedAiProviderOptions("customAction", baseProviders)
+
+  const featureIds = FEATURE_KEYS.map((k) => FEATURE_PROVIDER_DEFS[k].getProviderId(config))
+  const activeCustomActions = useMemo(
+    () =>
+      getSelectionToolbarActions(config.selectionToolbar).filter(
+        (action) => action.enabled !== false,
+      ),
+    [config.selectionToolbar],
+  )
+  const customActionIds = activeCustomActions.map((a) => a.providerId)
+  const allIds = [...featureIds, ...customActionIds]
+  const allSame = allIds.length > 0 && allIds.every((id) => id === allIds[0])
+  const currentValue = allSame ? (allIds[0] ?? "") : ""
+
+  const handleApplyToAll = (newProviderId: string) => {
+    const patchAssignments: Partial<Record<FeatureKey, string>> = {}
+    for (const key of FEATURE_KEYS) {
+      if (key === "pageTranslation" && config.pageTranslation.mode === "translationOnly") {
+        const localConfig = providersConfig.find((p) => p.id === newProviderId)
+        if (localConfig && !providerSupportsTranslationOnlyMode(localConfig.provider)) {
+          continue
+        }
+      }
+      if (
+        doesProviderSupportsCapability(key, providersConfig, newProviderId, { requireEnable: true })
+      ) {
+        patchAssignments[key] = newProviderId
+      }
+    }
+    let patch = buildFeatureProviderPatch(patchAssignments)
+
+    if (
+      doesProviderSupportsCapability("customAction", providersConfig, newProviderId, {
+        requireEnable: true,
+      })
+    ) {
+      let currentToolbar = config.selectionToolbar
+      for (const action of activeCustomActions) {
+        currentToolbar = patchSelectionToolbarAction(currentToolbar, action.id, {
+          providerId: newProviderId,
+        })
+      }
+      patch = {
+        ...patch,
+        selectionToolbar: currentToolbar,
+      }
+    }
+
+    void setConfig(patch)
+  }
+
+  return (
+    <div className="flex items-center gap-2">
+      <span className="text-xs font-normal whitespace-nowrap text-muted-foreground">
+        {i18n.t("options.apiProviders.featureProviders.applyToAll")}:
+      </span>
+      <div className="w-[180px] sm:w-[200px]">
+        <ProviderSelector
+          providers={providers}
+          value={currentValue}
+          onChange={handleApplyToAll}
+          triggerSize="sm"
+          className="w-full"
+          placeholder={i18n.t("options.apiProviders.featureProviders.chooseProvider")}
+          selectContentProps={SELECT_CONTENT_PROPS}
+        />
+      </div>
+    </div>
+  )
+}
+
 export function FeatureProvidersConfig() {
   return (
     <ConfigSection
       id="feature-providers"
       title={i18n.t("options.apiProviders.featureProviders.title")}
+      action={<AllFeatureProvidersSelector />}
       contentClassName="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch"
     >
       {FEATURE_KEYS.map((featureKey) => (

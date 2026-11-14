@@ -314,6 +314,7 @@ options:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
       chooseProvider: プロバイダーを選択
+      applyToAll: すべてに適用
       features:
         pageTranslation: ページ翻訳
         selectionTranslation: 選択ツールバー翻訳

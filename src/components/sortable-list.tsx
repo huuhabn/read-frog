@@ -27,12 +27,14 @@ export function SortableList<T extends { id: string }>({
   renderItem,
   className,
   layout = "vertical",
+  footer,
 }: {
   list: T[]
   setList: (items: T[]) => void
   renderItem: (item: T) => React.ReactNode
   className?: string
   layout?: "vertical" | "grid"
+  footer?: React.ReactNode
 }) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -102,6 +104,7 @@ export function SortableList<T extends { id: string }>({
               {renderItem(item)}
             </SortableItemWrapper>
           ))}
+          {footer}
         </div>
       </SortableContext>
       <DragOverlay>

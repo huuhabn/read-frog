@@ -88,10 +88,17 @@ vi.mock("@/components/sortable-list", () => ({
   SortableList: ({
     list,
     renderItem,
+    footer,
   }: {
     list: (typeof providerConfig)[]
     renderItem: (item: typeof providerConfig) => ReactNode
-  }) => <>{list.map(renderItem)}</>,
+    footer?: ReactNode
+  }) => (
+    <>
+      {list.map(renderItem)}
+      {footer}
+    </>
+  ),
 }))
 
 vi.mock("@/components/ui/base-ui/dialog", () => ({

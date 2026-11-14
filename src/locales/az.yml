@@ -315,6 +315,7 @@ options:
       title: Funksiya provayderləri
       description: Hər funksiya üçün istifadə ediləcək provayderi seçin
       chooseProvider: Provayder seç
+      applyToAll: Hamısına tətbiq et
       features:
         pageTranslation: Səhifə tərcüməsi
         selectionTranslation: Seçim alətlər panelində tərcümə
