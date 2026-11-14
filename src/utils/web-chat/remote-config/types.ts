@@ -49,9 +49,10 @@ export const DEFAULT_PLATFORM_SELECTORS: WebChatRemoteConfig = {
       authorSelector: ".peer-title, .message-title",
       contentSelector: "[data-message-text-source], .message, .translatable-message, .text-content",
       timestampSelector: ".time .i18n, .time, .message-time",
-      inputBoxSelector: ".input-message-input, [contenteditable='true'], #editable-message-text",
+      inputBoxSelector:
+        "#editable-message-text, .input-message-input, .composer-text, .input-message-container [contenteditable='true'], .chat-input [contenteditable='true']",
       sendButtonSelector:
-        ".btn-send.send, button.btn-send.send, .btn-send-container button.send, button.send[aria-label='Send'], button[aria-label='Send'], .btn-send-icon-send, .btn-send",
+        ".btn-send.send, button.btn-send.send, .btn-send-container button.send, button.send[aria-label='Send'], button[aria-label='Send'], .btn-send-icon-send",
       roomTitleSelector: ".chat-info .peer-title, .top .person .title, .chat-info h3",
       ownMessageSelector: ".is-out, .own, [data-is-out='true']",
     },

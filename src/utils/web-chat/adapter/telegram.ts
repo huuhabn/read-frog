@@ -25,13 +25,35 @@ export class TelegramChatAdapter implements IChatAdapter {
 
   getInputElement(): HTMLElement | null {
     const config = getPlatformSelectorConfig("telegram")
-    return document.querySelector<HTMLElement>(config.inputBoxSelector)
+    const primary = document.querySelector<HTMLElement>(config.inputBoxSelector)
+    if (primary) return primary
+
+    return (
+      document.getElementById("editable-message-text") ||
+      document.querySelector<HTMLElement>(".input-message-input") ||
+      document.querySelector<HTMLElement>(".composer-text") ||
+      document.querySelector<HTMLElement>(".input-message-container [contenteditable='true']") ||
+      document.querySelector<HTMLElement>("#middle-column [contenteditable='true']") ||
+      null
+    )
   }
 
   insertText(text: string, options?: { autoSend?: boolean }): boolean {
     const input = this.getInputElement()
     if (!input) return false
+
+    try {
+      input.focus()
+    } catch {
+      // Ignore focus errors
+    }
+
     const success = insertTextIntoElement(input, text)
+    if (success) {
+      input.classList.remove("is-empty")
+      input.classList.remove("empty")
+    }
+
     if (success && options?.autoSend) {
       setTimeout(() => {
         this.submitSend()
@@ -44,12 +66,34 @@ export class TelegramChatAdapter implements IChatAdapter {
     const config = getPlatformSelectorConfig("telegram")
     const input = this.getInputElement()
     const sent = triggerDOMSend(input, config.sendButtonSelector)
+
+    // On Telegram Web, dispatching Enter key on the input element natively triggers message send
+    if (input) {
+      try {
+        input.focus()
+        const enterOpts: KeyboardEventInit = {
+          key: "Enter",
+          code: "Enter",
+          keyCode: 13,
+          which: 13,
+          bubbles: true,
+          cancelable: true,
+          composed: true,
+        }
+        input.dispatchEvent(new KeyboardEvent("keydown", enterOpts))
+        try {
+          input.dispatchEvent(new KeyboardEvent("keypress", enterOpts))
+        } catch {}
+        input.dispatchEvent(new KeyboardEvent("keyup", enterOpts))
+      } catch {}
+    }
+
     if (!sent && input) {
       setTimeout(() => {
         triggerDOMSend(input, config.sendButtonSelector)
       }, 120)
     }
-    return sent
+    return sent || Boolean(input)
   }
 
   getMessageContainer(): HTMLElement | null {

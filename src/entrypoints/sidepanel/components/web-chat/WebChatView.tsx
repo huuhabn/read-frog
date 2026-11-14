@@ -4,6 +4,7 @@ import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
+import { createLogger } from "@/utils/logging/logger"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { getActiveTabInfo } from "@/utils/sidepanel/page-context"
 import { getActiveChatMessagesFromTab, insertTextToActiveChatTab } from "@/utils/sidepanel/web-chat"
@@ -22,6 +23,8 @@ interface RoomCacheData {
   lastSecondaryResult?: string
   activeAction?: WebChatActionType
 }
+
+const log = createLogger("sidepanel:web-chat-view")
 
 export function WebChatView() {
   const webChatConfig = useAtomValue(configFieldsAtomMap.webChat)
@@ -161,6 +164,9 @@ export function WebChatView() {
         lastRepliedMessageIdRef.current = lastMsg.id
         setIsAutoReplying(true)
         try {
+          if (data.room) setRoom(data.room)
+          setMessages(msgs)
+
           const res = await generateSmartReply({
             contextMessages: msgs.slice(-5),
             targetLang: effectiveLang,
@@ -181,9 +187,12 @@ export function WebChatView() {
                 ? i18n.t("options.webChat.sidepanel.autoReply.statusSent")
                 : i18n.t("options.webChat.sidepanel.autoReply.statusDrafted"),
             )
+          } else {
+            lastRepliedMessageIdRef.current = ""
           }
-        } catch {
-          // Ignore auto-reply network/LLM errors silently
+        } catch (err) {
+          log.error("Failed to execute auto reply", { err, lastMsgId: lastMsg.id })
+          lastRepliedMessageIdRef.current = ""
         } finally {
           if (isSubscribed) {
             setIsAutoReplying(false)

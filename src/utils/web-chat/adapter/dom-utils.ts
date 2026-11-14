@@ -69,27 +69,41 @@ export function insertTextIntoElement(el: HTMLElement, text: string): boolean {
       }
     }
 
+    const dispatchInputEvents = () => {
+      try {
+        if (typeof InputEvent !== "undefined") {
+          el.dispatchEvent(
+            new InputEvent("beforeinput", {
+              bubbles: true,
+              cancelable: true,
+              inputType: "insertText",
+              data: text,
+            }),
+          )
+          el.dispatchEvent(
+            new InputEvent("input", {
+              bubbles: true,
+              cancelable: true,
+              inputType: "insertText",
+              data: text,
+            }),
+          )
+        } else {
+          el.dispatchEvent(new Event("input", { bubbles: true }))
+        }
+      } catch {
+        el.dispatchEvent(new Event("input", { bubbles: true }))
+      }
+      el.dispatchEvent(new Event("change", { bubbles: true }))
+      el.classList.remove("empty")
+      el.classList.remove("is-empty")
+    }
+
     // Method A: execCommand
     try {
       const execSuccess = document.execCommand?.("insertText", false, text)
       if (execSuccess) {
-        try {
-          if (typeof InputEvent !== "undefined") {
-            el.dispatchEvent(
-              new InputEvent("input", {
-                bubbles: true,
-                cancelable: true,
-                inputType: "insertText",
-                data: text,
-              }),
-            )
-          } else {
-            el.dispatchEvent(new Event("input", { bubbles: true }))
-          }
-        } catch {
-          el.dispatchEvent(new Event("input", { bubbles: true }))
-        }
-        el.dispatchEvent(new Event("change", { bubbles: true }))
+        dispatchInputEvents()
         return true
       }
     } catch {
@@ -108,7 +122,7 @@ export function insertTextIntoElement(el: HTMLElement, text: string): boolean {
         })
         const handled = !el.dispatchEvent(pasteEvent)
         if (handled) {
-          el.dispatchEvent(new Event("input", { bubbles: true }))
+          dispatchInputEvents()
           return true
         }
       }
@@ -128,7 +142,7 @@ export function insertTextIntoElement(el: HTMLElement, text: string): boolean {
         range.collapse(true)
         sel.removeAllRanges()
         sel.addRange(range)
-        el.dispatchEvent(new Event("input", { bubbles: true }))
+        dispatchInputEvents()
         return true
       }
     } catch {
@@ -144,9 +158,7 @@ export function insertTextIntoElement(el: HTMLElement, text: string): boolean {
       }
       const textNode = document.createTextNode(text)
       targetLine.appendChild(textNode)
-      el.classList.remove("empty")
-      el.dispatchEvent(new Event("input", { bubbles: true }))
-      el.dispatchEvent(new Event("change", { bubbles: true }))
+      dispatchInputEvents()
       return true
     } catch {
       // Fallback
@@ -178,7 +190,6 @@ export function triggerDOMSend(input?: HTMLElement | null, customButtonSelector?
     "button.send[aria-label='Send']",
     "button[aria-label='Send']",
     ".btn-send-icon-send",
-    ".btn-send",
     // Zalo
     ".send-msg-btn",
     "[icon='Sent-msg_24_Line']",

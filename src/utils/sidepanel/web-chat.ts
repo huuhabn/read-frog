@@ -454,8 +454,15 @@ export async function insertTextToActiveChatTab(
           document.querySelector<HTMLElement>("#chat-input-content-id .rich-input") ||
           document.querySelector<HTMLElement>("#chat-input-container-id #richInput")
 
+        const telegramInput =
+          document.getElementById("editable-message-text") ||
+          document.querySelector<HTMLElement>(".input-message-input") ||
+          document.querySelector<HTMLElement>(".composer-text") ||
+          document.querySelector<HTMLElement>(".input-message-container [contenteditable='true']")
+
         const target =
           zaloInput ||
+          telegramInput ||
           document.querySelector<HTMLElement>(
             "[contenteditable='true'], [contenteditable], textarea, [role='textbox']",
           )
@@ -484,7 +491,6 @@ export async function insertTextToActiveChatTab(
               ".btn-send-container button",
               "button[aria-label='Send']",
               ".btn-send-icon-send",
-              ".btn-send",
               // Zalo
               ".send-msg-btn",
               "[icon='Sent-msg_24_Line']",
