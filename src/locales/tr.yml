@@ -358,6 +358,10 @@ options:
       theme:
         title: Tema
         description: Workmate AI için bir tema seçin.
+        modeTitle: Mod
+        modeDescription: Sistem görünümünü izleyin veya açık ya da koyu modu seçin.
+        scaledTitle: Ölçeklendirilmiş arayüz
+        scaledDescription: Workmate AI genelinde boşlukları ve metin boyutlarını artırın.
         system: Sistem
         light: Açık
         dark: Koyu

@@ -359,6 +359,10 @@ options:
       theme:
         title: 主题
         description: 为陪读蛙选择主题。
+        modeTitle: 模式
+        modeDescription: 跟随系统外观，或选择浅色或深色模式。
+        scaledTitle: 放大界面
+        scaledDescription: 增大 Workmate AI 中的间距和文字尺寸。
         system: 跟随系统
         light: 浅色
         dark: 深色

@@ -358,6 +358,10 @@ options:
       theme:
         title: 테마
         description: Workmate AI의 테마를 선택하세요.
+        modeTitle: 모드
+        modeDescription: 시스템 설정을 따르거나 라이트 또는 다크 모드를 선택하세요.
+        scaledTitle: 확대된 인터페이스
+        scaledDescription: Workmate AI의 간격과 글자 크기를 늘립니다.
         system: 시스템
         light: 라이트
         dark: 다크

@@ -362,6 +362,10 @@ options:
       theme:
         title: Chủ đề
         description: Chọn chủ đề cho Workmate AI.
+        modeTitle: Chế độ
+        modeDescription: Theo giao diện hệ thống hoặc chọn chế độ sáng hay tối.
+        scaledTitle: Giao diện phóng lớn
+        scaledDescription: Tăng khoảng cách và cỡ chữ trong Workmate AI.
         system: Hệ thống
         light: Sáng
         dark: Tối

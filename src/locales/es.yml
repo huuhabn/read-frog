@@ -359,6 +359,10 @@ options:
       theme:
         title: Tema
         description: Elige un tema para Workmate AI.
+        modeTitle: Modo
+        modeDescription: Sigue la apariencia del sistema o elige el modo claro u oscuro.
+        scaledTitle: Interfaz ampliada
+        scaledDescription: Aumenta el espaciado y el tamaño del texto en Workmate AI.
         system: Sistema
         light: Claro
         dark: Oscuro
