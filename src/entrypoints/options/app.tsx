@@ -41,6 +41,9 @@ const TextToSpeechPage = lazy(() =>
 const UpworkSettingsPage = lazy(() =>
   import("./pages/upwork").then((module) => ({ default: module.UpworkSettingsPage })),
 )
+const WebChatSettingsPage = lazy(() =>
+  import("./pages/web-chat").then((module) => ({ default: module.WebChatSettingsPage })),
+)
 const GlossaryPage = lazy(() =>
   import("./pages/advanced/glossary").then((module) => ({ default: module.GlossaryPage })),
 )
@@ -145,6 +148,7 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/input-translation": InputTranslationPage,
   "/tts": TextToSpeechPage,
   "/upwork": UpworkSettingsPage,
+  "/web-chat": WebChatSettingsPage,
   "/advanced": AdvancedRedirect,
   "/help-and-community": HelpAndCommunityPage,
   "/advanced/glossary": GlossaryPage,

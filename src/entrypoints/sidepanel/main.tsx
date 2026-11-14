@@ -12,6 +12,7 @@ import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 import { initI18n } from "@/utils/i18n"
+import { createLogger } from "@/utils/logging/logger"
 import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import {
@@ -23,12 +24,14 @@ import { ChatView } from "./components/chat/chat-view"
 import { ReadView } from "./components/read/read-view"
 import { SidePanelNavBar } from "./components/sidepanel-nav-bar"
 import { TranslateView } from "./components/translate/translate-view"
+import { WebChatView } from "./components/web-chat/WebChatView"
 import { WriteView } from "./components/write/write-view"
 import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
 
 setupExtensionPageLogging("sidepanel")
+const log = createLogger("sidepanel")
 
 function HydrateAtoms({
   initialValues,
@@ -52,6 +55,7 @@ function SidePanelShell() {
     <div className="flex h-screen w-screen overflow-hidden bg-background text-foreground antialiased">
       <main className="h-full min-w-0 flex-1 overflow-hidden">
         {activeTab === "chat" && <ChatView />}
+        {activeTab === "web-chat" && <WebChatView />}
         {activeTab === "read" && <ReadView />}
         {activeTab === "write" && <WriteView />}
         {activeTab === "translate" && <TranslateView />}
@@ -78,7 +82,7 @@ function setupSidePanelConnection() {
         browser.runtime.connect({ name: "side-panel-connection" })
       })
   } catch (error) {
-    console.warn("[SidePanel] Failed to establish connection port:", error)
+    log.warn("Failed to establish connection port", { error })
   }
 }
 
@@ -102,16 +106,15 @@ async function initApp() {
     if (localThemeMode) themeMode = localThemeMode
     if (localSelectedModel) selectedModel = localSelectedModel
   } catch (error) {
-    console.warn(
-      "[SidePanel] Failed to load config, theme, or selected model from storage, using defaults:",
+    log.warn("Failed to load config, theme, or selected model from storage, using defaults", {
       error,
-    )
+    })
   }
 
   try {
     await initI18n(config.uiLanguage)
   } catch (error) {
-    console.warn("[SidePanel] Failed to initialize i18n:", error)
+    log.warn("Failed to initialize i18n", { error })
   }
 
   renderPersistentReactRoot(

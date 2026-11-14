@@ -19,21 +19,29 @@ export interface SystemProviderSelectorItem {
 export type ProviderSelectorOption = ProviderConfig | SystemProviderSelectorItem
 
 export function isSystemProviderSelectorItem(
-  provider: ProviderSelectorOption,
+  provider: ProviderSelectorOption | null | undefined,
 ): provider is SystemProviderSelectorItem {
-  return "kind" in provider && provider.kind === "system"
+  return Boolean(
+    provider && typeof provider === "object" && "kind" in provider && provider.kind === "system",
+  )
 }
 
-export function getProviderLogo(provider: ProviderSelectorOption, theme: Theme): string {
+export function getProviderLogo(
+  provider: ProviderSelectorOption | null | undefined,
+  theme: Theme,
+): string {
+  if (!provider) return ""
   return isSystemProviderSelectorItem(provider)
     ? provider.logo(theme)
-    : PROVIDER_ITEMS[provider.provider].logo(theme)
+    : (PROVIDER_ITEMS[provider.provider]?.logo(theme) ?? "")
 }
 
-export function getProviderName(provider: ProviderSelectorOption): string {
-  return provider.name
+export function getProviderName(provider: ProviderSelectorOption | null | undefined): string {
+  return provider?.name ?? ""
 }
 
-export function isProviderSelectorOptionDisabled(provider: ProviderSelectorOption): boolean {
+export function isProviderSelectorOptionDisabled(
+  provider: ProviderSelectorOption | null | undefined,
+): boolean {
   return isSystemProviderSelectorItem(provider) && provider.disabled === true
 }

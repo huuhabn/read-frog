@@ -141,7 +141,11 @@ export function computeProviderFallbacksAfterDeletion(
     const currentId = def.getProviderId(config)
     if (currentId !== deletedProviderId) continue
     const fallbackProviderId = getUsableProviderIdsForCapability(key, remainingProviders, status)[0]
-    if (fallbackProviderId) updates[key] = fallbackProviderId
+    if (fallbackProviderId) {
+      updates[key] = fallbackProviderId
+    } else if (key === "upwork" || key === "webChat") {
+      updates[key] = ""
+    }
   }
   return updates
 }
@@ -172,6 +176,7 @@ export function findFeatureMissingProvider(
   status?: HostedAiStatus,
 ): FeatureKey | "languageDetection" | null {
   for (const key of FEATURE_KEYS) {
+    if (key === "upwork" || key === "webChat") continue
     if (!getUsableProviderIdsForCapability(key, remainingProviders, status)[0]) {
       return key
     }

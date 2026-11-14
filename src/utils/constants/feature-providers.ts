@@ -10,6 +10,8 @@ export const FEATURE_KEYS = [
   "selectionTranslation",
   "inputTranslation",
   "noteSuggestion",
+  "upwork",
+  "webChat",
 ] as const
 
 export type FeatureKey = (typeof FEATURE_KEYS)[number]
@@ -46,6 +48,16 @@ export const FEATURE_PROVIDER_DEFS = {
     getProviderId: (c: Config) => c.selectionToolbar.noteSuggestion.providerId,
     configPath: ["selectionToolbar", "noteSuggestion", "providerId"],
   },
+  upwork: {
+    isProvider: isLLMProvider,
+    getProviderId: (c: Config) => c.upwork.providerId,
+    configPath: ["upwork", "providerId"],
+  },
+  webChat: {
+    isProvider: isLLMProvider,
+    getProviderId: (c: Config) => c.webChat.providerId,
+    configPath: ["webChat", "providerId"],
+  },
 } as const satisfies Record<FeatureKey, FeatureProviderDef>
 
 /** Maps FeatureKey (with dots) to i18n-safe key (with underscores) for `options.apiProviders.featureProviders.features.*` */
@@ -55,6 +67,8 @@ export const FEATURE_KEY_I18N_MAP = {
   selectionTranslation: "selectionTranslation",
   inputTranslation: "inputTranslation",
   noteSuggestion: "noteSuggestion",
+  upwork: "upwork",
+  webChat: "webChat",
 } as const satisfies Record<FeatureKey, string>
 
 export type FeatureLabelI18nKey =

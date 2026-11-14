@@ -320,12 +320,16 @@ options:
         inputTranslation: Dịch đầu vào
         videoSubtitles: Phụ đề video
         noteSuggestion: Gợi ý ghi chú
+        upwork: Tạo Proposal & Phân tích Job Upwork
+        webChat: Trợ lý Web Chat AI
       descriptions:
         pageTranslation: Dịch toàn bộ trang ở chế độ song ngữ hoặc thay thế bản gốc.
         selectionTranslation: "Dịch văn bản bạn chọn; nghĩa của chú thích từ cũng lấy từ đây."
         inputTranslation: Dịch nội dung bạn gõ trong ô nhập trước khi gửi.
         videoSubtitles: Dịch phụ đề hiện ra trong trình phát video.
         noteSuggestion: Gợi ý các từ đáng lưu vào Notebase sau khi dịch vùng chọn.
+        upwork: Tạo proposal phù hợp và phân tích yêu cầu công việc Upwork dựa trên hồ sơ thực tế.
+        webChat: Xử lý gợi ý trả lời, viết lại tin nhắn, tóm tắt hội thoại và menu nổi trên các nền tảng chat.
     languageDetection:
       title: Phát hiện ngôn ngữ
       description: Ảnh hưởng đến phát hiện ngôn ngữ tự động dịch và độ chính xác chọn giọng nói.
@@ -1160,6 +1164,101 @@ options:
       translating: Đang dịch nội dung...
       translateTo: Dịch sang
       translateProvider: Nhà cung cấp dịch
+  webChat:
+    title: Trợ lý Web Chat
+    pageDescription: Cấu hình trợ lý AI cho Zalo, Telegram, Slack và các nền tảng chat trên web.
+    enable:
+      title: Bật Trợ lý Web Chat
+      description: Kích hoạt menu nổi, slash commands, dịch thời gian thực và trợ lý AI trên các trang chat.
+    sections:
+      provider: Nhà cung cấp AI
+      realtimeTranslate: Dịch song ngữ thời gian thực
+      slashCommands: Lệnh Slash & Phím tắt
+      platforms: Nền tảng hỗ trợ
+      privacy: Bảo mật & Riêng tư (PII Masking)
+    provider:
+      title: Nhà cung cấp AI
+      description: Nhà cung cấp LLM cho trợ lý web chat (gợi ý trả lời, viết lại tin nhắn, tóm tắt).
+      placeholder: Chọn nhà cung cấp AI
+    translate:
+      inboundEnableTitle: Tự động dịch tin nhắn đến
+      inboundEnableDesc: Hiển thị dòng dịch sub-line dưới mỗi tin nhắn nhận được trên giao diện chat.
+      inboundLangTitle: Ngôn ngữ dịch tin nhắn đến
+      inboundLangDesc: Dịch các tin nhắn từ người khác sang ngôn ngữ này.
+      outboundLangTitle: Ngôn ngữ dịch tin nhắn gửi đi
+      outboundLangDesc: Ngôn ngữ đích khi dùng phím tắt dịch tin gửi đi (Ctrl+Shift+E).
+      contextCountTitle: Số tin nhắn ngữ cảnh
+      contextCountDesc: Gửi kèm N tin nhắn trước đó để AI hiểu đúng đại từ nhân xưng và chủ đề (1 - 20 tin).
+    slash:
+      enableTitle: Bật Palette lệnh Slash
+      enableDesc: Gõ / để mở danh sách lệnh nhanh như /reply, /tone, /dich, /tpl.
+    platforms:
+      zaloTitle: Zalo Web (chat.zalo.me)
+      zaloDesc: Tự động nhận diện tin nhắn và hỗ trợ gõ trên Zalo Web.
+      telegramTitle: Telegram Web (web.telegram.org)
+      telegramDesc: Tự động nhận diện tin nhắn trên Telegram Web.
+      slackTitle: Slack Web (app.slack.com)
+      slackDesc: Hỗ trợ các kênh chat và tin nhắn trực tiếp trên Slack.
+      genericTitle: Generic Web Chat (Universal)
+      genericDesc: Hỗ trợ mọi khung chat trên web bất kỳ có textarea hoặc contenteditable.
+      remoteConfigTitle: Địa chỉ Remote Config Selectors
+      remoteConfigDesc: Tự động cập nhật bộ chọn DOM mà không cần chờ cập nhật extension.
+    privacy:
+      piiEnableTitle: Bật che thông tin nhạy cảm (PII Masking)
+      piiEnableDesc: Tự động che số điện thoại, số tài khoản, CCCD, email trước khi gửi lên AI và khôi phục khi nhận về.
+      maskPhoneTitle: Che số điện thoại (Việt Nam & quốc tế)
+      maskPhoneDesc: Thay thế số điện thoại bằng [PHONE_1], [PHONE_2]...
+      maskStkTitle: Che số tài khoản ngân hàng
+      maskStkDesc: Thay thế số tài khoản ngân hàng bằng [STK_1], [STK_2]...
+      maskCccdTitle: Che số Căn cước công dân / CMND
+      maskCccdDesc: Thay thế dãy số CCCD/CMND bằng [CCCD_1], [CCCD_2]...
+      maskEmailTitle: Che địa chỉ Email
+      maskEmailDesc: Thay thế email bằng [EMAIL_1], [EMAIL_2]...
+    sidepanel:
+      tabLabel: Trợ lý Web Chat
+      noRoomDetected: Chưa phát hiện phòng chat
+      refreshTooltip: Làm mới tin nhắn
+      messagesCount: "$1 tin nhắn"
+      piiMasked: PII Masked
+      cloudLlm: Cloud LLM
+      actions:
+        summary: Tóm tắt hội thoại
+        reply: Gợi ý trả lời
+        extract: Trích xuất thông tin
+        translate: Dịch tin nhắn
+      emptyPrompt: Chọn hành động nhanh phía trên để bắt đầu trợ lý hội thoại.
+      processing: Đang xử lý nội dung với AI...
+      copy: Sao chép
+      copied: Đã chép
+      insertToChat: Chèn vào ô chat
+      summaryTitle: "📌 Tóm tắt hội thoại:"
+      actionItemsTitle: "✅ Việc cần làm:"
+      entitiesTitle: "🔍 Thông tin quan trọng trích xuất:"
+      phoneLabel: "📞 Số điện thoại:"
+      bankLabel: "💳 Số tài khoản:"
+      linkLabel: "🔗 Liên kết:"
+      dateLabel: "📅 Thời gian / Lịch hẹn:"
+      noEntitiesFound: Không tìm thấy thông tin nhạy cảm hoặc lịch hẹn trong tin nhắn gần đây.
+      errorProcessing: Có lỗi xảy ra khi gọi AI.
+    floatingMenu:
+      translate: "🌐 Dịch"
+      rewrite: "✍️ Viết lại"
+      reply: "💬 Trả lời"
+      askAi: "🤖 Hỏi AI"
+      replace: Thay thế
+      insertToChat: Chèn vào chat
+      translating: Đang dịch...
+      rewriting: Đang viết lại theo giọng điệu...
+      generatingReply: Đang phân tích và gợi ý câu trả lời...
+      askingAi: Đang giải đáp...
+      close: Đóng
+      glossPrefix: "Dịch nghĩa:"
+      error: Lỗi kết nối dịch vụ AI.
+    slashCommands:
+      replyDesc: Gợi ý câu trả lời thông minh dựa trên ngữ cảnh hội thoại
+      toneDesc: Viết lại văn bản theo giọng điệu (professional, friendly, brief)
+      dichDesc: Dịch nhanh văn bản sang ngôn ngữ mong muốn
+      tplDesc: Chèn mẫu tin nhắn nhanh có biến tự động
   advanced:
     title: Nâng cao
     pageDescription: Những thiết lập mạnh mẽ nhưng không dùng đến hằng ngày.

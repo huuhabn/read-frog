@@ -91,6 +91,7 @@ function FeatureProviderItem({ featureKey }: { featureKey: FeatureKey }) {
         value={providerId}
         onChange={setProviderId}
         triggerSize="sm"
+        placeholder={i18n.t("options.apiProviders.featureProviders.chooseProvider")}
         selectContentProps={SELECT_CONTENT_PROPS}
       />
     </ConfigItem>

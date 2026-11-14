@@ -153,7 +153,7 @@ options:
       description: Scan the QR code to join the WeChat discussion group
       qrCodeAlt: WeChat QR code
   apiProviders:
-    title: API Providers
+    title: Providers
     pageDescription: Connect the AI services Workmate AI calls, then choose which one runs each feature.
     description: Add the providers Workmate AI can call. Over 20 are built in, with custom support for Chat Completions-compatible and Open Responses APIs.
     configTitle: Provider config
@@ -321,12 +321,16 @@ options:
         inputTranslation: Input translation
         videoSubtitles: Video subtitles
         noteSuggestion: Note suggestions
+        upwork: Upwork Proposal & Job Analysis
+        webChat: Web Chat AI Assistant
       descriptions:
         pageTranslation: Translates the whole page in bilingual or replace mode.
         selectionTranslation: "Translates the text you select; word annotations use it too."
         inputTranslation: Translates what you type into an input box before you send it.
         videoSubtitles: Translates subtitles as they appear in a video player.
         noteSuggestion: Suggests words worth saving to your Notebase after a selection translation.
+        upwork: Generates tailored proposals and analyzes job requirements using profile facts.
+        webChat: Powers smart replies, message rewriting, summaries, and floating actions on web chat platforms.
     languageDetection:
       title: Language detection
       description: Affects auto-translate language detection and Speaking voice selection accuracy.
@@ -1307,6 +1311,101 @@ options:
       translating: Translating...
       translateTo: Translate to
       translateProvider: Translation Provider
+  webChat:
+    title: Web Chat Assistant
+    pageDescription: Configure AI assistant for Zalo, Telegram, Slack, and web chat platforms.
+    enable:
+      title: Enable Web Chat Assistant
+      description: Activates floating menu, slash commands, real-time translation, and AI assistant on chat platforms.
+    sections:
+      provider: AI Provider
+      realtimeTranslate: Real-time Bilingual Translation
+      slashCommands: Slash Commands & Shortcuts
+      platforms: Supported Platforms
+      privacy: Security & Privacy (PII Masking)
+    provider:
+      title: AI Provider
+      description: LLM provider for web chat assistance (smart replies, rewrites, summaries).
+      placeholder: Select an AI Provider
+    translate:
+      inboundEnableTitle: Auto-translate incoming messages
+      inboundEnableDesc: Displays a sub-line translation below received messages in the chat interface.
+      inboundLangTitle: Incoming translation language
+      inboundLangDesc: Translates messages from others into this language.
+      outboundLangTitle: Outgoing translation language
+      outboundLangDesc: Target language when translating your input message (Ctrl+Shift+E).
+      contextCountTitle: Context messages count
+      contextCountDesc: Includes previous messages so AI understands context and pronouns (1 - 20 messages).
+    slash:
+      enableTitle: Enable Slash Command Palette
+      enableDesc: Type / to open quick commands like /reply, /tone, /dich, /tpl.
+    platforms:
+      zaloTitle: Zalo Web (chat.zalo.me)
+      zaloDesc: Automatically detect messages and assist typing on Zalo Web.
+      telegramTitle: Telegram Web (web.telegram.org)
+      telegramDesc: Automatically detect messages on Telegram Web.
+      slackTitle: Slack Web (app.slack.com)
+      slackDesc: Supports chat channels and direct messages on Slack.
+      genericTitle: Generic Web Chat (Universal)
+      genericDesc: Supports any web chat interface containing a textarea or contenteditable input.
+      remoteConfigTitle: Remote Config Selectors URL
+      remoteConfigDesc: Automatically updates DOM selectors without waiting for extension updates.
+    privacy:
+      piiEnableTitle: Enable Sensitive Information Masking (PII Masking)
+      piiEnableDesc: Automatically masks phone numbers, bank accounts, citizen IDs, and emails before sending to AI, and restores them in the response.
+      maskPhoneTitle: Mask phone numbers (Vietnam & International)
+      maskPhoneDesc: Replaces phone numbers with [PHONE_1], [PHONE_2]...
+      maskStkTitle: Mask bank account numbers
+      maskStkDesc: Replaces bank account numbers with [STK_1], [STK_2]...
+      maskCccdTitle: Mask Citizen ID / National ID numbers
+      maskCccdDesc: Replaces ID numbers with [CCCD_1], [CCCD_2]...
+      maskEmailTitle: Mask email addresses
+      maskEmailDesc: Replaces email addresses with [EMAIL_1], [EMAIL_2]...
+    sidepanel:
+      tabLabel: Web Chat Assistant
+      noRoomDetected: No chat room detected
+      refreshTooltip: Refresh messages
+      messagesCount: "$1 messages"
+      piiMasked: PII Masked
+      cloudLlm: Cloud LLM
+      actions:
+        summary: Summarize Chat
+        reply: Smart Reply
+        extract: Extract Info
+        translate: Translate Message
+      emptyPrompt: Select a quick action above to start the chat assistant.
+      processing: Processing with AI...
+      copy: Copy
+      copied: Copied
+      insertToChat: Insert into chat
+      summaryTitle: "📌 Chat Summary:"
+      actionItemsTitle: "✅ Action Items:"
+      entitiesTitle: "🔍 Extracted Key Info:"
+      phoneLabel: "📞 Phone:"
+      bankLabel: "💳 Bank Account:"
+      linkLabel: "🔗 Link:"
+      dateLabel: "📅 Schedule / Date:"
+      noEntitiesFound: No sensitive info or schedules found in recent messages.
+      errorProcessing: An error occurred while communicating with AI.
+    floatingMenu:
+      translate: "🌐 Translate"
+      rewrite: "✍️ Rewrite"
+      reply: "💬 Reply"
+      askAi: "🤖 Ask AI"
+      replace: Replace
+      insertToChat: Insert into chat
+      translating: Translating...
+      rewriting: Rewriting with tone...
+      generatingReply: Generating smart reply...
+      askingAi: Asking AI...
+      close: Close
+      glossPrefix: "Meaning:"
+      error: Error connecting to AI service.
+    slashCommands:
+      replyDesc: Smart reply suggestion based on chat context
+      toneDesc: Rewrite text with specific tone (professional, friendly, brief)
+      dichDesc: Quickly translate text to target language
+      tplDesc: Insert quick message template with automatic variables
   advanced:
     title: Advanced
     pageDescription: Powerful settings that are not part of the everyday path.

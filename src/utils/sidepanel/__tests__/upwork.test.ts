@@ -46,6 +46,7 @@ describe("Upwork Sidepanel Utilities", () => {
       tone: "concise",
       rules: "- Không chào sáo rỗng\n- Đi thẳng vào giải pháp",
       examples: "Hi, I have built similar React SaaS applications...",
+      providerId: "",
       translateLang: "en",
       translateProviderId: "",
       jobDetailsSelector: ".job-desc",

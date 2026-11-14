@@ -37,6 +37,7 @@ import {
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { db } from "@/utils/db/dexie/db"
 import { i18n } from "@/utils/i18n"
+import { createLogger } from "@/utils/logging/logger"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import {
   getLocalSelectedChatModel,
@@ -69,6 +70,8 @@ const QUICK_PROMPTS = [
   "Phân tích ưu điểm và nhược điểm của chủ đề này",
   "Viết một email tóm tắt gửi cho đồng nghiệp",
 ]
+
+const log = createLogger("sidepanel:chat")
 
 function getTimestamp(): Date {
   return new Date()
@@ -379,7 +382,7 @@ export function ChatView() {
       }
       setShowTranslatedResponseMap((prev) => ({ ...prev, [msg.id]: true }))
     } catch (err) {
-      console.warn("[Sidepanel] Failed to translate assistant response:", err)
+      log.warn("Failed to translate assistant response", { error: err })
     } finally {
       setTranslatingMsgId(null)
     }
@@ -638,7 +641,16 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
     const controller = new AbortController()
     abortControllerRef.current = controller
 
-    const matchedProvider = llmProviders.find((p) => p.id === selectedModel.providerId)
+    const isUpworkTask = isUpworkCoverLetter || isUpworkAnalyze
+    const upworkCustomProvider =
+      isUpworkTask && upworkConfig.providerId
+        ? llmProviders.find((p) => p.id === upworkConfig.providerId)
+        : null
+
+    const matchedProvider =
+      upworkCustomProvider || llmProviders.find((p) => p.id === selectedModel.providerId)
+    const targetProviderId = matchedProvider?.id || selectedModel.providerId
+
     const effectiveProviderConfig =
       matchedProvider && isLLMProviderConfig(matchedProvider)
         ? ({
@@ -664,12 +676,12 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
       await streamBackgroundText(
         {
           providerKind: "local",
-          providerId: selectedModel.providerId,
+          providerId: targetProviderId,
           providerConfig: effectiveProviderConfig,
           instructions,
           messages: formattedMessages,
           temperature: 0.7,
-          sourceFeature: "Sidepanel Chat",
+          sourceFeature: isUpworkTask ? "Upwork Assistant" : "Sidepanel Chat",
           url: activeTab?.url,
         },
         {
@@ -958,7 +970,7 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
               <Sparkles className="size-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold tracking-tight">Sider AI Assistant</h3>
+              <h3 className="text-sm font-semibold tracking-tight">Workmate AI Assistant</h3>
               <p className="max-w-[240px] text-xs text-muted-foreground">
                 Đặt câu hỏi, tóm tắt bài viết hoặc dịch thuật với các mô hình AI thông minh.
               </p>

@@ -108,6 +108,8 @@ const LOCAL_PROVIDER_CAPABILITY_PREDICATES = {
   noteSuggestion: isLLMProviderConfig,
   customAction: isLLMProviderConfig,
   languageDetection: isLLMProviderConfig,
+  upwork: isLLMProviderConfig,
+  webChat: isLLMProviderConfig,
 } as const satisfies Record<ProviderCapability, ProviderConfigPredicate>
 
 export type ProviderConfigForCapability<C extends ProviderCapability> =

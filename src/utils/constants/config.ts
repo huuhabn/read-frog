@@ -9,6 +9,7 @@ import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
 import { DEFAULT_AUDIT_LOG_CONFIG } from "@/types/config/audit-log"
 import { DEFAULT_SIDE_PANEL_SHORTCUT_KEY } from "@/types/config/side-panel"
 import { DEFAULT_UPWORK_CONFIG } from "@/types/config/upwork"
+import { DEFAULT_WEB_CHAT_CONFIG } from "@/types/config/web-chat"
 import {
   buildDictionaryActionLayout,
   buildImproveWritingActionLayout,
@@ -366,6 +367,7 @@ export const DEFAULT_CONFIG: Config = {
   },
   auditLog: { ...DEFAULT_AUDIT_LOG_CONFIG },
   upwork: { ...DEFAULT_UPWORK_CONFIG },
+  webChat: { ...DEFAULT_WEB_CHAT_CONFIG },
 }
 
 /**

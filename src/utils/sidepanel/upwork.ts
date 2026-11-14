@@ -3,16 +3,31 @@ import type { UpworkConfig } from "@/types/config/upwork"
 import { browser } from "#imports"
 import { MICROSOFT_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
 import { executeTranslate } from "@/utils/host/translate/execute-translate"
+import { createLogger } from "@/utils/logging/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { doesProviderSupportsCapability } from "@/utils/providers/provider-registry"
+
+const log = createLogger("upwork")
 
 export const UPWORK_QUICK_PROMPT_COVER_LETTER =
   "Viết Upwork Cover Letter & Trả lời Screening Questions"
 export const UPWORK_QUICK_PROMPT_ANALYZE_JOB = "Phân tích yêu cầu & rủi ro của job Upwork này"
 
+export type UpworkTranslateLangKey =
+  | "options.upwork.translateLangs.en"
+  | "options.upwork.translateLangs.original"
+  | "options.upwork.translateLangs.vi"
+  | "options.upwork.translateLangs.zhCN"
+  | "options.upwork.translateLangs.ja"
+  | "options.upwork.translateLangs.ko"
+  | "options.upwork.translateLangs.fr"
+  | "options.upwork.translateLangs.de"
+  | "options.upwork.translateLangs.es"
+  | "options.upwork.translateLangs.ru"
+
 export interface UpworkTranslateLangOption {
   code: string
-  labelKey: string
+  labelKey: UpworkTranslateLangKey
   name: string
 }
 
@@ -79,7 +94,7 @@ export async function translateTextWithProvider(
     })
     return res || text
   } catch (error) {
-    console.warn("[Upwork] Translation failed, using original text:", error)
+    log.warn("Translation failed, using original text", { error })
     return text
   }
 }
@@ -158,7 +173,7 @@ export async function extractUpworkJobData(
 
     return results?.[0]?.result ?? {}
   } catch (error) {
-    console.warn("[Upwork] Failed to extract job data from tab:", error)
+    log.warn("Failed to extract job data from tab", { error })
     return {}
   }
 }
@@ -296,7 +311,7 @@ export async function fillUpworkCoverLetter(
         "Không tìm thấy ô nhập Cover Letter trên trang hiện tại. Vui lòng mở trang Submit Proposal.",
     }
   } catch (error) {
-    console.warn("[Upwork] Failed to fill cover letter into tab:", error)
+    log.warn("Failed to fill cover letter into tab", { error })
     return {
       success: false,
       message: "Không thể điền vào trang web. Vui lòng sao chép thủ công.",

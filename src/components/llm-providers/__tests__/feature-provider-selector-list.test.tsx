@@ -59,6 +59,8 @@ describe("featureProviderSelectorList feature rows", () => {
       "selectionTranslation",
       "inputTranslation",
       "noteSuggestion",
+      "upwork",
+      "webChat",
     ]) {
       expect(
         screen.getByText(`options.apiProviders.featureProviders.features.${featureKey}`),

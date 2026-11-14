@@ -3,6 +3,7 @@ import type { Config, UiLanguage } from "@/types/config/config"
 import { browser, defineBackground } from "#imports"
 import { env } from "@/env"
 import { storageAdapter } from "@/utils/atoms/storage-adapter"
+import { recordAuditLog } from "@/utils/audit-log/audit-log-service"
 import { selectFreshTranslateProviders } from "@/utils/config/default-translate-provider"
 import { CONFIG_STORAGE_KEY } from "@/utils/constants/config"
 import { initI18n, setUiLanguage } from "@/utils/i18n"
@@ -134,6 +135,10 @@ export default defineBackground({
 
     onMessage("clearAiSegmentationCache", async () => {
       await cleanupAllAiSegmentationCache()
+    })
+
+    onMessage("recordAuditLogEntry", async ({ data }) => {
+      return recordAuditLog(data)
     })
 
     newUserGuide()

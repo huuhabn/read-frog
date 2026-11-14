@@ -183,7 +183,7 @@ export const SEARCH_ITEMS: SearchItem[] = [
     pageKey: "options.shortcuts.title",
   },
 
-  // API Providers page
+  // Providers page
   {
     sectionId: "provider-config",
     route: "/api-providers",

@@ -19,6 +19,7 @@ import type {
   TTSPlaybackStartResponse,
   TTSPlaybackStopRequest,
 } from "@/types/tts-playback"
+import type { AuditLogEntryInput } from "@/utils/audit-log/audit-log-service"
 import type { DiagnosticsReport } from "@/utils/diagnostics/report"
 import type { GlossarySnapshot } from "@/utils/glossary/active-matcher"
 import type { MatchedTerm } from "@/utils/glossary/types"
@@ -215,6 +216,8 @@ interface ProtocolMap {
   // offscreen internal
   ttsOffscreenPlay: (data: TTSPlaybackStartRequest) => Promise<TTSPlaybackStartResponse>
   ttsOffscreenStop: (data: TTSPlaybackStopRequest) => Promise<{ ok: true }>
+  // audit log
+  recordAuditLogEntry: (data: AuditLogEntryInput) => Promise<string | null>
 }
 
 export const { sendMessage, onMessage } = defineExtensionMessaging<ProtocolMap>()

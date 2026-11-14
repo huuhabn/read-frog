@@ -24,6 +24,7 @@ import { isSiteEnabled } from "@/utils/site-control"
 import { mirrorDynamicStyles, protectInternalStyles } from "@/utils/styles"
 import { queryClient } from "@/utils/tanstack-query"
 import { getLocalThemeMode } from "@/utils/theme"
+import { bootstrapWebChat } from "@/utils/web-chat/runtime/bootstrap"
 import App from "./app"
 import { store } from "./atoms"
 
@@ -56,6 +57,8 @@ export async function runSideContent(ctx: ContentScriptContext) {
   if (!isSiteEnabled(window.location.href, config)) {
     return
   }
+
+  void bootstrapWebChat(ctx)
 
   await initI18n(config.uiLanguage)
 

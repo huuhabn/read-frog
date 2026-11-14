@@ -174,14 +174,18 @@ function GroupedSelect({
     >
       <SelectTrigger className={className} size={triggerSize}>
         <SelectValue placeholder={placeholder}>
-          {(provider: ProviderSelectorOption) => (
-            <ProviderIcon
-              logo={getProviderLogo(provider, theme)}
-              name={getProviderName(provider)}
-              size="sm"
-              textClassName={triggerNameClassName}
-            />
-          )}
+          {(provider: ProviderSelectorOption | null) =>
+            provider ? (
+              <ProviderIcon
+                logo={getProviderLogo(provider, theme)}
+                name={getProviderName(provider)}
+                size="sm"
+                textClassName={triggerNameClassName}
+              />
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )
+          }
         </SelectValue>
       </SelectTrigger>
       <SelectContent {...selectContentProps}>
@@ -244,14 +248,18 @@ function UngroupedSelect({
     >
       <SelectTrigger className={className} size={triggerSize}>
         <SelectValue placeholder={placeholder}>
-          {(provider: ProviderSelectorOption) => (
-            <ProviderIcon
-              logo={getProviderLogo(provider, theme)}
-              name={getProviderName(provider)}
-              size="sm"
-              textClassName={triggerNameClassName}
-            />
-          )}
+          {(provider: ProviderSelectorOption | null) =>
+            provider ? (
+              <ProviderIcon
+                logo={getProviderLogo(provider, theme)}
+                name={getProviderName(provider)}
+                size="sm"
+                textClassName={triggerNameClassName}
+              />
+            ) : (
+              <span className="text-muted-foreground">{placeholder}</span>
+            )
+          }
         </SelectValue>
       </SelectTrigger>
       <SelectContent {...selectContentProps}>

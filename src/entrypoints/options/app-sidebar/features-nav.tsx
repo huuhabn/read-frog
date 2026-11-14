@@ -195,6 +195,17 @@ export function FeaturesNav() {
 
           <SidebarMenuItem>
             <SidebarMenuButton
+              render={<Link to="/web-chat" />}
+              isActive={pathname === "/web-chat"}
+              tooltip={i18n.t("options.webChat.title")}
+            >
+              <Icon icon="tabler:messages" />
+              <span>{i18n.t("options.webChat.title")}</span>
+            </SidebarMenuButton>
+          </SidebarMenuItem>
+
+          <SidebarMenuItem>
+            <SidebarMenuButton
               render={
                 <a
                   href={browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH)}

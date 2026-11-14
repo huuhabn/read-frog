@@ -12,6 +12,7 @@ export const ROUTE_DEFS = [
   { path: "/input-translation" },
   { path: "/tts" },
   { path: "/upwork" },
+  { path: "/web-chat" },
   // Advanced is a sidebar GROUP with no page of its own; this path only exists
   // so links made before that change still land somewhere.
   { path: "/advanced" },

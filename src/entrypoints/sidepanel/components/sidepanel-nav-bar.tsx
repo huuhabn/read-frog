@@ -2,6 +2,7 @@ import type { SidePanelNavTab } from "@/utils/atoms/sidepanel"
 import { useAtom } from "jotai"
 import {
   BookOpen,
+  BotMessageSquare,
   History,
   Languages,
   MessageSquare,
@@ -17,6 +18,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/base-ui/tooltip"
 import { sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
+import { i18n } from "@/utils/i18n"
 import { openOptionsPage } from "@/utils/navigation"
 import { cn } from "@/utils/styles/utils"
 
@@ -28,6 +30,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: "chat", label: "Chat AI", icon: MessageSquare },
+  { id: "web-chat", label: "Web Chat Assistant", icon: BotMessageSquare },
   { id: "read", label: "Read & Summarize", icon: BookOpen },
   { id: "write", label: "Write & Compose", icon: PenTool },
   { id: "translate", label: "Translate", icon: Languages },
@@ -62,7 +65,7 @@ export function SidePanelNavBar() {
                   <TooltipTrigger
                     onClick={() => setActiveTab(item.id)}
                     className={cn(
-                      "flex size-7.5 items-center justify-center rounded-lg text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
+                      "flex size-6 items-center justify-center rounded-lg text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
                       isActive &&
                         "bg-primary/15 font-medium text-primary shadow-xs ring-1 ring-primary/20",
                     )}
@@ -70,7 +73,9 @@ export function SidePanelNavBar() {
                     <Icon className="size-4" />
                   </TooltipTrigger>
                   <TooltipContent side="left" sideOffset={6} className="text-xs font-medium">
-                    {item.label}
+                    {item.id === "web-chat"
+                      ? i18n.t("options.webChat.sidepanel.tabLabel")
+                      : item.label}
                   </TooltipContent>
                 </Tooltip>
               )

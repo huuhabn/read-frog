@@ -17,7 +17,7 @@ Tiện ích mở rộng trình duyệt giúp học ngôn ngữ bằng AI, và l�
 Dịch trang web, câu bạn chọn và phụ đề trên YouTube, X và Netflix. Sau đó lưu từ mới và ôn tập bằng flashcard theo lịch FSRS.<br/>
 Học ngôn ngữ dễ hơn và sâu hơn ngay trong trình duyệt của bạn.
 
-[![English][english-shield]](../README.md) [![简体中文][chinese-shield]](./README.zh-CN.md) [![繁體中文][traditional-chinese-shield]](./README.zh-TW.md) [![日本語][japanese-shield]](./README.ja.md) [![한국어][korean-shield]](./README.ko.md) [![Español][spanish-shield]](./README.es.md) [![Русский][russian-shield]](./README.ru.md) [![Türkçe][turkish-shield]](./README.tr.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
+[![English][english-shield]](../README.md) [![Tiếng Việt][vietnamese-shield]](./README.vi.md)
 
 [Trang chính thức](https://www.readfrog.app/vi?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) · [Tất cả tính năng](https://www.readfrog.app/vi/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) · [Hướng dẫn](https://www.readfrog.app/vi/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) · [Nhật ký phát hành][github-release-link] · [Blog](https://www.readfrog.app/vi/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi) · [vs Immersive Translate (tiếng Anh)](https://www.readfrog.app/en/compare/immersive-translate?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=vi)
 

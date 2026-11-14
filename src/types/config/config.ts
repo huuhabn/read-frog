@@ -34,6 +34,7 @@ import { videoSubtitlesSchema } from "./subtitles"
 import { translateConfigSchema } from "./translate"
 import { ttsConfigSchema } from "./tts"
 import { upworkConfigSchema } from "./upwork"
+import { webChatConfigSchema } from "./web-chat"
 // Language schema
 const languageSchema = z.object({
   sourceCode: storedLanguageTagSchema.or(z.literal("auto")),
@@ -219,11 +220,16 @@ export const configSchema = z
     sidePanel: sidePanelSchema,
     auditLog: auditLogConfigSchema,
     upwork: upworkConfigSchema,
+    webChat: webChatConfigSchema,
   })
   .superRefine((data, ctx) => {
     for (const featureKey of FEATURE_KEYS) {
       const def = FEATURE_PROVIDER_DEFS[featureKey]
       const providerId = def.getProviderId(data)
+
+      if (!providerId) {
+        continue
+      }
 
       if (
         !doesProviderSupportsCapability(featureKey, data.providersConfig, providerId, {

@@ -1,0 +1,220 @@
+import type { ChatMessage, ChatRoom } from "@/utils/web-chat/adapter/types"
+import { useCallback, useEffect, useRef, useState } from "react"
+import { i18n } from "@/utils/i18n"
+import { getActiveTabInfo } from "@/utils/sidepanel/page-context"
+import { getActiveChatMessagesFromTab, insertTextToActiveChatTab } from "@/utils/sidepanel/web-chat"
+import {
+  generateSmartReply,
+  summarizeChatRoom,
+  translateChatText,
+} from "@/utils/web-chat/ai/service"
+import { ActionChips, type WebChatActionType } from "./ActionChips"
+import { ChatContextHeader } from "./ChatContextHeader"
+import { ResultStream } from "./ResultStream"
+
+interface RoomCacheData {
+  messages: ChatMessage[]
+  lastResult?: string
+  lastSecondaryResult?: string
+  activeAction?: WebChatActionType
+}
+
+export function WebChatView() {
+  const [currentTabId, setCurrentTabId] = useState<number | null>(null)
+  const [currentTabUrl, setCurrentTabUrl] = useState<string | undefined>()
+  const [room, setRoom] = useState<ChatRoom | null>(null)
+  const [messages, setMessages] = useState<ChatMessage[]>([])
+  const [loading, setLoading] = useState(false)
+  const [activeAction, setActiveAction] = useState<WebChatActionType | null>(null)
+  const [resultContent, setResultContent] = useState<string>("")
+  const [secondaryResult, setSecondaryResult] = useState<string | undefined>()
+
+  // Room cache: Map<roomId, RoomCacheData>
+  const roomCacheRef = useRef<Map<string, RoomCacheData>>(new Map())
+
+  const loadActiveChat = useCallback(async (forceRefresh = false) => {
+    setLoading(true)
+    try {
+      const tabInfo = await getActiveTabInfo(true)
+      if (!tabInfo?.id) {
+        setLoading(false)
+        return
+      }
+
+      setCurrentTabId(tabInfo.id)
+      setCurrentTabUrl(tabInfo.url)
+      const data = await getActiveChatMessagesFromTab(tabInfo.id)
+      const currentRoom = data.room
+      setRoom(currentRoom)
+      setMessages(data.messages)
+
+      const roomId = currentRoom?.id || "unknown"
+      const cached = roomCacheRef.current.get(roomId)
+
+      if (cached && !forceRefresh) {
+        // Restore from cache, do NOT call LLM
+        setResultContent(cached.lastResult || "")
+        setSecondaryResult(cached.lastSecondaryResult)
+        setActiveAction(cached.activeAction || null)
+      } else if (forceRefresh || !cached) {
+        // Reset results on room switch if not in cache
+        if (!cached) {
+          setResultContent("")
+          setSecondaryResult(undefined)
+          setActiveAction(null)
+        }
+      }
+    } finally {
+      setLoading(false)
+    }
+  }, [])
+
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      void loadActiveChat(false)
+    }, 0)
+    return () => clearTimeout(timer)
+  }, [loadActiveChat])
+
+  const handleActionSelect = async (action: WebChatActionType) => {
+    setActiveAction(action)
+    setLoading(true)
+
+    const roomId = room?.id || "unknown"
+
+    try {
+      if (action === "summary") {
+        const res = await summarizeChatRoom(messages, room?.name, {
+          sourceFeature: "Web Chat (Summary)",
+          url: currentTabUrl,
+        })
+        let formatted = `${i18n.t("options.webChat.sidepanel.summaryTitle")}\n${res.summary}\n\n`
+        if (res.actionItems.length > 0) {
+          formatted += `${i18n.t("options.webChat.sidepanel.actionItemsTitle")}\n${res.actionItems.map((a) => `- ${a}`).join("\n")}\n\n`
+        }
+        setResultContent(formatted)
+        setSecondaryResult(undefined)
+
+        roomCacheRef.current.set(roomId, {
+          messages,
+          lastResult: formatted,
+          activeAction: "summary",
+        })
+      } else if (action === "reply") {
+        const res = await generateSmartReply({
+          contextMessages: messages.slice(-5),
+          targetLang: "vi",
+          tone: "friendly",
+          sourceFeature: "Web Chat (Smart Reply)",
+          url: currentTabUrl,
+        })
+
+        setResultContent(res.replyText)
+        setSecondaryResult(
+          res.viGloss
+            ? `${i18n.t("options.webChat.floatingMenu.glossPrefix")} ${res.viGloss}`
+            : undefined,
+        )
+
+        roomCacheRef.current.set(roomId, {
+          messages,
+          lastResult: res.replyText,
+          lastSecondaryResult: res.viGloss
+            ? `${i18n.t("options.webChat.floatingMenu.glossPrefix")} ${res.viGloss}`
+            : undefined,
+          activeAction: "reply",
+        })
+      } else if (action === "extract") {
+        const res = await summarizeChatRoom(messages, room?.name, {
+          sourceFeature: "Web Chat (Extract Entities)",
+          url: currentTabUrl,
+        })
+        const entities = res.extractedEntities
+        let formatted = `${i18n.t("options.webChat.sidepanel.entitiesTitle")}\n\n`
+        if (entities.phones.length > 0) {
+          formatted += `${i18n.t("options.webChat.sidepanel.phoneLabel")} ${entities.phones.join(", ")}\n`
+        }
+        if (entities.bankAccounts.length > 0) {
+          formatted += `${i18n.t("options.webChat.sidepanel.bankLabel")} ${entities.bankAccounts.join(", ")}\n`
+        }
+        if (entities.links.length > 0) {
+          formatted += `${i18n.t("options.webChat.sidepanel.linkLabel")} ${entities.links.join(", ")}\n`
+        }
+        if (entities.dates.length > 0) {
+          formatted += `${i18n.t("options.webChat.sidepanel.dateLabel")} ${entities.dates.join(", ")}\n`
+        }
+        if (
+          entities.phones.length === 0 &&
+          entities.bankAccounts.length === 0 &&
+          entities.links.length === 0 &&
+          entities.dates.length === 0
+        ) {
+          formatted += i18n.t("options.webChat.sidepanel.noEntitiesFound")
+        }
+
+        setResultContent(formatted)
+        setSecondaryResult(undefined)
+
+        roomCacheRef.current.set(roomId, {
+          messages,
+          lastResult: formatted,
+          activeAction: "extract",
+        })
+      } else if (action === "translate") {
+        const lastMsg = messages[messages.length - 1]
+        const textToTranslate = lastMsg?.content || "No message to translate."
+        const translated = await translateChatText({
+          text: textToTranslate,
+          targetLang: "vi",
+          sourceFeature: "Web Chat (Translate)",
+          url: currentTabUrl,
+        })
+
+        setResultContent(translated)
+        setSecondaryResult(`Original: "${textToTranslate}"`)
+
+        roomCacheRef.current.set(roomId, {
+          messages,
+          lastResult: translated,
+          lastSecondaryResult: `Original: "${textToTranslate}"`,
+          activeAction: "translate",
+        })
+      }
+    } catch {
+      setResultContent(i18n.t("options.webChat.sidepanel.errorProcessing"))
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const handleInsertToChat = async (text: string) => {
+    if (!currentTabId) return
+    await insertTextToActiveChatTab(currentTabId, text)
+  }
+
+  return (
+    <div className="flex h-full flex-col bg-background text-foreground">
+      <ChatContextHeader
+        room={room}
+        messageCount={messages.length}
+        loading={loading}
+        onRefresh={() => void loadActiveChat(true)}
+      />
+
+      <ActionChips
+        loading={loading}
+        activeAction={activeAction}
+        onSelectAction={(action) => void handleActionSelect(action)}
+      />
+
+      <div className="flex-1 overflow-y-auto">
+        <ResultStream
+          content={resultContent}
+          secondaryContent={secondaryResult}
+          loading={loading}
+          onInsertToChat={(text) => void handleInsertToChat(text)}
+        />
+      </div>
+    </div>
+  )
+}

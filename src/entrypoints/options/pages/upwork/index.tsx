@@ -184,7 +184,7 @@ export function UpworkSettingsPage() {
               <SelectGroup>
                 {UPWORK_TRANSLATE_LANGUAGES.map((lang) => (
                   <SelectItem key={lang.code} value={lang.code}>
-                    {lang.name}
+                    {i18n.t(lang.labelKey)}
                   </SelectItem>
                 ))}
               </SelectGroup>

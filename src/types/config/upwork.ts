@@ -8,6 +8,7 @@ export const DEFAULT_UPWORK_CONFIG = {
   rules:
     "- Chỉ sử dụng facts có trong profile, tuyệt đối không bịa đặt kinh nghiệm hoặc kỹ năng.\n- Trả lời đầy đủ và cụ thể tất cả câu hỏi screening nếu có.\n- Đi thẳng vào giải pháp và kinh nghiệm liên quan đến yêu cầu công việc.",
   examples: "",
+  providerId: "",
   translateLang: "en",
   translateProviderId: "",
   jobDetailsSelector:
@@ -26,6 +27,7 @@ export const upworkConfigSchema = z
     tone: z.string().default(DEFAULT_UPWORK_CONFIG.tone),
     rules: z.string().default(DEFAULT_UPWORK_CONFIG.rules),
     examples: z.string().default(DEFAULT_UPWORK_CONFIG.examples),
+    providerId: z.string().default(DEFAULT_UPWORK_CONFIG.providerId),
     translateLang: z.string().default(DEFAULT_UPWORK_CONFIG.translateLang),
     translateProviderId: z.string().default(DEFAULT_UPWORK_CONFIG.translateProviderId),
     jobDetailsSelector: z.string().default(DEFAULT_UPWORK_CONFIG.jobDetailsSelector),

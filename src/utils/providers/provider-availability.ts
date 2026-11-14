@@ -22,7 +22,9 @@ const CAPABILITY_HOSTED_FEATURES = {
   noteSuggestion: "noteSuggestion",
   customAction: "customAction",
   languageDetection: "languageDetection",
-} as const satisfies Record<ProviderCapability, HostedAiFeature>
+  upwork: null,
+  webChat: null,
+} as const satisfies Record<ProviderCapability, HostedAiFeature | null>
 
 export function getHostedFeatureForCapability(
   capability: ProviderCapability,

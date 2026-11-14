@@ -1,6 +1,7 @@
 import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { getLocalConfig } from "@/utils/config/storage"
 import { db } from "@/utils/db/dexie/db"
+import { sendMessage } from "@/utils/message"
 
 export type AuditLogEntryInput = Omit<AuditLogItem, "id" | "createdAt">
 
@@ -9,6 +10,23 @@ export async function recordAuditLog(entry: AuditLogEntryInput): Promise<string 
     const config = await getLocalConfig()
     if (!config?.auditLog?.enabled) {
       return null
+    }
+
+    // When called from a content script (running inside an external web page), IndexedDB is scoped
+    // to the webpage origin instead of the extension. Relay the audit log entry to the background script.
+    const isExtensionContext =
+      typeof window === "undefined" ||
+      !window.location?.protocol ||
+      window.location.protocol.startsWith("chrome-extension") ||
+      window.location.protocol.startsWith("moz-extension")
+
+    if (!isExtensionContext) {
+      try {
+        return await sendMessage("recordAuditLogEntry", entry)
+      } catch (err) {
+        console.warn("[AuditLog] Failed to forward audit log to background:", err)
+        return null
+      }
     }
 
     const id = crypto.randomUUID()
