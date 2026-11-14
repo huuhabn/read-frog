@@ -475,46 +475,69 @@ export async function insertTextToActiveChatTab(
         const triggerSend = () => {
           if (!autoSend) return
           setTimeout(() => {
-            // 1. Zalo send button
-            const zaloSend = document.querySelector<HTMLElement>(
-              ".send-msg-btn, [icon='Sent-msg_24_Line'], [data-id='btn_RTF_Send'], [data-translate-title='STR_SEND']",
-            )
-            if (zaloSend) {
-              zaloSend.removeAttribute("data-disabled")
-              zaloSend.removeAttribute("disabled")
-              zaloSend.click()
+            const sendSelectors = [
+              // Telegram Web
+              ".btn-send.send",
+              "button.btn-send.send",
+              ".btn-send-container button.send",
+              "button.send[aria-label='Send']",
+              ".btn-send-container button",
+              "button[aria-label='Send']",
+              ".btn-send-icon-send",
+              ".btn-send",
+              // Zalo
+              ".send-msg-btn",
+              "[icon='Sent-msg_24_Line']",
+              "[data-id='btn_RTF_Send']",
+              "[data-translate-title='STR_SEND']",
+              // Slack
+              "[data-qa='texty_send_button']",
+              // Generic
+              "button[type='submit']",
+              "[data-testid='send-button']",
+              "button[aria-label*='Send' i]",
+              "button[aria-label*='Gửi' i]",
+            ]
+
+            let sendBtn: HTMLElement | null = null
+            for (const sel of sendSelectors) {
+              const el = document.querySelector<HTMLElement>(sel)
+              if (el) {
+                sendBtn = el.tagName.toLowerCase() === "button" ? el : el.closest("button") || el
+                break
+              }
+            }
+
+            if (sendBtn) {
+              sendBtn.removeAttribute("data-disabled")
+              sendBtn.removeAttribute("disabled")
+              const mouseInit = { bubbles: true, cancelable: true, composed: true }
+              try {
+                sendBtn.dispatchEvent(new PointerEvent("pointerdown", mouseInit))
+                sendBtn.dispatchEvent(new PointerEvent("pointerup", mouseInit))
+              } catch {}
+              sendBtn.dispatchEvent(new MouseEvent("mousedown", mouseInit))
+              sendBtn.dispatchEvent(new MouseEvent("mouseup", mouseInit))
+              sendBtn.click()
               return
             }
 
-            // 2. Generic platform send button
-            const genericSend = document.querySelector<HTMLElement>(
-              "button[type='submit'], .btn-send, [data-testid='send-button'], button[aria-label*='Send'], button[aria-label*='Gửi']",
-            )
-            if (genericSend) {
-              genericSend.click()
-              return
-            }
-
-            // 3. Dispatch Enter key
-            const enterDown = new KeyboardEvent("keydown", {
+            // Fallback Enter key
+            const enterOpts = {
               key: "Enter",
               code: "Enter",
               keyCode: 13,
               which: 13,
               bubbles: true,
               cancelable: true,
-            })
-            target.dispatchEvent(enterDown)
-            const enterUp = new KeyboardEvent("keyup", {
-              key: "Enter",
-              code: "Enter",
-              keyCode: 13,
-              which: 13,
-              bubbles: true,
-              cancelable: true,
-            })
-            target.dispatchEvent(enterUp)
-          }, 120)
+              composed: true,
+            }
+            target.dispatchEvent(new KeyboardEvent("keydown", enterOpts))
+            try {
+              target.dispatchEvent(new KeyboardEvent("keypress", enterOpts))
+            } catch {}
+            target.dispatchEvent(new KeyboardEvent("keyup", enterOpts))
+          }, 150)
         }
 
         if (target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement) {

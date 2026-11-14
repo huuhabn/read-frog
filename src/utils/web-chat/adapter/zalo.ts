@@ -1,6 +1,6 @@
 import type { ChatMessage, ChatRoom, IChatAdapter } from "./types"
 import { getPlatformSelectorConfig } from "../remote-config/loader"
-import { extractCleanText, insertTextIntoElement } from "./dom-utils"
+import { extractCleanText, insertTextIntoElement, triggerDOMSend } from "./dom-utils"
 
 export class ZaloChatAdapter implements IChatAdapter {
   readonly platform = "zalo"
@@ -114,7 +114,7 @@ export class ZaloChatAdapter implements IChatAdapter {
     )
   }
 
-  insertText(text: string): boolean {
+  insertText(text: string, options?: { autoSend?: boolean }): boolean {
     const input = this.getInputElement()
     if (!input) return false
 
@@ -136,7 +136,25 @@ export class ZaloChatAdapter implements IChatAdapter {
       input.classList.remove("empty")
     }
 
+    if (success && options?.autoSend) {
+      setTimeout(() => {
+        this.submitSend()
+      }, 150)
+    }
+
     return success
+  }
+
+  submitSend(): boolean {
+    const config = getPlatformSelectorConfig("zalo")
+    const input = this.getInputElement()
+    const sent = triggerDOMSend(input, config.sendButtonSelector)
+    if (!sent && input) {
+      setTimeout(() => {
+        triggerDOMSend(input, config.sendButtonSelector)
+      }, 120)
+    }
+    return sent
   }
 
   getMessages(limit = 50): ChatMessage[] {

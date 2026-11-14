@@ -87,7 +87,7 @@ export async function bootstrapWebChat(ctx?: ContentScriptContext): Promise<() =
 
   // 6. Sidepanel messaging bridge
   const onRuntimeMessage = (
-    message: { type?: string; text?: string },
+    message: { type?: string; text?: string; autoSend?: boolean },
     _sender: unknown,
     sendResponse: (res: unknown) => void,
   ) => {
@@ -115,7 +115,9 @@ export async function bootstrapWebChat(ctx?: ContentScriptContext): Promise<() =
         sendResponse({ success: false })
         return false
       }
-      const success = activeAdapter.insertText(message.text)
+      const success = activeAdapter.insertText(message.text, {
+        autoSend: Boolean(message.autoSend),
+      })
       sendResponse({ success })
       return false
     }

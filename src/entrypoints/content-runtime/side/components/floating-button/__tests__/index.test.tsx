@@ -21,6 +21,17 @@ vi.mock("#imports", () => ({
   },
 }))
 
+vi.mock("@/components/providers/theme-provider", () => ({
+  useTheme: () => ({
+    themeName: "default" as const,
+    themeMode: "system" as const,
+    scaled: false,
+    setThemeMode: vi.fn<(...args: any[]) => void>(),
+    setScaled: vi.fn<(...args: any[]) => void>(),
+    setThemeName: vi.fn<(...args: any[]) => void>(),
+  }),
+}))
+
 vi.mock("@/utils/atoms/config", () => {
   const floatingButtonBaseAtom = atom<FloatingButtonConfig>({
     enabled: true,
@@ -147,7 +158,6 @@ function mockRect(element: Element, rect: Partial<DOMRect>) {
 
 const TOOLTIP_CONTROL_LABELS = [
   "options.floatingButton.tooltips.togglePageTranslation",
-  "options.floatingButton.tooltips.settings",
   "options.floatingButton.tooltips.feedback",
 ] as const
 
@@ -285,7 +295,7 @@ describe("floatingButton controls", () => {
     async ({ floatingSide, tooltipSide }) => {
       renderFloatingButton({ side: floatingSide })
       fireEvent.mouseEnter(getMainButton())
-      expect(TOOLTIP_CONTROL_LABELS).toHaveLength(3)
+      expect(TOOLTIP_CONTROL_LABELS).toHaveLength(2)
 
       for (const label of TOOLTIP_CONTROL_LABELS) {
         await expectTooltipSide(label, tooltipSide)

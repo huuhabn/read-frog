@@ -28,8 +28,10 @@ export interface IChatAdapter {
   getCurrentRoom(): ChatRoom | null
   /** Find current input box (textarea, contenteditable, role=textbox) */
   getInputElement(): HTMLElement | null
-  /** Insert text into the active chat input without auto-submitting */
-  insertText(text: string): boolean
+  /** Insert text into the active chat input with optional auto-send */
+  insertText(text: string, options?: { autoSend?: boolean }): boolean
+  /** Submit/send the message currently in the input box */
+  submitSend?(): boolean
   /** Get last N messages as context */
   getRecentMessages(n: number): ChatMessage[]
   /** Optional observer for new messages arriving */

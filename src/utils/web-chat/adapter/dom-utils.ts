@@ -73,7 +73,23 @@ export function insertTextIntoElement(el: HTMLElement, text: string): boolean {
     try {
       const execSuccess = document.execCommand?.("insertText", false, text)
       if (execSuccess) {
-        el.dispatchEvent(new Event("input", { bubbles: true }))
+        try {
+          if (typeof InputEvent !== "undefined") {
+            el.dispatchEvent(
+              new InputEvent("input", {
+                bubbles: true,
+                cancelable: true,
+                inputType: "insertText",
+                data: text,
+              }),
+            )
+          } else {
+            el.dispatchEvent(new Event("input", { bubbles: true }))
+          }
+        } catch {
+          el.dispatchEvent(new Event("input", { bubbles: true }))
+        }
+        el.dispatchEvent(new Event("change", { bubbles: true }))
         return true
       }
     } catch {
@@ -146,4 +162,105 @@ export function insertTextIntoElement(el: HTMLElement, text: string): boolean {
 export function extractCleanText(el: HTMLElement): string {
   if (!el) return ""
   return (el.innerText || el.textContent || "").trim()
+}
+
+/**
+ * Triggers message submission across Telegram, Zalo, Slack, and generic web chats.
+ * Dispatches pointer/mouse event sequences on send buttons, and dispatches Enter keyboard events on input.
+ */
+export function triggerDOMSend(input?: HTMLElement | null, customButtonSelector?: string): boolean {
+  const sendButtonSelectors = [
+    ...(customButtonSelector ? customButtonSelector.split(",").map((s) => s.trim()) : []),
+    // Telegram Web (Web A, Web K, Web Z)
+    ".btn-send.send",
+    "button.btn-send.send",
+    ".btn-send-container button.send",
+    "button.send[aria-label='Send']",
+    "button[aria-label='Send']",
+    ".btn-send-icon-send",
+    ".btn-send",
+    // Zalo
+    ".send-msg-btn",
+    "[icon='Sent-msg_24_Line']",
+    "[data-id='btn_RTF_Send']",
+    "[data-translate-title='STR_SEND']",
+    // Slack
+    "[data-qa='texty_send_button']",
+    // Generic
+    "button[type='submit']",
+    "[data-testid='send-button']",
+    "button[aria-label*='Send' i]",
+    "button[aria-label*='Gửi' i]",
+  ]
+
+  let sendButton: HTMLElement | null = null
+  for (const sel of sendButtonSelectors) {
+    if (!sel) continue
+    try {
+      const el = document.querySelector<HTMLElement>(sel)
+      if (el) {
+        sendButton = el.tagName.toLowerCase() === "button" ? el : el.closest("button") || el
+        break
+      }
+    } catch {
+      // Ignore selector syntax error if any
+    }
+  }
+
+  if (sendButton) {
+    try {
+      sendButton.removeAttribute("disabled")
+      sendButton.removeAttribute("data-disabled")
+
+      const mouseInit: MouseEventInit = {
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      }
+      if (typeof PointerEvent !== "undefined") {
+        try {
+          sendButton.dispatchEvent(new PointerEvent("pointerdown", mouseInit))
+          sendButton.dispatchEvent(new PointerEvent("pointerup", mouseInit))
+        } catch {
+          // PointerEvent fallback
+        }
+      }
+      sendButton.dispatchEvent(new MouseEvent("mousedown", mouseInit))
+      sendButton.dispatchEvent(new MouseEvent("mouseup", mouseInit))
+      sendButton.click()
+      return true
+    } catch {
+      // Fallback to Enter key
+    }
+  }
+
+  // Fallback: Dispatch Enter key on target input
+  const targetInput =
+    input || (typeof document !== "undefined" ? (document.activeElement as HTMLElement) : null)
+  if (targetInput) {
+    try {
+      targetInput.focus()
+      const enterOpts: KeyboardEventInit = {
+        key: "Enter",
+        code: "Enter",
+        keyCode: 13,
+        which: 13,
+        bubbles: true,
+        cancelable: true,
+        composed: true,
+      }
+      targetInput.dispatchEvent(new KeyboardEvent("keydown", enterOpts))
+      try {
+        targetInput.dispatchEvent(new KeyboardEvent("keypress", enterOpts))
+      } catch {
+        // Fallback
+      }
+      targetInput.dispatchEvent(new KeyboardEvent("keyup", enterOpts))
+      return true
+    } catch {
+      // Fallback
+    }
+  }
+
+  return false
 }

@@ -81,6 +81,7 @@ describe("Sidepanel Web Chat Bridge", () => {
     expect(browser.tabs.sendMessage).toHaveBeenCalledWith(104, {
       type: "WEB_CHAT_INSERT_TEXT",
       text: "Xin chào!",
+      autoSend: false,
     })
     expect(success).toBe(true)
   })
@@ -95,7 +96,7 @@ describe("Sidepanel Web Chat Bridge", () => {
     expect(browser.scripting.executeScript).toHaveBeenCalledWith(
       expect.objectContaining({
         target: { tabId: 105 },
-        args: ["Nội dung fallback"],
+        args: ["Nội dung fallback", false],
       }),
     )
     expect(success).toBe(true)

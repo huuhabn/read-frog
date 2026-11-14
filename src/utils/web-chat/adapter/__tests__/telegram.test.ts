@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it } from "vitest"
+import { beforeEach, describe, expect, it, vi } from "vitest"
 import { TelegramChatAdapter } from "../telegram"
 
 describe("TelegramChatAdapter", () => {
@@ -70,5 +70,97 @@ describe("TelegramChatAdapter", () => {
     expect(second?.content).toBe("Hello from teammate")
     expect(second?.isOwn).toBe(false)
     expect(second?.author).toBe("Đối phương")
+  })
+
+  it("triggers message send on Telegram send button", () => {
+    // Add Telegram input and send button matching the exact user structure
+    const input = document.createElement("div")
+    input.id = "editable-message-text"
+    input.className = "input-message-input"
+    input.setAttribute("contenteditable", "true")
+    document.body.appendChild(input)
+
+    const btnContainer = document.createElement("div")
+    btnContainer.className = "btn-send-container"
+    btnContainer.innerHTML = `
+      <span class="btn-send-stars-badge stars-badge-base">
+        <span class="tgico stars-badge-base__icon" aria-hidden="true"></span>
+      </span>
+      <button class="btn-icon rp btn-circle btn-send animated-button-icon send" tabindex="-1" aria-label="Send">
+        <div class="c-ripple"></div>
+        <span class="tgico animated-button-icon-icon btn-send-icon-send icon-mirror" aria-hidden="true"></span>
+      </button>
+      <div class="btn-send-effect-container"></div>
+    `
+    document.body.appendChild(btnContainer)
+
+    const sendButton = btnContainer.querySelector<HTMLButtonElement>("button")!
+    expect(document.querySelector(".btn-send.send")).toBe(sendButton)
+    let clickFired = false
+    let mousedownFired = false
+    sendButton.addEventListener("click", () => {
+      clickFired = true
+    })
+    sendButton.addEventListener("mousedown", () => {
+      mousedownFired = true
+    })
+
+    const result = adapter.submitSend()
+    expect(result).toBe(true)
+    expect(mousedownFired).toBe(true)
+    expect(clickFired).toBe(true)
+
+    input.remove()
+    btnContainer.remove()
+  })
+
+  it("falls back to Enter key when send button is not present", () => {
+    const input = document.createElement("div")
+    input.id = "editable-message-text"
+    input.className = "input-message-input"
+    input.setAttribute("contenteditable", "true")
+    document.body.appendChild(input)
+
+    let enterFired = false
+    input.addEventListener("keydown", (e) => {
+      if (e.key === "Enter") {
+        enterFired = true
+      }
+    })
+
+    const result = adapter.submitSend()
+    expect(result).toBe(true)
+    expect(enterFired).toBe(true)
+
+    input.remove()
+  })
+
+  it("inserts text and triggers autoSend if specified", () => {
+    vi.useFakeTimers()
+    const input = document.createElement("div")
+    input.id = "editable-message-text"
+    input.className = "input-message-input"
+    input.setAttribute("contenteditable", "true")
+    document.body.appendChild(input)
+
+    const btn = document.createElement("button")
+    btn.className = "btn-send send"
+    btn.setAttribute("aria-label", "Send")
+    document.body.appendChild(btn)
+
+    let sendClicked = false
+    btn.addEventListener("click", () => {
+      sendClicked = true
+    })
+
+    const inserted = adapter.insertText("Hello Telegram", { autoSend: true })
+    expect(inserted).toBe(true)
+
+    vi.advanceTimersByTime(200)
+    expect(sendClicked).toBe(true)
+
+    input.remove()
+    btn.remove()
+    vi.useRealTimers()
   })
 })

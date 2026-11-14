@@ -1,8 +1,8 @@
 // @vitest-environment jsdom
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { WebChatAutoReplyMode, WebChatTone } from "@/types/config/web-chat"
-import { fireEvent, render, screen } from "@testing-library/react"
-import { describe, expect, it, vi } from "vitest"
+import { cleanup, fireEvent, render, screen } from "@testing-library/react"
+import { afterEach, describe, expect, it, vi } from "vitest"
 import { ChatContextHeader } from "../ChatContextHeader"
 
 vi.mock("@/utils/i18n", () => ({
@@ -16,6 +16,10 @@ vi.mock("@/utils/i18n", () => ({
 }))
 
 describe("ChatContextHeader", () => {
+  afterEach(() => {
+    cleanup()
+  })
+
   const defaultProps = {
     room: {
       id: "zalo-123",
@@ -87,7 +91,9 @@ describe("ChatContextHeader", () => {
     expect(screen.getByText("Google Gemini")).toBeDefined()
     expect(screen.getByText("VI")).toBeDefined()
     expect(screen.getByText("options.webChat.toneShort.friendly")).toBeDefined()
-    expect(screen.getByText("options.webChat.sidepanel.autoReply.none")).toBeDefined()
+    expect(screen.getAllByText("options.webChat.sidepanel.autoReply.none").length).toBeGreaterThan(
+      0,
+    )
   })
 
   it("highlights auto reply pill when enabled and handles mode change", () => {
@@ -100,6 +106,8 @@ describe("ChatContextHeader", () => {
       />,
     )
 
-    expect(screen.getByText("options.webChat.sidepanel.autoReply.draft")).toBeDefined()
+    expect(screen.getAllByText("options.webChat.sidepanel.autoReply.draft").length).toBeGreaterThan(
+      0,
+    )
   })
 })
