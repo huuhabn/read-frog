@@ -9,6 +9,7 @@ vi.mock("@/utils/i18n", () => ({
   i18n: {
     t: (key: string) => key,
   },
+  getUiLocale: () => "en",
 }))
 
 describe("UpworkSettingsPage", () => {

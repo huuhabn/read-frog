@@ -1312,13 +1312,14 @@ options:
       translateTo: Translate to
       translateProvider: Translation Provider
   webChat:
-    title: Web Chat Assistant
+    title: Web Assistant
     pageDescription: Configure AI assistant for Zalo, Telegram, Slack, and web chat platforms.
     enable:
-      title: Enable Web Chat Assistant
+      title: Enable Web Assistant
       description: Activates floating menu, slash commands, real-time translation, and AI assistant on chat platforms.
     sections:
       provider: AI Provider
+      behavior: Writing Style & Rules
       realtimeTranslate: Real-time Bilingual Translation
       slashCommands: Slash Commands & Shortcuts
       platforms: Supported Platforms
@@ -1327,6 +1328,24 @@ options:
       title: AI Provider
       description: LLM provider for web chat assistance (smart replies, rewrites, summaries).
       placeholder: Select an AI Provider
+    tone:
+      title: Chat Writing Style & Tone
+      description: The default writing style and tone used by the AI when crafting replies and rewriting messages.
+      friendly: Friendly (Warm, approachable)
+      professional: Professional (Polite, workplace-appropriate)
+      brief: Brief (Concise, to the point)
+      casual: Casual (Everyday, relaxed)
+      humorous: Humorous (Witty, cheerful)
+    toneShort:
+      friendly: Friendly
+      professional: Professional
+      brief: Brief
+      casual: Casual
+      humorous: Humorous
+    rules:
+      title: Rules the AI must follow
+      description: Custom constraints applied as global instructions for all web chat actions.
+      placeholder: "E.g. Always respond politely, keep messages concise, never use jargon..."
     translate:
       inboundEnableTitle: Auto-translate incoming messages
       inboundEnableDesc: Displays a sub-line translation below received messages in the chat interface.
@@ -1362,9 +1381,14 @@ options:
       maskEmailTitle: Mask email addresses
       maskEmailDesc: Replaces email addresses with [EMAIL_1], [EMAIL_2]...
     sidepanel:
-      tabLabel: Web Chat Assistant
+      tabLabel: Web Assistant
       noRoomDetected: No chat room detected
       refreshTooltip: Refresh messages
+      resetDefaults: Reset to settings defaults
+      model: Model
+      language: Language
+      tone: Tone
+      sessionCustomized: Session customized
       messagesCount: "$1 messages"
       piiMasked: PII Masked
       cloudLlm: Cloud LLM

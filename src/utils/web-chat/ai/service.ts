@@ -13,7 +13,7 @@ export interface SmartReplyResult {
   viGloss?: string
 }
 
-export type RewriteTone = "professional" | "friendly" | "brief"
+export type RewriteTone = "friendly" | "professional" | "brief" | "casual" | "humorous"
 
 export interface RoomSummaryResult {
   summary: string
@@ -29,6 +29,7 @@ export interface RoomSummaryResult {
 export interface CallWebChatLLMOptions {
   systemPrompt: string
   userPrompt: string
+  rules?: string
   maskPii?: boolean
   providerId?: string
   sourceFeature?: string
@@ -81,9 +82,10 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
   const {
     systemPrompt,
     userPrompt,
+    rules,
     maskPii = true,
     providerId,
-    sourceFeature = "Web Chat Assistant",
+    sourceFeature = "Web Assistant",
     url,
   } = options
 
@@ -110,10 +112,14 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
   let outputText = ""
   let tokenUsage: AuditLogTokenUsage | undefined
 
+  const fullSystemPrompt = rules?.trim()
+    ? `${systemPrompt}\n\nStrict Rules you MUST follow:\n${rules.trim()}`
+    : systemPrompt
+
   try {
     const response = await generateText({
       model,
-      system: systemPrompt,
+      system: fullSystemPrompt,
       prompt: processedPrompt,
       temperature: 0.7,
     })
@@ -219,6 +225,8 @@ export async function generateSmartReply(options: {
   customInstruction?: string
   targetLang?: string
   tone?: RewriteTone
+  rules?: string
+  providerId?: string
   sourceFeature?: string
   url?: string
 }): Promise<SmartReplyResult> {
@@ -227,6 +235,8 @@ export async function generateSmartReply(options: {
     customInstruction,
     targetLang = "vi",
     tone = "friendly",
+    rules,
+    providerId,
     sourceFeature = "Web Chat (Smart Reply)",
     url,
   } = options
@@ -235,15 +245,18 @@ export async function generateSmartReply(options: {
     .map((m) => `${m.author} (${m.isOwn ? "Tôi" : "Đối phương"}): ${m.content}`)
     .join("\n")
 
-  const toneGuide = {
-    professional: "polite, formal, professional, well-crafted",
+  const toneGuide: Record<RewriteTone, string> = {
     friendly: "warm, approachable, natural, friendly",
+    professional: "polite, formal, professional, well-crafted",
     brief: "concise, direct, to-the-point",
-  }[tone]
+    casual: "casual, relaxed, conversational, natural",
+    humorous: "witty, cheerful, playful, humorous",
+  }
+  const selectedToneGuide = toneGuide[tone] || toneGuide.friendly
 
   const systemPrompt = `You are an intelligent Web Chat AI Assistant.
 Analyze the recent messages in this conversation and compose the most natural and appropriate reply.
-Tone: ${toneGuide}.
+Tone: ${selectedToneGuide}.
 Target Language of the reply: ${targetLang}.
 Strict Output Requirement: Return ONLY raw JSON without markdown formatting (\`\`\`json):
 {
@@ -260,6 +273,8 @@ ${customInstruction ? `User specific instruction: ${customInstruction}` : "Pleas
     const raw = await callWebChatLLM({
       systemPrompt,
       userPrompt,
+      rules,
+      providerId,
       maskPii: true,
       sourceFeature,
       url,
@@ -277,8 +292,10 @@ ${customInstruction ? `User specific instruction: ${customInstruction}` : "Pleas
   } catch {
     // Fallback if JSON parsing failed
     const fallback = await callWebChatLLM({
-      systemPrompt: `You are an intelligent Web Chat AI Assistant. Compose an appropriate reply for the conversation in ${targetLang} using a ${toneGuide} tone. Return ONLY the reply content without explanation.`,
+      systemPrompt: `You are an intelligent Web Chat AI Assistant. Compose an appropriate reply for the conversation in ${targetLang} using a ${selectedToneGuide} tone. Return ONLY the reply content without explanation.`,
       userPrompt: formattedContext || "(No prior context)",
+      rules,
+      providerId,
       maskPii: true,
       sourceFeature: `${sourceFeature} [Fallback]`,
       url,
@@ -293,6 +310,7 @@ ${customInstruction ? `User specific instruction: ${customInstruction}` : "Pleas
 export async function translateChatText(options: {
   text: string
   targetLang?: string
+  rules?: string
   providerId?: string
   sourceFeature?: string
   url?: string
@@ -300,6 +318,7 @@ export async function translateChatText(options: {
   const {
     text,
     targetLang = "vi",
+    rules,
     providerId,
     sourceFeature = "Web Chat (Translate)",
     url,
@@ -315,6 +334,7 @@ Output STRICTLY and ONLY the translated text without any quotes, introduction, m
   return callWebChatLLM({
     systemPrompt,
     userPrompt: trimmed,
+    rules,
     maskPii: true,
     providerId,
     sourceFeature,
@@ -323,27 +343,34 @@ Output STRICTLY and ONLY the translated text without any quotes, introduction, m
 }
 
 /**
- * Rewrite selected text into one of three tones: professional, friendly, brief.
+ * Rewrite selected text into one of tones: friendly, professional, brief, casual, humorous.
  */
 export async function rewriteChatText(
   text: string,
-  tone: RewriteTone = "professional",
+  tone: RewriteTone = "friendly",
   options?: {
+    rules?: string
+    providerId?: string
     sourceFeature?: string
     url?: string
   },
 ): Promise<string> {
-  const toneDesc = {
-    professional: "professional, formal, polite, workplace-appropriate",
+  const toneDesc: Record<RewriteTone, string> = {
     friendly: "friendly, casual, warm, conversational",
+    professional: "professional, formal, polite, workplace-appropriate",
     brief: "brief, concise, direct, eliminating filler words",
-  }[tone]
+    casual: "casual, relaxed, conversational, natural",
+    humorous: "witty, cheerful, playful, humorous",
+  }
+  const selectedTone = toneDesc[tone] || toneDesc.friendly
 
-  const systemPrompt = `You are an expert message editor. Rewrite the user's message so that it sounds ${toneDesc}. Keep the core meaning and essential facts intact. Respond ONLY with the rewritten message without preface or explanation.`
+  const systemPrompt = `You are an expert message editor. Rewrite the user's message so that it sounds ${selectedTone}. Keep the core meaning and essential facts intact. Respond ONLY with the rewritten message without preface or explanation.`
 
   return callWebChatLLM({
     systemPrompt,
     userPrompt: text,
+    rules: options?.rules,
+    providerId: options?.providerId,
     maskPii: true,
     sourceFeature: options?.sourceFeature || `Web Chat (Rewrite - ${tone})`,
     url: options?.url,
@@ -357,6 +384,8 @@ export async function summarizeChatRoom(
   messages: ChatMessage[],
   roomName = "Chat",
   options?: {
+    rules?: string
+    providerId?: string
     sourceFeature?: string
     url?: string
   },
@@ -381,6 +410,8 @@ Return STRICT JSON format (without markdown code blocks):
     const raw = await callWebChatLLM({
       systemPrompt,
       userPrompt: context,
+      rules: options?.rules,
+      providerId: options?.providerId,
       maskPii: true,
       sourceFeature: options?.sourceFeature || "Web Chat (Summary)",
       url: options?.url,

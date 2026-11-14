@@ -1,4 +1,6 @@
+import type { LanguageTag } from "@read-frog/definitions"
 import { useAtom } from "jotai"
+import { LanguageCombobox } from "@/components/language-combobox"
 import ProviderSelector from "@/components/llm-providers/provider-selector"
 import { SetApiKeyWarning } from "@/components/llm-providers/set-api-key-warning"
 import { useFeatureProvider } from "@/components/llm-providers/use-feature-providers"
@@ -12,15 +14,15 @@ import {
   SelectValue,
 } from "@/components/ui/base-ui/select"
 import { Switch } from "@/components/ui/base-ui/switch"
+import { Textarea } from "@/components/ui/base-ui/textarea"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
-import { UPWORK_TRANSLATE_LANGUAGES } from "@/utils/sidepanel/upwork"
 import { ConfigItem } from "../../components/config-item"
 import { ConfigSection } from "../../components/config-section"
 import { PageLayout } from "../../components/page-layout"
 import { SELECT_CONTENT_PROPS } from "../../components/select-content-props"
 
-export function WebChatSettingsPage() {
+export function WebAssistantSettingsPage() {
   const [webChat, setWebChat] = useAtom(configFieldsAtomMap.webChat)
   const { providers, providerId, providerConfig, setProviderId } = useFeatureProvider("webChat")
 
@@ -30,8 +32,6 @@ export function WebChatSettingsPage() {
       ...patch,
     })
   }
-
-  const translateLangs = UPWORK_TRANSLATE_LANGUAGES.filter((l) => l.code !== "original")
 
   return (
     <PageLayout
@@ -72,6 +72,51 @@ export function WebChatSettingsPage() {
         </ConfigItem>
       </ConfigSection>
 
+      <ConfigSection title={i18n.t("options.webChat.sections.behavior")}>
+        <ConfigItem
+          id="webchat-tone"
+          title={i18n.t("options.webChat.tone.title")}
+          description={i18n.t("options.webChat.tone.description")}
+        >
+          <Select
+            value={webChat.tone}
+            onValueChange={(val) => {
+              if (val) handleUpdate({ tone: val })
+            }}
+          >
+            <SelectTrigger size="sm" className="w-56 text-xs">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent {...SELECT_CONTENT_PROPS}>
+              <SelectGroup>
+                <SelectItem value="friendly">{i18n.t("options.webChat.tone.friendly")}</SelectItem>
+                <SelectItem value="professional">
+                  {i18n.t("options.webChat.tone.professional")}
+                </SelectItem>
+                <SelectItem value="brief">{i18n.t("options.webChat.tone.brief")}</SelectItem>
+                <SelectItem value="casual">{i18n.t("options.webChat.tone.casual")}</SelectItem>
+                <SelectItem value="humorous">{i18n.t("options.webChat.tone.humorous")}</SelectItem>
+              </SelectGroup>
+            </SelectContent>
+          </Select>
+        </ConfigItem>
+
+        <ConfigItem
+          id="webchat-rules"
+          title={i18n.t("options.webChat.rules.title")}
+          description={i18n.t("options.webChat.rules.description")}
+          orientation="vertical"
+        >
+          <Textarea
+            value={webChat.rules}
+            onChange={(e) => handleUpdate({ rules: e.target.value })}
+            placeholder={i18n.t("options.webChat.rules.placeholder")}
+            rows={4}
+            className="w-full font-mono text-xs"
+          />
+        </ConfigItem>
+      </ConfigSection>
+
       <ConfigSection title={i18n.t("options.webChat.sections.realtimeTranslate")}>
         <ConfigItem
           id="webchat-translate-enable"
@@ -89,23 +134,15 @@ export function WebChatSettingsPage() {
           title={i18n.t("options.webChat.translate.inboundLangTitle")}
           description={i18n.t("options.webChat.translate.inboundLangDesc")}
         >
-          <Select
-            value={webChat.inboundTargetLang}
-            onValueChange={(val) => handleUpdate({ inboundTargetLang: val ?? "vi" })}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent {...SELECT_CONTENT_PROPS}>
-              <SelectGroup>
-                {translateLangs.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    {i18n.t(lang.labelKey)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <LanguageCombobox
+            triggerSize="sm"
+            className="text-xs"
+            value={webChat.inboundTargetLang as LanguageTag}
+            onValueChange={(val) => {
+              if (val === "auto") return
+              handleUpdate({ inboundTargetLang: val })
+            }}
+          />
         </ConfigItem>
 
         <ConfigItem
@@ -113,23 +150,15 @@ export function WebChatSettingsPage() {
           title={i18n.t("options.webChat.translate.outboundLangTitle")}
           description={i18n.t("options.webChat.translate.outboundLangDesc")}
         >
-          <Select
-            value={webChat.outboundTargetLang}
-            onValueChange={(val) => handleUpdate({ outboundTargetLang: val ?? "en" })}
-          >
-            <SelectTrigger className="w-48">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent {...SELECT_CONTENT_PROPS}>
-              <SelectGroup>
-                {translateLangs.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    {i18n.t(lang.labelKey)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          <LanguageCombobox
+            triggerSize="sm"
+            className="text-xs"
+            value={webChat.outboundTargetLang as LanguageTag}
+            onValueChange={(val) => {
+              if (val === "auto") return
+              handleUpdate({ outboundTargetLang: val })
+            }}
+          />
         </ConfigItem>
 
         <ConfigItem

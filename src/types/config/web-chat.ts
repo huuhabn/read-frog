@@ -1,8 +1,13 @@
 import { z } from "zod"
 
+export type WebChatTone = "friendly" | "professional" | "brief" | "casual" | "humorous"
+
 export const DEFAULT_WEB_CHAT_CONFIG = {
   enabled: true,
   providerId: "",
+  // Style & Rules
+  tone: "friendly" as WebChatTone,
+  rules: "",
   // Translation
   translateEnabled: false,
   inboundTargetLang: "vi",
@@ -31,6 +36,10 @@ export const webChatConfigSchema = z
   .object({
     enabled: z.boolean().default(DEFAULT_WEB_CHAT_CONFIG.enabled),
     providerId: z.string().default(DEFAULT_WEB_CHAT_CONFIG.providerId),
+    tone: z
+      .enum(["friendly", "professional", "brief", "casual", "humorous"])
+      .default(DEFAULT_WEB_CHAT_CONFIG.tone),
+    rules: z.string().default(DEFAULT_WEB_CHAT_CONFIG.rules),
     translateEnabled: z.boolean().default(DEFAULT_WEB_CHAT_CONFIG.translateEnabled),
     inboundTargetLang: z.string().default(DEFAULT_WEB_CHAT_CONFIG.inboundTargetLang),
     outboundTargetLang: z.string().default(DEFAULT_WEB_CHAT_CONFIG.outboundTargetLang),

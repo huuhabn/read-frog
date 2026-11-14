@@ -1,6 +1,10 @@
+import type { WebChatTone } from "@/types/config/web-chat"
 import type { ChatMessage, ChatRoom } from "@/utils/web-chat/adapter/types"
-import { useCallback, useEffect, useRef, useState } from "react"
+import { useAtomValue } from "jotai"
+import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
+import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { getActiveTabInfo } from "@/utils/sidepanel/page-context"
 import { getActiveChatMessagesFromTab, insertTextToActiveChatTab } from "@/utils/sidepanel/web-chat"
 import {
@@ -20,6 +24,30 @@ interface RoomCacheData {
 }
 
 export function WebChatView() {
+  const webChatConfig = useAtomValue(configFieldsAtomMap.webChat)
+  const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
+
+  const llmProviders = useMemo(
+    () => getSelectableProvidersForCapability("webChat", providersConfig),
+    [providersConfig],
+  )
+
+  // Session overrides (scoped to sidepanel session)
+  const [sessionModel, setSessionModel] = useState<string | null>(null)
+  const [sessionLang, setSessionLang] = useState<string | null>(null)
+  const [sessionTone, setSessionTone] = useState<WebChatTone | null>(null)
+
+  const effectiveModel = sessionModel ?? webChatConfig?.providerId ?? ""
+  const effectiveLang = sessionLang ?? webChatConfig?.outboundTargetLang ?? "vi"
+  const effectiveTone: WebChatTone = sessionTone ?? webChatConfig?.tone ?? "friendly"
+  const isOverridden = sessionModel !== null || sessionLang !== null || sessionTone !== null
+
+  const handleResetDefaults = () => {
+    setSessionModel(null)
+    setSessionLang(null)
+    setSessionTone(null)
+  }
+
   const [currentTabId, setCurrentTabId] = useState<number | null>(null)
   const [currentTabUrl, setCurrentTabUrl] = useState<string | undefined>()
   const [room, setRoom] = useState<ChatRoom | null>(null)
@@ -85,6 +113,8 @@ export function WebChatView() {
     try {
       if (action === "summary") {
         const res = await summarizeChatRoom(messages, room?.name, {
+          rules: webChatConfig?.rules,
+          providerId: effectiveModel || undefined,
           sourceFeature: "Web Chat (Summary)",
           url: currentTabUrl,
         })
@@ -103,8 +133,10 @@ export function WebChatView() {
       } else if (action === "reply") {
         const res = await generateSmartReply({
           contextMessages: messages.slice(-5),
-          targetLang: "vi",
-          tone: "friendly",
+          targetLang: effectiveLang,
+          tone: effectiveTone,
+          rules: webChatConfig?.rules,
+          providerId: effectiveModel || undefined,
           sourceFeature: "Web Chat (Smart Reply)",
           url: currentTabUrl,
         })
@@ -126,6 +158,8 @@ export function WebChatView() {
         })
       } else if (action === "extract") {
         const res = await summarizeChatRoom(messages, room?.name, {
+          rules: webChatConfig?.rules,
+          providerId: effectiveModel || undefined,
           sourceFeature: "Web Chat (Extract Entities)",
           url: currentTabUrl,
         })
@@ -165,7 +199,9 @@ export function WebChatView() {
         const textToTranslate = lastMsg?.content || "No message to translate."
         const translated = await translateChatText({
           text: textToTranslate,
-          targetLang: "vi",
+          targetLang: effectiveLang,
+          rules: webChatConfig?.rules,
+          providerId: effectiveModel || undefined,
           sourceFeature: "Web Chat (Translate)",
           url: currentTabUrl,
         })
@@ -199,6 +235,15 @@ export function WebChatView() {
         messageCount={messages.length}
         loading={loading}
         onRefresh={() => void loadActiveChat(true)}
+        availableProviders={llmProviders}
+        selectedProviderId={effectiveModel}
+        onSelectProvider={(id) => setSessionModel(id)}
+        selectedLang={effectiveLang}
+        onSelectLang={(lang) => setSessionLang(lang)}
+        selectedTone={effectiveTone}
+        onSelectTone={(tone) => setSessionTone(tone)}
+        isOverridden={isOverridden}
+        onResetDefaults={handleResetDefaults}
       />
 
       <ActionChips

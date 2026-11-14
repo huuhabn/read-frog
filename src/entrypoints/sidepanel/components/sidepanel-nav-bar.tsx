@@ -30,7 +30,7 @@ interface NavItem {
 
 const NAV_ITEMS: NavItem[] = [
   { id: "chat", label: "Chat AI", icon: MessageSquare },
-  { id: "web-chat", label: "Web Chat Assistant", icon: BotMessageSquare },
+  { id: "web-chat", label: "Web Assistant", icon: BotMessageSquare },
   { id: "read", label: "Read & Summarize", icon: BookOpen },
   { id: "write", label: "Write & Compose", icon: PenTool },
   { id: "translate", label: "Translate", icon: Languages },

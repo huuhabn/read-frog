@@ -1,5 +1,7 @@
+import type { LanguageTag } from "@read-frog/definitions"
 import { useAtom, useAtomValue } from "jotai"
 import { useMemo } from "react"
+import { LanguageCombobox } from "@/components/language-combobox"
 import { Input } from "@/components/ui/base-ui/input"
 import {
   Select,
@@ -14,7 +16,6 @@ import { Textarea } from "@/components/ui/base-ui/textarea"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
-import { UPWORK_TRANSLATE_LANGUAGES } from "@/utils/sidepanel/upwork"
 import { ConfigItem } from "../../components/config-item"
 import { ConfigSection } from "../../components/config-section"
 import { PageLayout } from "../../components/page-layout"
@@ -171,25 +172,15 @@ export function UpworkSettingsPage() {
           title={i18n.t("options.upwork.parametersSection.translateLangTitle")}
           description={i18n.t("options.upwork.parametersSection.translateLangDesc")}
         >
-          <Select
-            value={upwork.translateLang || "en"}
+          <LanguageCombobox
+            triggerSize="sm"
+            className="w-56 text-xs"
+            value={(upwork.translateLang || "en") as LanguageTag}
             onValueChange={(val) => {
-              if (val) handleUpdate({ translateLang: val })
+              if (val === "auto") return
+              handleUpdate({ translateLang: val })
             }}
-          >
-            <SelectTrigger size="sm" className="w-56 text-xs">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent {...SELECT_CONTENT_PROPS}>
-              <SelectGroup>
-                {UPWORK_TRANSLATE_LANGUAGES.map((lang) => (
-                  <SelectItem key={lang.code} value={lang.code}>
-                    {i18n.t(lang.labelKey)}
-                  </SelectItem>
-                ))}
-              </SelectGroup>
-            </SelectContent>
-          </Select>
+          />
         </ConfigItem>
 
         <ConfigItem

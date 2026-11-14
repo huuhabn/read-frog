@@ -1172,6 +1172,7 @@ options:
       description: Kích hoạt menu nổi, slash commands, dịch thời gian thực và trợ lý AI trên các trang chat.
     sections:
       provider: Nhà cung cấp AI
+      behavior: Phong cách & Quy tắc AI
       realtimeTranslate: Dịch song ngữ thời gian thực
       slashCommands: Lệnh Slash & Phím tắt
       platforms: Nền tảng hỗ trợ
@@ -1180,6 +1181,24 @@ options:
       title: Nhà cung cấp AI
       description: Nhà cung cấp LLM cho trợ lý web chat (gợi ý trả lời, viết lại tin nhắn, tóm tắt).
       placeholder: Chọn nhà cung cấp AI
+    tone:
+      title: Phong cách & Giọng điệu trò chuyện
+      description: Phong cách và giọng điệu mặc định mà AI sử dụng khi gợi ý phản hồi và viết lại tin nhắn.
+      friendly: Thân thiện (Ấm áp, tự nhiên)
+      professional: Chuyên nghiệp (Lịch sự, công việc)
+      brief: Ngắn gọn (Súc tích, trực diện)
+      casual: Tự nhiên (Đời thường, thoải mái)
+      humorous: Hài hước (Dí dỏm, vui vẻ)
+    toneShort:
+      friendly: Thân thiện
+      professional: Chuyên nghiệp
+      brief: Ngắn gọn
+      casual: Tự nhiên
+      humorous: Hài hước
+    rules:
+      title: Quy tắc AI phải tuân theo
+      description: Các quy định bắt buộc áp dụng vào chỉ dẫn hệ thống cho toàn bộ tác vụ của trợ lý chat.
+      placeholder: "Ví dụ: Luôn xưng hô em và gọi anh/chị, giải thích dễ hiểu, không dùng tiếng lóng..."
     translate:
       inboundEnableTitle: Tự động dịch tin nhắn đến
       inboundEnableDesc: Hiển thị dòng dịch sub-line dưới mỗi tin nhắn nhận được trên giao diện chat.
@@ -1218,6 +1237,11 @@ options:
       tabLabel: Trợ lý Web Chat
       noRoomDetected: Chưa phát hiện phòng chat
       refreshTooltip: Làm mới tin nhắn
+      resetDefaults: Khôi phục cấu hình mặc định
+      model: Mô hình
+      language: Ngôn ngữ
+      tone: Giọng điệu
+      sessionCustomized: Đã tùy chỉnh phiên này
       messagesCount: "$1 tin nhắn"
       piiMasked: PII Masked
       cloudLlm: Cloud LLM

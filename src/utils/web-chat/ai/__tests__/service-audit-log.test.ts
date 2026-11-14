@@ -201,4 +201,20 @@ describe("Web Chat AI Service - Audit Log Integration", () => {
       }),
     )
   })
+
+  it("injects rules and tone into smart reply prompt", async () => {
+    const { generateText } = await import("ai")
+    await generateSmartReply({
+      contextMessages: [{ id: "1", author: "A", content: "Hi", timestamp: 1, isOwn: false }],
+      targetLang: "vi",
+      tone: "casual",
+      rules: "Always say hello first and be polite.",
+    })
+
+    expect(generateText).toHaveBeenCalledWith(
+      expect.objectContaining({
+        system: expect.stringMatching(/Strict Rules you MUST follow:[\s\S]*Always say hello first/),
+      }),
+    )
+  })
 })
