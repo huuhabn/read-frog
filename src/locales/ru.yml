@@ -358,6 +358,10 @@ options:
       theme:
         title: Тема
         description: Выберите тему для Workmate AI.
+        modeTitle: Режим
+        modeDescription: Следовать системным настройкам или выбрать светлый либо тёмный режим.
+        scaledTitle: Увеличенный интерфейс
+        scaledDescription: Увеличить интервалы и размер текста в Workmate AI.
         system: Системная
         light: Светлая
         dark: Тёмная

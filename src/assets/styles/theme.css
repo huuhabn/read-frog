@@ -202,7 +202,7 @@
     0 56px 67px 0 rgb(var(--rf-elevation-ink) / calc(0.08 * var(--rf-elevation-strength)));
 }
 
-:root {
+:where([data-theme="default"]) {
   /* Latin → Inter Variable (bundled via @fontsource-variable/inter, imported
      only in the extension's own pages — not content scripts). CJK stays on the
      lang-correct native font via system-ui (PingFang / 微软雅黑 on macOS/
@@ -286,7 +286,7 @@
 
 /* Semantic layer, the design system's, behind the `--rf-` prefix. Components only ever reference
    these. Contrast notes in the design system's theme.css are APCA Lc. */
-:root {
+:where([data-theme="default"]) {
   --rf-background: var(--color-white);
   --rf-foreground: var(--rf-neutral-950);
   --rf-card: var(--color-white);
@@ -386,7 +386,7 @@
   --rf-ring-flash-ring: color-mix(in oklab, var(--rf-destructive) 20%, transparent);
 }
 
-.dark {
+:where([data-theme="default"].dark) {
   --rf-background: var(--rf-neutral-950);
   --rf-foreground: var(--rf-neutral-50);
   --rf-card: var(--rf-neutral-900);
@@ -466,6 +466,16 @@
      the light-theme pair is too hot against a near-black surface. */
   --rf-ring-flash-border: color-mix(in oklab, var(--rf-destructive) 50%, transparent);
   --rf-ring-flash-ring: color-mix(in oklab, var(--rf-destructive) 40%, transparent);
+}
+
+.theme-scaled {
+  --spacing: 0.275rem;
+  --text-xs: 0.8125rem;
+  --text-sm: 0.9375rem;
+  --text-base: 1.0625rem;
+  --text-lg: 1.1875rem;
+  --text-xl: 1.375rem;
+  --text-2xl: 1.625rem;
 }
 
 @layer base {

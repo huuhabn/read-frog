@@ -1,7 +1,6 @@
-import type { ThemeMode } from "@/types/config/theme"
-import { storage } from "#imports"
-import { DEFAULT_THEME_MODE } from "@/types/config/theme"
-import { THEME_STORAGE_KEY } from "./constants/config"
+import type { Theme, ThemeMode, ThemeSettings } from "@/types/config/theme"
+import { DEFAULT_THEME_NAME, DEFAULT_THEME_SCALED } from "@/types/config/theme"
+import { getThemeMode } from "./theme-storage"
 
 export function isDarkMode(themeMode: ThemeMode = "system"): boolean {
   if (themeMode === "system") {
@@ -13,17 +12,39 @@ export function isDarkMode(themeMode: ThemeMode = "system"): boolean {
   return themeMode === "dark"
 }
 
-export function applyTheme(target: HTMLElement, theme: "light" | "dark") {
-  target.classList.remove("light", "dark")
-  target.classList.add(theme)
-  target.style.colorScheme = theme
+const RTL_LANGUAGES = new Set(["ar", "he", "fa", "ur"])
+
+export function getTextDirection(locale: string): "ltr" | "rtl" {
+  const language = locale.trim().toLowerCase().split(/[-_]/)[0] ?? ""
+  return RTL_LANGUAGES.has(language) ? "rtl" : "ltr"
+}
+
+export function resolveThemeMode(mode: ThemeMode): Theme {
+  return isDarkMode(mode) ? "dark" : "light"
+}
+
+export function applyTheme(
+  target: HTMLElement,
+  settingsOrTheme: ThemeSettings | Theme,
+  locale = document.documentElement.lang || "en",
+) {
+  const settings: ThemeSettings =
+    typeof settingsOrTheme === "string"
+      ? { theme: DEFAULT_THEME_NAME, mode: settingsOrTheme, scaled: DEFAULT_THEME_SCALED }
+      : settingsOrTheme
+  const resolvedMode = resolveThemeMode(settings.mode)
+
+  target.dataset.theme = settings.theme
+  target.classList.toggle("dark", resolvedMode === "dark")
+  target.classList.toggle("theme-scaled", settings.scaled)
+  target.dir = getTextDirection(locale)
+  target.style.colorScheme = resolvedMode
 }
 
 export async function getLocalThemeMode(): Promise<ThemeMode> {
   try {
-    const themeMode = await storage.getItem<ThemeMode>(`local:${THEME_STORAGE_KEY}`)
-    return themeMode ?? DEFAULT_THEME_MODE
+    return await getThemeMode()
   } catch {
-    return DEFAULT_THEME_MODE
+    return "system"
   }
 }

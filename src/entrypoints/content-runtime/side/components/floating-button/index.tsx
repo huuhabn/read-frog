@@ -4,15 +4,22 @@ import { useAtom, useAtomValue } from "jotai"
 import { useEffect, useRef, useState } from "react"
 import { browser } from "#imports"
 import logo from "@/assets/icons/logo.png?url&no-inline"
+import { useTheme } from "@/components/providers/theme-provider"
 import {
   DropdownMenu,
+  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { useIsFullscreen } from "@/hooks/use-is-fullscreen"
 import { ANALYTICS_FEATURE, ANALYTICS_SURFACE } from "@/types/analytics"
+import { THEMES, themeModes } from "@/types/config/theme"
 import { createFeatureUsageContext } from "@/utils/analytics"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { APP_NAME } from "@/utils/constants/app"
@@ -459,14 +466,10 @@ export default function FloatingButton() {
         )}
       </div>
       {!isDraggingButton && (
-        <HiddenButton
+        <QuickSettings
           side={floatingButtonSide}
           expanded={isFloatingButtonExpanded}
-          icon={<IconSettings className="h-5 w-5" />}
-          label={i18n.t("options.floatingButton.tooltips.settings")}
-          onClick={() => {
-            void sendMessage("openOptionsPage", undefined)
-          }}
+          onOpenChange={setIsDropdownOpen}
         />
       )}
       {!isDraggingButton && (
@@ -479,6 +482,67 @@ export default function FloatingButton() {
         />
       )}
     </div>
+  )
+}
+
+const MODE_LABEL_KEY = {
+  system: "options.preference.appearanceAndLanguage.theme.system",
+  light: "options.preference.appearanceAndLanguage.theme.light",
+  dark: "options.preference.appearanceAndLanguage.theme.dark",
+} as const
+
+function QuickSettings({
+  side,
+  expanded,
+  onOpenChange,
+}: {
+  side: FloatingButtonSide
+  expanded: boolean
+  onOpenChange: (open: boolean) => void
+}) {
+  const { themeName, themeMode, scaled, setThemeMode, setScaled } = useTheme()
+
+  return (
+    <DropdownMenu onOpenChange={onOpenChange}>
+      <DropdownMenuTrigger
+        aria-label={i18n.t("options.floatingButton.tooltips.settings")}
+        className={cn(
+          "cursor-pointer rounded-full border border-border bg-white p-1.5 text-neutral-600 shadow-lg transition-transform duration-300 hover:bg-neutral-100 dark:bg-neutral-900 dark:text-neutral-400 dark:hover:bg-neutral-800",
+          side === "right" ? "mr-2" : "ml-2",
+          expanded ? "translate-x-0" : side === "right" ? "translate-x-12" : "-translate-x-12",
+        )}
+      >
+        <IconSettings className="h-5 w-5" />
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        container={shadowWrapper}
+        side={side === "right" ? "left" : "right"}
+        className="w-56"
+      >
+        <DropdownMenuLabel>{THEMES[themeName].name}</DropdownMenuLabel>
+        <DropdownMenuRadioGroup
+          value={themeMode}
+          onValueChange={(value) => void setThemeMode(value as (typeof themeModes)[number])}
+        >
+          {themeModes.map((mode) => (
+            <DropdownMenuRadioItem key={mode} value={mode}>
+              {i18n.t(MODE_LABEL_KEY[mode])}
+            </DropdownMenuRadioItem>
+          ))}
+        </DropdownMenuRadioGroup>
+        <DropdownMenuCheckboxItem
+          checked={scaled}
+          onCheckedChange={(checked) => void setScaled(checked)}
+          onClick={(event) => event.preventDefault()}
+        >
+          {i18n.t("options.preference.appearanceAndLanguage.theme.scaledTitle")}
+        </DropdownMenuCheckboxItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem onClick={() => void sendMessage("openOptionsPage", undefined)}>
+          {i18n.t("popup.options")}
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
   )
 }
 

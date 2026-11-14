@@ -358,6 +358,10 @@ options:
       theme:
         title: テーマ
         description: Workmate AI のテーマを選択します。
+        modeTitle: モード
+        modeDescription: システム設定に従うか、ライトまたはダークを選択します。
+        scaledTitle: 拡大表示
+        scaledDescription: Workmate AI の余白と文字サイズを大きくします。
         system: システム
         light: ライト
         dark: ダーク
