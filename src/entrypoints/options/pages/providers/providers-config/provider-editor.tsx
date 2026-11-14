@@ -23,6 +23,7 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/base-ui/alert-dialog"
 import { Button } from "@/components/ui/base-ui/button"
+import { Checkbox } from "@/components/ui/base-ui/checkbox"
 import {
   Collapsible,
   CollapsibleContent,
@@ -31,6 +32,11 @@ import {
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProvider } from "@/types/config/provider"
 import { configAtom, configFieldsAtomMap, writeConfigAtom } from "@/utils/atoms/config"
+import {
+  computeLanguageDetectionFallbackAfterDeletion,
+  computeProviderFallbacksAfterDeletion,
+  computeSelectionToolbarCustomActionFallbacksAfterDeletion,
+} from "@/utils/config/helpers"
 import {
   buildFeatureProviderPatch,
   FEATURE_KEYS,
@@ -76,6 +82,7 @@ interface ProviderEditorContextValue {
     assignFeature: (featureKey: FeatureKey) => Promise<void>
     assignLanguageDetection: () => Promise<void>
     assignCustomAction: (actionId: string) => Promise<void>
+    toggleAllAssignments: (assign: boolean) => Promise<void>
     duplicate?: () => Promise<void>
     delete?: () => Promise<void>
   }
@@ -98,6 +105,14 @@ function useRequiredProviderCommand(command: "duplicate" | "delete") {
   }
   return action
 }
+
+const BUILT_IN_FEATURE_KEYS: readonly FeatureKey[] = [
+  "pageTranslation",
+  "videoSubtitles",
+  "selectionTranslation",
+  "inputTranslation",
+  "noteSuggestion",
+]
 
 function useProviderEditorValue({
   identity,
@@ -161,6 +176,94 @@ function useProviderEditorValue({
           }),
           ...getAssignmentProvidersPatch(),
         })
+      },
+      toggleAllAssignments: async (assign) => {
+        if (assign) {
+          const targetKeys = providerType
+            ? FEATURE_KEYS.filter(
+                (featureKey) =>
+                  FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType) &&
+                  !(
+                    featureKey === "pageTranslation" &&
+                    config.pageTranslation.mode === "translationOnly" &&
+                    !providerSupportsTranslationOnlyMode(providerType)
+                  ),
+              )
+            : BUILT_IN_FEATURE_KEYS
+
+          const patchAssignments: Partial<Record<FeatureKey, string>> = {}
+          for (const key of targetKeys) {
+            patchAssignments[key] = providerId
+          }
+          let patch = buildFeatureProviderPatch(patchAssignments)
+
+          const isLlm = !providerType || isLLMProvider(providerType)
+          if (isLlm) {
+            patch = {
+              ...patch,
+              languageDetection: {
+                mode: "llm",
+                providerId,
+              },
+            }
+
+            let currentToolbar = config.selectionToolbar
+            for (const action of getSelectionToolbarActions(config.selectionToolbar)) {
+              currentToolbar = patchSelectionToolbarAction(currentToolbar, action.id, {
+                providerId,
+              })
+            }
+            patch = {
+              ...patch,
+              selectionToolbar: currentToolbar,
+            }
+          }
+
+          await setConfig({
+            ...patch,
+            ...getAssignmentProvidersPatch(),
+          })
+        } else {
+          const remainingProviders = config.providersConfig.filter((p) => p.id !== providerId)
+          const fallbacks = computeProviderFallbacksAfterDeletion(
+            providerId,
+            config,
+            remainingProviders,
+          )
+          let patch = buildFeatureProviderPatch(fallbacks)
+
+          const isLlm = !providerType || isLLMProvider(providerType)
+          if (isLlm) {
+            const ldFallback = computeLanguageDetectionFallbackAfterDeletion(
+              providerId,
+              config,
+              remainingProviders,
+            )
+            if (ldFallback !== null) {
+              patch = {
+                ...patch,
+                languageDetection: {
+                  ...config.languageDetection,
+                  ...(ldFallback ? { providerId: ldFallback } : { mode: "basic" as const }),
+                },
+              }
+            }
+
+            const toolbarFallback = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
+              providerId,
+              config,
+              remainingProviders,
+            )
+            if (toolbarFallback) {
+              patch = {
+                ...patch,
+                selectionToolbar: toolbarFallback,
+              }
+            }
+          }
+
+          await setConfig(patch)
+        }
       },
       ...(duplicate ? { duplicate } : {}),
       ...(deleteProvider ? { delete: deleteProvider } : {}),
@@ -357,6 +460,84 @@ function AdvancedFields() {
   )
 }
 
+function AllAssignmentsCheckbox() {
+  const {
+    state: {
+      assignmentTarget: { providerId, providerType },
+    },
+    actions,
+  } = useProviderEditor()
+  const config = useAtomValue(configAtom)
+
+  const candidateFeatureKeys = providerType
+    ? FEATURE_KEYS.filter(
+        (featureKey) =>
+          FEATURE_PROVIDER_DEFS[featureKey].isProvider(providerType) &&
+          !(
+            featureKey === "pageTranslation" &&
+            config.pageTranslation.mode === "translationOnly" &&
+            !providerSupportsTranslationOnlyMode(providerType)
+          ),
+      )
+    : BUILT_IN_FEATURE_KEYS
+
+  const isLlm = !providerType || isLLMProvider(providerType)
+  const customActions = isLlm ? getSelectionToolbarActions(config.selectionToolbar) : []
+
+  let totalCount = candidateFeatureKeys.length
+  let assignedCount = 0
+
+  for (const key of candidateFeatureKeys) {
+    if (FEATURE_PROVIDER_DEFS[key].getProviderId(config) === providerId) {
+      assignedCount++
+    }
+  }
+
+  if (isLlm) {
+    totalCount += 1
+    if (
+      config.languageDetection.mode === "llm" &&
+      config.languageDetection.providerId === providerId
+    ) {
+      assignedCount++
+    }
+
+    totalCount += customActions.length
+    for (const action of customActions) {
+      if (action.providerId === providerId) {
+        assignedCount++
+      }
+    }
+  }
+
+  if (totalCount === 0) return null
+
+  const isAllChecked = assignedCount === totalCount
+  const isIndeterminate = assignedCount > 0 && assignedCount < totalCount
+
+  return (
+    <div
+      className="flex cursor-pointer items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground"
+      onClick={(e) => e.stopPropagation()}
+    >
+      <Checkbox
+        id={`select-all-features-${providerId}`}
+        checked={isAllChecked}
+        indeterminate={isIndeterminate}
+        onCheckedChange={(checked) => {
+          void actions.toggleAllAssignments(checked)
+        }}
+      />
+      <label
+        htmlFor={`select-all-features-${providerId}`}
+        className="cursor-pointer font-normal whitespace-nowrap"
+      >
+        {i18n.t("options.apiProviders.featureProviders.applyToAll")}
+      </label>
+    </div>
+  )
+}
+
 function Assignments({
   children,
   defaultOpen = false,
@@ -368,15 +549,18 @@ function Assignments({
 
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-      <CollapsibleTrigger className="flex cursor-pointer items-center gap-2 py-2 text-sm text-muted-foreground hover:text-foreground">
-        <Icon
-          icon="tabler:chevron-right"
-          className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}
-        />
-        <span>{i18n.t("options.apiProviders.featureProviders.title")}</span>
-      </CollapsibleTrigger>
+      <div className="flex items-center justify-between py-2">
+        <CollapsibleTrigger className="flex cursor-pointer items-center gap-2 text-sm text-muted-foreground hover:text-foreground">
+          <Icon
+            icon="tabler:chevron-right"
+            className={cn("size-4 transition-transform duration-200", isOpen && "rotate-90")}
+          />
+          <span>{i18n.t("options.apiProviders.featureProviders.title")}</span>
+        </CollapsibleTrigger>
+        <AllAssignmentsCheckbox />
+      </div>
       <CollapsibleContent>
-        <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">{children}</div>
+        <div className="grid grid-cols-1 gap-3 pt-1 sm:grid-cols-2">{children}</div>
       </CollapsibleContent>
     </Collapsible>
   )
@@ -613,6 +797,7 @@ export const ProviderEditor = {
   AdvancedFields,
   Assignments,
   AssignmentRow,
+  AllAssignmentsCheckbox,
   CompatibleFeatureAssignments,
   FeatureAssignment,
   LanguageDetectionAssignment,

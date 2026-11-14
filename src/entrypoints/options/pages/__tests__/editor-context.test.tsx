@@ -201,4 +201,34 @@ describe("editor compound component contexts", () => {
       )
     })
   })
+
+  it("renders AllAssignmentsCheckbox in Assignments and toggles all assignments", async () => {
+    const store = createConfigStore()
+    const config = structuredClone(store.get(configAtom))
+    const providerConfig = config.providersConfig.find(
+      (provider) => provider.id === "openai-default",
+    )
+    if (!providerConfig || !isAPIProviderConfig(providerConfig)) {
+      throw new Error("Expected the default OpenAI provider")
+    }
+
+    render(
+      <Provider store={store}>
+        <ThemeProvider forcedTheme="light">
+          <CustomProviderAssignments providerConfig={providerConfig} />
+        </ThemeProvider>
+      </Provider>,
+    )
+
+    const checkbox = screen.getByRole("checkbox")
+    expect(checkbox).toBeInTheDocument()
+    fireEvent.click(checkbox)
+
+    await waitFor(() => {
+      const updatedConfig = store.get(configAtom)
+      expect(getBuiltInDictionaryAction(updatedConfig.selectionToolbar).providerId).toBe(
+        providerConfig.id,
+      )
+    })
+  })
 })
