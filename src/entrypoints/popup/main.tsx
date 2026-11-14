@@ -20,7 +20,7 @@ import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { sendMessage } from "@/utils/message"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import { queryClient } from "@/utils/tanstack-query"
-import { getLocalThemeMode } from "@/utils/theme"
+import { getLocalThemeMode, initDocumentTheme } from "@/utils/theme"
 import App from "./app"
 import {
   getIsInPatterns,
@@ -37,6 +37,7 @@ import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
 
+initDocumentTheme()
 setupExtensionPageLogging("popup")
 
 function HydrateAtoms({

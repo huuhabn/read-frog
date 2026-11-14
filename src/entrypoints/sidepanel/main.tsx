@@ -19,7 +19,7 @@ import {
   DEFAULT_SELECTED_CHAT_MODEL,
   getLocalSelectedChatModel,
 } from "@/utils/sidepanel/chat-model-storage"
-import { getLocalThemeMode } from "@/utils/theme"
+import { getLocalThemeMode, initDocumentTheme } from "@/utils/theme"
 import { ChatView } from "./components/chat/chat-view"
 import { ReadView } from "./components/read/read-view"
 import { SidePanelNavBar } from "./components/sidepanel-nav-bar"
@@ -30,6 +30,7 @@ import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/text-small.css"
 import "@/assets/styles/theme.css"
 
+initDocumentTheme()
 setupExtensionPageLogging("sidepanel")
 const log = createLogger("sidepanel")
 

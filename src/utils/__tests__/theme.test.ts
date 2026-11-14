@@ -2,7 +2,7 @@
 
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import { fakeBrowser } from "wxt/testing/fake-browser"
-import { applyTheme, getTextDirection, resolveThemeMode } from "../theme"
+import { applyTheme, getTextDirection, initDocumentTheme, resolveThemeMode } from "../theme"
 import {
   getThemeSettings,
   migrateLegacyThemeMode,
@@ -74,5 +74,25 @@ describe("theme DOM helpers", () => {
       value: vi.fn<() => MediaQueryList>(() => ({ matches: true }) as MediaQueryList),
     })
     expect(resolveThemeMode("system")).toBe("dark")
+  })
+
+  it("initializes document theme from localStorage", () => {
+    const root = document.createElement("div")
+    localStorage.setItem(
+      "workmate-theme-v1",
+      JSON.stringify({ version: 1, theme: "default", mode: "dark", scaled: true }),
+    )
+    initDocumentTheme(root)
+    expect(root.dataset.theme).toBe("default")
+    expect(root.classList.contains("dark")).toBe(true)
+    expect(root.classList.contains("theme-scaled")).toBe(true)
+    expect(root.style.colorScheme).toBe("dark")
+  })
+
+  it("handles missing or corrupted localStorage safely in initDocumentTheme", () => {
+    const root = document.createElement("div")
+    localStorage.setItem("workmate-theme-v1", "invalid json{")
+    initDocumentTheme(root)
+    expect(root.dataset.theme).toBe("default")
   })
 })

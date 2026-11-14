@@ -41,6 +41,30 @@ export function applyTheme(
   target.style.colorScheme = resolvedMode
 }
 
+export function initDocumentTheme(root: HTMLElement = document.documentElement) {
+  if (typeof document === "undefined" || !root) return
+  let value: { version?: number; theme?: string; mode?: string; scaled?: boolean } | null = null
+  try {
+    const raw = localStorage.getItem("workmate-theme-v1")
+    if (raw) {
+      value = JSON.parse(raw) as {
+        version?: number
+        theme?: string
+        mode?: string
+        scaled?: boolean
+      }
+    }
+  } catch {}
+
+  const mode: ThemeMode =
+    value?.version === 1 && typeof value.mode === "string" ? (value.mode as ThemeMode) : "system"
+  const dark = isDarkMode(mode)
+  root.dataset.theme = value?.theme === "default" ? value.theme : "default"
+  root.classList.toggle("dark", dark)
+  root.classList.toggle("theme-scaled", value?.version === 1 && value.scaled === true)
+  root.style.colorScheme = dark ? "dark" : "light"
+}
+
 export async function getLocalThemeMode(): Promise<ThemeMode> {
   try {
     return await getThemeMode()
