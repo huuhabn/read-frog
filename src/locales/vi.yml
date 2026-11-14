@@ -722,6 +722,12 @@ options:
       cycle:
         title: Đổi hướng mỗi lần
         description: Mỗi lần kích hoạt sẽ hoán đổi hai ngôn ngữ, nên lần kích hoạt sau sẽ đưa văn bản về ngôn ngữ bạn đã gõ.
+    systemPrompt:
+      title: System prompt AI
+      prompt:
+        title: System prompt
+        description: "Hướng dẫn AI cách dịch nội dung bạn gõ. Hỗ trợ token: {{targetLanguage}}, {{webTitle}}, {{webDescription}}, {{webContent}}, {{webSummary}}."
+      resetToDefault: Khôi phục mặc định
   floatingButton:
     title: Nút nổi
     pageDescription: Đặt vị trí nút nổi, hành động khi nhấp và những trang web cần ẩn nút.

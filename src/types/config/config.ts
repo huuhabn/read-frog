@@ -6,6 +6,7 @@ import {
   isBuiltInActionId,
 } from "@/utils/constants/custom-action"
 import { FEATURE_KEYS, FEATURE_PROVIDER_DEFS } from "@/utils/constants/feature-providers"
+import { DEFAULT_TRANSLATE_SYSTEM_PROMPT } from "@/utils/constants/prompt"
 import {
   MAX_SELECTION_OVERLAY_OPACITY,
   MIN_SELECTION_OVERLAY_OPACITY,
@@ -174,6 +175,11 @@ const inputTranslationSchema = z.object({
   toLang: inputTranslationLangSchema,
   enableCycle: z.boolean(),
   timeThreshold: z.number().min(100).max(1000),
+  // Custom system prompt for AI translation. Stored as-is; supports all
+  // {{token}} replacements (targetLanguage, webTitle, etc.). An empty string
+  // is treated the same as the default prompt at build time, so the
+  // `.default()` here is load-bearing: pre-field configs parse without it.
+  systemPrompt: z.string().default(DEFAULT_TRANSLATE_SYSTEM_PROMPT),
 })
 
 // Export types for use in components

@@ -283,5 +283,6 @@ export async function translateTextForInput(
     webPageContext,
     // User-typed newlines are always meaningful.
     preserveLineBreaks: true,
+    customSystemPrompt: config.inputTranslation.systemPrompt,
   })
 }

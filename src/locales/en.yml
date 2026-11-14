@@ -723,6 +723,12 @@ options:
       cycle:
         title: Swap direction each time
         description: Every trigger swaps the two languages, so triggering again brings the text back to the language you typed in.
+    systemPrompt:
+      title: AI system prompt
+      prompt:
+        title: System prompt
+        description: "Instruct the AI on how to translate your input. Supports tokens: {{targetLanguage}}, {{webTitle}}, {{webDescription}}, {{webContent}}, {{webSummary}}."
+      resetToDefault: Reset to default
   floatingButton:
     title: Floating Button
     pageDescription: Set which side the floating button sits on, what a click does, and where it stays hidden.

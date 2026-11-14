@@ -20,6 +20,7 @@ import {
   BUILT_IN_PAGE_TRANSLATE_PROMPTS,
   DEFAULT_BATCH_TRANSLATE_PROMPT,
   DEFAULT_SENTINEL_TRANSLATE_PROMPT,
+  DEFAULT_TRANSLATE_PROMPT,
   DEFAULT_TRANSLATE_PROMPT_ID,
   getTokenCellText,
   INPUT,
@@ -183,4 +184,53 @@ export async function getTranslatePrompt(
     ...options,
     glossaryTerms,
   })
+}
+
+/**
+ * Build a translate prompt for input translation using a custom system prompt
+ * template. The template supports all standard `{{token}}` replacements:
+ * targetLanguage, webTitle, webDescription, webContent, webSummary, input.
+ *
+ * Unlike page translation, input translation never runs in batch mode and never
+ * appends HTML-attribute-marker or inline-atom rules, so the system prompt is
+ * simpler. The glossary block is still appended after token replacement, for the
+ * same reason as `getTranslatePromptFromConfig`: a term containing a token
+ * substring must not corrupt the prompt.
+ */
+export function getInputTranslatePrompt(
+  systemPromptTemplate: string,
+  targetLang: string,
+  input: string,
+  options?: Pick<TranslatePromptOptions<WebPagePromptContext>, "context" | "glossaryTerms">,
+): TranslatePromptResult {
+  const title = resolvePromptReplacementValue(options?.context?.webTitle, "No title available")
+  const description = resolvePromptReplacementValue(
+    options?.context?.webDescription,
+    "No description available",
+  )
+  const contentText = resolvePromptReplacementValue(
+    options?.context?.webContent,
+    "No content available",
+  )
+  const summary = resolvePromptReplacementValue(
+    options?.context?.webSummary,
+    "No summary available",
+  )
+
+  const replaceTokens = (text: string) =>
+    text
+      .replaceAll(getTokenCellText(TARGET_LANGUAGE), targetLang)
+      .replaceAll(getTokenCellText(INPUT), input)
+      .replaceAll(getTokenCellText(WEB_TITLE), title)
+      .replaceAll(getTokenCellText(WEB_DESCRIPTION), description)
+      .replaceAll(getTokenCellText(WEB_CONTENT), contentText)
+      .replaceAll(getTokenCellText(WEB_SUMMARY), summary)
+
+  return {
+    systemPrompt: appendGlossaryToSystemPrompt(
+      replaceTokens(systemPromptTemplate),
+      options?.glossaryTerms ?? [],
+    ),
+    prompt: replaceTokens(DEFAULT_TRANSLATE_PROMPT),
+  }
 }

@@ -33,6 +33,7 @@ import { DEFAULT_NODE_TRANSLATION_SHORTCUT_KEY } from "./hotkeys"
 import {
   DEFAULT_SUBTITLE_TRANSLATE_PROMPTS_CONFIG,
   DEFAULT_TRANSLATE_PROMPTS_CONFIG,
+  DEFAULT_TRANSLATE_SYSTEM_PROMPT,
 } from "./prompt"
 import {
   buildDefaultProviderConfigList,
@@ -297,6 +298,7 @@ export const DEFAULT_CONFIG: Config = {
     toLang: "sourceCode",
     enableCycle: false,
     timeThreshold: 300,
+    systemPrompt: DEFAULT_TRANSLATE_SYSTEM_PROMPT,
   },
   videoSubtitles: {
     enabled: true,

@@ -22,7 +22,7 @@ import { normalizePromptContextValue } from "@/utils/host/translate/translate-te
 import { validateProviderHostedFeature } from "@/utils/hosted-ai/routing"
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
-import { getTranslatePrompt } from "@/utils/prompts/translate"
+import { getInputTranslatePrompt, getTranslatePrompt } from "@/utils/prompts/translate"
 import { canProviderRefGenerateText } from "@/utils/providers/provider-ref"
 import { TranslationCancelledError } from "@/utils/request/cancellation"
 import { getOrGenerateTranslationContextSummary } from "./translation-context-summary"
@@ -92,6 +92,7 @@ export function setupPageTranslationHandlers(): void {
         forceRetranslation = false,
         glossaryTerms,
         glossaryRevision,
+        customSystemPrompt,
       },
     } = message
     const langConfig = normalizeLanguageConfig(sentLangConfig)
@@ -156,8 +157,15 @@ export function setupPageTranslationHandlers(): void {
         throw new Error("Invalid local page translation provider")
       }
       // Create thunk based on type and params
+      // When a custom system prompt is provided (input translation), build a
+      // dedicated resolver from it so the AI uses the user's prompt instead
+      // of the page-translation default.
+      const promptResolver = customSystemPrompt
+        ? (targetLang: string, input: string, opts?: Parameters<typeof getTranslatePrompt>[2]) =>
+            Promise.resolve(getInputTranslatePrompt(customSystemPrompt, targetLang, input, opts))
+        : getTranslatePrompt
       const thunk = (signal?: AbortSignal) =>
-        executeTranslate(text, langConfig, localProvider, getTranslatePrompt, {
+        executeTranslate(text, langConfig, localProvider, promptResolver, {
           textFormat,
           preserveLineBreaks,
           signal,

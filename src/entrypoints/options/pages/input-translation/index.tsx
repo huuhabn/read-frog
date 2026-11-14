@@ -1,6 +1,7 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { LanguagesSection } from "./languages"
+import { SystemPromptSection } from "./system-prompt"
 import { TriggerSection } from "./trigger"
 
 export function InputTranslationPage() {
@@ -12,6 +13,7 @@ export function InputTranslationPage() {
     >
       <TriggerSection />
       <LanguagesSection />
+      <SystemPromptSection />
     </PageLayout>
   )
 }

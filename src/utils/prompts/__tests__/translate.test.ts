@@ -11,7 +11,7 @@ import {
 } from "@/utils/constants/prompt"
 import { HTML_ATTRIBUTE_MARKER } from "@/utils/host/translate/html-attribute-markers"
 import { getSubtitlesTranslatePrompt } from "../subtitles"
-import { getTranslatePromptFromConfig } from "../translate"
+import { getInputTranslatePrompt, getTranslatePromptFromConfig } from "../translate"
 
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: vi.fn<(...args: any[]) => any>(),
@@ -436,5 +436,22 @@ describe("no-translation sentinel", () => {
     expect(isNoTranslationSentinel(`text ${NO_TRANSLATION_SENTINEL}`)).toBe(false)
     expect(isNoTranslationSentinel("{{NO_TRANSLATION")).toBe(false)
     expect(isNoTranslationSentinel("")).toBe(false)
+  })
+
+  it("builds input translate prompt with custom system prompt template and token replacement", () => {
+    const customTemplate =
+      "You are translating to {{targetLanguage}}. Web: {{webTitle}} / {{webSummary}}."
+    const result = getInputTranslatePrompt(customTemplate, "Vietnamese", "Hello world", {
+      context: {
+        webTitle: "Test Page",
+        webSummary: "A summary of test page",
+      },
+    })
+
+    expect(result.systemPrompt).toBe(
+      "You are translating to Vietnamese. Web: Test Page / A summary of test page.",
+    )
+    expect(result.prompt).toContain("Translate to Vietnamese:")
+    expect(result.prompt).toContain("Hello world")
   })
 })

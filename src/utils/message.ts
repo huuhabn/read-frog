@@ -137,6 +137,11 @@ interface ProtocolMap {
       // message arrival order, which is a coin flip. See
       // `mergeBatchGlossaryTerms`.
       glossaryRevision?: number
+      // Custom system prompt template for input translation. When provided, the
+      // background uses it instead of the page-translation prompt, with all
+      // standard {{token}} replacements applied. Absent for page/selection
+      // translation, which always use their own prompt configs.
+      customSystemPrompt?: string
     },
   ) => Promise<string>
   // Drain queued/in-flight page-translation requests of one session (#1881).

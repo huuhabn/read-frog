@@ -311,6 +311,13 @@ export interface TranslateTextOptions {
   hostedFeature: HostedAiTextStreamRoute
   /** Page translation: told when the answer is empty, and why. */
   diagnosis?: ParagraphDiagnosis
+  /**
+   * Custom system prompt template for input translation. When present, the
+   * background uses it instead of the page-translation prompt, with all
+   * standard {{token}} replacements applied. Its SHA-256 hash is included in
+   * the cache key so users with different prompts never share cached results.
+   */
+  customSystemPrompt?: string
 }
 
 /**
@@ -332,6 +339,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     glossaryEnabled = false,
     hostedFeature,
     diagnosis,
+    customSystemPrompt,
   } = options
 
   const preparedText = prepareTranslationText(text)
@@ -388,6 +396,13 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
   // Add extra hash tags for cache differentiation
   hashComponents.push(...extraHashTags)
 
+  // A custom system prompt (input translation) changes the prompt sent to the
+  // AI, so it must be part of the cache key. Hashing it avoids bloating the
+  // key with potentially long strings while still differentiating prompts.
+  if (customSystemPrompt !== undefined) {
+    hashComponents.push(`customSystemPrompt:${Sha256Hex(customSystemPrompt)}`)
+  }
+
   // Final gate before dispatch: if the page-translation session that owned
   // this request has ended (or been replaced) while we were preparing it,
   // abort instead of enqueueing. Sending now would either be unscoped (if the
@@ -435,6 +450,7 @@ export async function translateTextCore(options: TranslateTextOptions): Promise<
     glossaryTerms,
     glossaryRevision,
     hostedFeature,
+    customSystemPrompt,
   })
   if (sessionId !== undefined) {
     // Raw result, sentinel included, so a "no translation needed" verdict is
