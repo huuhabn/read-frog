@@ -1,7 +1,7 @@
 name: Workmate AI
-extName: "Workmate AI - Dịch AI và thẻ ghi nhớ"
+extName: "Chat với trợ lý Workmate AI"
 extDescription: "Dịch song ngữ bằng AI cho trang web và phụ đề YouTube, Netflix, X. Lưu từ mới và ôn tập bằng thẻ ghi nhớ."
-uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+uninstallSurveyUrl: https://vexaltrix.com/workmate-ai/survey
 account:
   login: Đăng nhập
   webApp: Ứng dụng web
@@ -22,6 +22,32 @@ sidePanel:
   firefoxUserActionHint: Trong Firefox, hãy mở Workmate AI từ thanh bên của trình duyệt.
   firefoxUserActionHelpText: Xem cách mở thanh bên Firefox
   firefoxUserActionHelpUrl: https://support.mozilla.org/vi/kb/use-sidebar-access-tools-and-vertical-tabs
+  chat:
+    title: Workmate AI Assistant
+    description: Đặt câu hỏi, tóm tắt bài viết hoặc dịch thuật với các mô hình AI thông minh.
+    inputPlaceholder: "Hỏi bất kỳ điều gì, @ để đề cập, / để chọn tác vụ... (Enter để gửi)"
+    inputPlaceholderCompact: "Hỏi bất kỳ điều gì, @ để đề cập, / để chọn tác vụ"
+    tabContextOn: "Tab Context: Bật"
+    tabContextOff: "Tab Context: Tắt"
+    internalPage: "Trang nội bộ"
+    stop: "Dừng"
+    send: "Gửi"
+    actions: "Tác vụ"
+    selectModel: "Chọn mô hình"
+    noProviderConfigured: "Chưa có provider. Nhấn nút Cài đặt để thêm API Key."
+    newChat: "Cuộc trò chuyện mới"
+    history: "Lịch sử trò chuyện"
+    thinking: "Đang suy nghĩ..."
+    noResponse: "Không có phản hồi"
+    copied: "Đã chép"
+    copy: "Sao chép"
+    slashHint: "Gõ / để chọn Custom AI Actions"
+    slashKey: "/"
+    quickPrompts:
+      summarize: "Tóm tắt các ý chính trên trang này"
+      explainTerms: "Giải thích các thuật ngữ chuyên môn trong bài"
+      prosAndCons: "Phân tích ưu điểm và nhược điểm của chủ đề này"
+      emailSummary: "Viết một email tóm tắt gửi cho đồng nghiệp"
 popup:
   theme: Chủ đề
   autoLang: Tự động
@@ -1865,7 +1891,7 @@ pageDiagnosis:
   framesNotIncluded: "Văn bản bên trong các khung nhúng không được tính ở đây."
   hint: "Nhấp vào một lý do để khoanh các đoạn tương ứng trên trang."
   close: "Đóng"
-  unavailable: "Read Frog không thể chạy trên trang này"
+  unavailable: "Workmate AI không thể chạy trên trang này"
   reasons:
     noProse: "Không có chữ để dịch"
     tooShort: "Quá ngắn để dịch"

@@ -2,30 +2,11 @@ import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
 import type { ChatMessageItem } from "@/utils/db/dexie/tables/chat-session"
 import { Icon } from "@iconify/react"
 import { useAtom, useAtomValue } from "jotai"
-import {
-  Check,
-  ChevronDown,
-  Copy,
-  Globe,
-  History,
-  Languages,
-  Plus,
-  Send,
-  Sparkles,
-  Square,
-} from "lucide-react"
+import { Check, Copy, Languages, Sparkles } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { browser } from "#imports"
 import { MarkdownRenderer } from "@/components/markdown-renderer"
-import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/base-ui/dropdown-menu"
-import { Textarea } from "@/components/ui/base-ui/textarea"
 import { isLLMProviderConfig, type LLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
@@ -57,19 +38,19 @@ import {
   translateTextWithProvider,
   UPWORK_QUICK_PROMPT_ANALYZE_JOB,
   UPWORK_QUICK_PROMPT_COVER_LETTER,
-  UPWORK_TRANSLATE_LANGUAGES,
 } from "@/utils/sidepanel/upwork"
 import { cn } from "@/utils/styles/utils"
+import { ChatHeader } from "./chat-header"
 import { ChatHistoryDrawer } from "./chat-history-drawer"
-import { filterCustomAIActions, type CustomAIAction } from "./custom-ai-actions"
-import { SlashPromptPopover } from "./slash-prompt-popover"
+import { ChatInputBox } from "./chat-input-box"
+import { ChatUpworkBar } from "./chat-upwork-bar"
 
-const QUICK_PROMPTS = [
-  "Tóm tắt các ý chính trên trang này",
-  "Giải thích các thuật ngữ chuyên môn trong bài",
-  "Phân tích ưu điểm và nhược điểm của chủ đề này",
-  "Viết một email tóm tắt gửi cho đồng nghiệp",
-]
+const QUICK_PROMPT_KEYS = [
+  "sidePanel.chat.quickPrompts.summarize",
+  "sidePanel.chat.quickPrompts.explainTerms",
+  "sidePanel.chat.quickPrompts.prosAndCons",
+  "sidePanel.chat.quickPrompts.emailSummary",
+] as const
 
 const log = createLogger("sidepanel:chat")
 
@@ -119,45 +100,16 @@ export function ChatView() {
     }
   }, [navTab, setNavTab])
 
-  // Custom AI Actions slash menu state
-  const [isSlashOpen, setIsSlashOpen] = useState(false)
-  const [slashQuery, setSlashQuery] = useState("")
-  const [selectedActionIndex, setSelectedActionIndex] = useState(0)
-
   const loadedSessionIdRef = useRef<string | null>(null)
   const abortControllerRef = useRef<AbortController | null>(null)
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
   const isAtBottomRef = useRef(true)
-  const textareaRef = useRef<HTMLTextAreaElement>(null)
-  const inputContainerRef = useRef<HTMLDivElement>(null)
-
-  const filteredActions = useMemo(() => {
-    return filterCustomAIActions(slashQuery)
-  }, [slashQuery])
-
-  const safeSelectedActionIndex =
-    filteredActions.length === 0 ? 0 : Math.min(selectedActionIndex, filteredActions.length - 1)
-
-  // Close slash popover when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-      if (
-        isSlashOpen &&
-        inputContainerRef.current &&
-        !inputContainerRef.current.contains(e.target as Node)
-      ) {
-        setIsSlashOpen(false)
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside)
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside)
-    }
-  }, [isSlashOpen])
 
   // Filter available LLM providers from config
-  const llmProviders = providersConfig.filter((p) => isLLMProviderConfig(p) && p.enabled)
+  const llmProviders = providersConfig.filter(
+    (p): p is LLMProviderConfig => isLLMProviderConfig(p) && p.enabled,
+  )
 
   // Auto-fallback if the current selected provider is not enabled/configured
   useEffect(() => {
@@ -166,11 +118,10 @@ export function ChatView() {
       if (!isCurrentProviderValid) {
         const fallbackProvider = llmProviders[0]
         if (fallbackProvider) {
-          const modelName = isLLMProviderConfig(fallbackProvider)
-            ? typeof fallbackProvider.model === "string"
+          const modelName =
+            typeof fallbackProvider.model === "string"
               ? fallbackProvider.model
               : fallbackProvider.model.customModel || fallbackProvider.model.model
-            : fallbackProvider.id
           const fallbackModel: SelectedModelConfig = {
             providerId: fallbackProvider.id,
             model: modelName,
@@ -398,7 +349,7 @@ export function ChatView() {
 
     setInput("")
 
-    const isBaseQuickPrompt = QUICK_PROMPTS.includes(rawText)
+    const isBaseQuickPrompt = QUICK_PROMPT_KEYS.some((key) => i18n.t(key) === rawText)
     const isUpworkCoverLetter = rawText === UPWORK_QUICK_PROMPT_COVER_LETTER
     const isUpworkAnalyze = rawText === UPWORK_QUICK_PROMPT_ANALYZE_JOB
     const isQuickPrompt = isBaseQuickPrompt || isUpworkCoverLetter || isUpworkAnalyze
@@ -774,193 +725,16 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
     setIsTranslating(false)
   }
 
-  const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    const value = e.target.value
-    setInput(value)
-
-    if (value.startsWith("/")) {
-      setIsSlashOpen(true)
-      setSlashQuery(value.slice(1))
-      setSelectedActionIndex(0)
-    } else {
-      setIsSlashOpen(false)
-      setSlashQuery("")
-    }
-  }
-
-  const handleSelectAction = useCallback((action: CustomAIAction) => {
-    setIsSlashOpen(false)
-    setSlashQuery("")
-    setInput(action.prompt)
-
-    // Move cursor to end of prompt
-    setTimeout(() => {
-      if (textareaRef.current) {
-        textareaRef.current.focus()
-        const len = action.prompt.length
-        textareaRef.current.setSelectionRange(len, len)
-      }
-    }, 0)
-  }, [])
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (isSlashOpen && filteredActions.length > 0) {
-      if (e.key === "ArrowDown") {
-        e.preventDefault()
-        setSelectedActionIndex((prev) => (prev + 1) % filteredActions.length)
-        return
-      }
-      if (e.key === "ArrowUp") {
-        e.preventDefault()
-        setSelectedActionIndex(
-          (prev) => (prev - 1 + filteredActions.length) % filteredActions.length,
-        )
-        return
-      }
-      if (e.key === "Enter" && !e.shiftKey) {
-        e.preventDefault()
-        const selected = filteredActions[safeSelectedActionIndex]
-        if (selected) {
-          handleSelectAction(selected)
-        }
-        return
-      }
-      if (e.key === "Escape") {
-        e.preventDefault()
-        setIsSlashOpen(false)
-        return
-      }
-    }
-
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault()
-      void handleSend()
-    }
-  }
-
   return (
     <div className="relative flex h-full w-full min-w-0 flex-col overflow-x-hidden bg-background text-foreground">
       {/* Top Header */}
-      <header className="flex h-12 w-full min-w-0 items-center justify-between border-b border-border/60 px-3">
-        <DropdownMenu>
-          <DropdownMenuTrigger className="flex items-center gap-1.5 rounded-md px-2 py-1 text-xs font-medium text-foreground/90 transition-colors hover:bg-muted">
-            <Sparkles className="size-3.5 text-primary" />
-            <span className="max-w-[120px] truncate">{selectedModel.model || "Select Model"}</span>
-            <ChevronDown className="size-3 opacity-60" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56 text-xs">
-            {llmProviders.length === 0 ? (
-              <div className="p-2 text-center text-muted-foreground">
-                Chưa có provider. Nhấn nút Settings ở cột trái để thêm API Key.
-              </div>
-            ) : (
-              llmProviders.map((p) => {
-                const modelName = isLLMProviderConfig(p)
-                  ? typeof p.model === "string"
-                    ? p.model
-                    : p.model.customModel || p.model.model
-                  : p.id
-                return (
-                  <DropdownMenuItem
-                    key={p.id}
-                    onClick={() => void handleSelectModel(p.id, modelName)}
-                    className="flex items-center justify-between"
-                  >
-                    <span className="truncate font-medium">{p.name || p.id}</span>
-                    <span className="text-[10px] text-muted-foreground">{modelName}</span>
-                  </DropdownMenuItem>
-                )
-              })
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <div className="flex items-center gap-1">
-          {/* Translation Config Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger
-              className={cn(
-                "flex h-7 items-center gap-1 rounded-md px-2 text-xs font-medium transition-colors hover:bg-muted",
-                upworkConfig.translateLang && upworkConfig.translateLang !== "original"
-                  ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-                  : "text-muted-foreground",
-              )}
-              title={i18n.t("options.upwork.parametersSection.translateLangTitle")}
-            >
-              <Languages className="size-3.5" />
-              <span className="text-[11px] font-medium uppercase">
-                {upworkConfig.translateLang || "en"}
-              </span>
-              <ChevronDown className="size-2.5 opacity-60" />
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 p-1 text-xs">
-              <div className="px-2 py-1.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                {i18n.t("options.upwork.sidepanel.translateTo")}
-              </div>
-              {UPWORK_TRANSLATE_LANGUAGES.map((lang) => (
-                <DropdownMenuItem
-                  key={lang.code}
-                  onClick={() =>
-                    void setUpworkConfig({ ...upworkConfig, translateLang: lang.code })
-                  }
-                  className="flex items-center justify-between py-1 text-xs"
-                >
-                  <span>{lang.name}</span>
-                  {upworkConfig.translateLang === lang.code && (
-                    <Check className="size-3 text-primary" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-
-              <div className="my-1 border-t border-border/40" />
-
-              <div className="px-2 py-1.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                {i18n.t("options.upwork.parametersSection.translateProviderTitle")}
-              </div>
-              <DropdownMenuItem
-                onClick={() => void setUpworkConfig({ ...upworkConfig, translateProviderId: "" })}
-                className="flex items-center justify-between py-1 text-xs"
-              >
-                <span>{i18n.t("options.upwork.parametersSection.translateProviderAuto")}</span>
-                {!upworkConfig.translateProviderId && <Check className="size-3 text-primary" />}
-              </DropdownMenuItem>
-              {translationProviders.map((p) => (
-                <DropdownMenuItem
-                  key={p.id}
-                  onClick={() =>
-                    void setUpworkConfig({ ...upworkConfig, translateProviderId: p.id })
-                  }
-                  className="flex items-center justify-between py-1 text-xs"
-                >
-                  <span className="truncate">{p.name || p.id}</span>
-                  {upworkConfig.translateProviderId === p.id && (
-                    <Check className="size-3 text-primary" />
-                  )}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          <Button
-            size="icon"
-            variant="ghost"
-            className="size-7.5"
-            onClick={() => setIsHistoryOpen(true)}
-            title="Chat History"
-          >
-            <History className="size-4" />
-          </Button>
-          <Button
-            size="icon"
-            variant="ghost"
-            className="size-7.5"
-            onClick={handleNewChat}
-            title="New Chat"
-          >
-            <Plus className="size-4" />
-          </Button>
-        </div>
-      </header>
+      <ChatHeader
+        onNewChat={handleNewChat}
+        onOpenHistory={() => setIsHistoryOpen(true)}
+        upworkConfig={upworkConfig}
+        setUpworkConfig={setUpworkConfig}
+        translationProviders={translationProviders}
+      />
 
       {/* Messages Scroll View */}
       <div
@@ -974,9 +748,11 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
               <Sparkles className="size-6" />
             </div>
             <div className="space-y-1">
-              <h3 className="text-sm font-semibold tracking-tight">Workmate AI Assistant</h3>
+              <h3 className="text-sm font-semibold tracking-tight">
+                {i18n.t("sidePanel.chat.title")}
+              </h3>
               <p className="max-w-[240px] text-xs text-muted-foreground">
-                Đặt câu hỏi, tóm tắt bài viết hoặc dịch thuật với các mô hình AI thông minh.
+                {i18n.t("sidePanel.chat.description")}
               </p>
             </div>
 
@@ -987,7 +763,7 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
                   <button
                     type="button"
                     onClick={() => void handleSend(UPWORK_QUICK_PROMPT_COVER_LETTER)}
-                    className="flex items-center gap-2 rounded-lg border border-emerald-600/40 bg-emerald-500/10 p-2.5 text-xs font-medium text-emerald-800 transition-all hover:border-emerald-600/60 hover:bg-emerald-500/20 dark:text-emerald-300"
+                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-600/40 bg-emerald-500/10 p-2.5 text-xs font-medium text-emerald-800 transition-all hover:border-emerald-600/60 hover:bg-emerald-500/20 dark:text-emerald-300"
                   >
                     <Icon
                       icon="tabler:briefcase"
@@ -998,7 +774,7 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
                   <button
                     type="button"
                     onClick={() => void handleSend(UPWORK_QUICK_PROMPT_ANALYZE_JOB)}
-                    className="flex items-center gap-2 rounded-lg border border-emerald-600/30 bg-emerald-500/5 p-2.5 text-xs text-emerald-700 transition-all hover:border-emerald-600/50 hover:bg-emerald-500/15 dark:text-emerald-400"
+                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-600/30 bg-emerald-500/5 p-2.5 text-xs text-emerald-700 transition-all hover:border-emerald-600/50 hover:bg-emerald-500/15 dark:text-emerald-400"
                   >
                     <Icon
                       icon="tabler:file-search"
@@ -1008,16 +784,19 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
                   </button>
                 </>
               )}
-              {QUICK_PROMPTS.map((prompt) => (
-                <button
-                  type="button"
-                  key={prompt}
-                  onClick={() => void handleSend(prompt)}
-                  className="rounded-lg border border-border/60 bg-muted/30 p-2.5 text-xs text-muted-foreground transition-all hover:border-primary/40 hover:bg-muted/70 hover:text-foreground"
-                >
-                  {prompt}
-                </button>
-              ))}
+              {QUICK_PROMPT_KEYS.map((key) => {
+                const promptText = i18n.t(key)
+                return (
+                  <button
+                    type="button"
+                    key={key}
+                    onClick={() => void handleSend(promptText)}
+                    className="cursor-pointer rounded-lg border border-border/60 bg-muted/30 p-2.5 text-left text-xs text-muted-foreground transition-all hover:border-primary/40 hover:bg-muted/70 hover:text-foreground"
+                  >
+                    {promptText}
+                  </button>
+                )
+              })}
             </div>
           </div>
         ) : (
@@ -1078,14 +857,18 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
                             type="button"
                             onClick={() => void handleCopy(displayedUserContent, idx)}
                             className="flex cursor-pointer items-center gap-1 text-[10px] text-primary-foreground/85 hover:text-primary-foreground"
-                            title="Copy"
+                            title={i18n.t("sidePanel.chat.copy")}
                           >
                             {copiedIndex === idx ? (
                               <Check className="size-3 text-emerald-300" />
                             ) : (
                               <Copy className="size-3 shrink-0" />
                             )}
-                            <span>{copiedIndex === idx ? "Đã copy" : "Copy"}</span>
+                            <span>
+                              {copiedIndex === idx
+                                ? i18n.t("sidePanel.chat.copied")
+                                : i18n.t("sidePanel.chat.copy")}
+                            </span>
                           </button>
                         </div>
                       </div>
@@ -1105,11 +888,13 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
                             <span className="size-1.5 animate-pulse rounded-full bg-primary" />
                             <span className="size-1.5 animate-pulse rounded-full bg-primary [animation-delay:200ms]" />
                             <span className="size-1.5 animate-pulse rounded-full bg-primary [animation-delay:400ms]" />
-                            <span className="ml-1 text-[11px]">Đang suy nghĩ...</span>
+                            <span className="ml-1 text-[11px]">
+                              {i18n.t("sidePanel.chat.thinking")}
+                            </span>
                           </div>
                         ) : (
                           <span className="text-[11px] text-muted-foreground italic">
-                            Không có phản hồi
+                            {i18n.t("sidePanel.chat.noResponse")}
                           </span>
                         )}
                         {msg.content && (
@@ -1171,6 +956,7 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
                                   idx,
                                 )
                               }
+                              title={i18n.t("sidePanel.chat.copy")}
                             >
                               {copiedIndex === idx ? (
                                 <Check className="size-3 text-emerald-500" />
@@ -1199,192 +985,32 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
         )}
       </div>
 
-      {/* Page Context Badge */}
-      {activeTab?.title && (
-        <div className="flex w-full min-w-0 items-center justify-between border-t border-border/40 bg-muted/20 px-3 py-1.5 text-[11px]">
-          <div className="mr-2 flex min-w-0 flex-1 items-center gap-1.5">
-            <Globe className="size-3.5 shrink-0 text-muted-foreground" />
-            <span className="truncate text-muted-foreground" title={activeTab.url}>
-              {activeTab.title}
-            </span>
-          </div>
-          <button
-            type="button"
-            onClick={() => {
-              if (!isRestrictedUrl(activeTab.url)) {
-                setUsePageContext(!usePageContext)
-              }
-            }}
-            disabled={isRestrictedUrl(activeTab.url)}
-            className="shrink-0 cursor-pointer disabled:cursor-not-allowed"
-          >
-            <Badge
-              variant={usePageContext && !isRestrictedUrl(activeTab.url) ? "default" : "outline"}
-              className={cn(
-                "h-5 text-[10px] transition-colors",
-                isRestrictedUrl(activeTab.url)
-                  ? "border-dashed text-muted-foreground opacity-60"
-                  : usePageContext
-                    ? "bg-primary text-primary-foreground"
-                    : "text-muted-foreground",
-              )}
-            >
-              {isRestrictedUrl(activeTab.url)
-                ? "Trang nội bộ"
-                : usePageContext
-                  ? "Tab Context: On"
-                  : "Tab Context: Off"}
-            </Badge>
-          </button>
-        </div>
-      )}
-
       {/* Upwork Job Quick Action Bar */}
-      {isUpworkJob && (
-        <div className="flex w-full min-w-0 items-center justify-between gap-2 border-t border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-900 dark:text-emerald-200">
-          <div className="flex min-w-0 items-center gap-1.5">
-            <div className="flex min-w-0 items-center gap-1 font-medium">
-              <Icon
-                icon="tabler:briefcase"
-                className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
-              />
-              <span className="max-w-[85px] truncate sm:max-w-none">
-                {i18n.t("options.upwork.sidepanel.quickActionLabel")}
-              </span>
-            </div>
-
-            {/* Translation Language & Provider Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger
-                className="flex h-5.5 items-center gap-1 rounded-md border border-emerald-600/30 bg-background/80 px-1.5 text-[11px] font-medium text-foreground hover:bg-background"
-                title={i18n.t("options.upwork.parametersSection.translateLangTitle")}
-              >
-                <Languages className="size-3 text-emerald-600 dark:text-emerald-400" />
-                <span className="max-w-[70px] truncate text-[10px] font-semibold uppercase">
-                  {upworkConfig.translateLang || "en"}
-                </span>
-                <ChevronDown className="size-2.5 opacity-60" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 p-1 text-xs">
-                <div className="px-2 py-1.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                  {i18n.t("options.upwork.sidepanel.translateTo")}
-                </div>
-                {UPWORK_TRANSLATE_LANGUAGES.map((lang) => (
-                  <DropdownMenuItem
-                    key={lang.code}
-                    onClick={() =>
-                      void setUpworkConfig({ ...upworkConfig, translateLang: lang.code })
-                    }
-                    className="flex items-center justify-between py-1 text-xs"
-                  >
-                    <span>{lang.name}</span>
-                    {upworkConfig.translateLang === lang.code && (
-                      <Check className="size-3 text-primary" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-
-                <div className="my-1 border-t border-border/40" />
-
-                <div className="px-2 py-1.5 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase">
-                  {i18n.t("options.upwork.parametersSection.translateProviderTitle")}
-                </div>
-                <DropdownMenuItem
-                  onClick={() => void setUpworkConfig({ ...upworkConfig, translateProviderId: "" })}
-                  className="flex items-center justify-between py-1 text-xs"
-                >
-                  <span>{i18n.t("options.upwork.parametersSection.translateProviderAuto")}</span>
-                  {!upworkConfig.translateProviderId && <Check className="size-3 text-primary" />}
-                </DropdownMenuItem>
-                {translationProviders.map((p) => (
-                  <DropdownMenuItem
-                    key={p.id}
-                    onClick={() =>
-                      void setUpworkConfig({ ...upworkConfig, translateProviderId: p.id })
-                    }
-                    className="flex items-center justify-between py-1 text-xs"
-                  >
-                    <span className="truncate">{p.name || p.id}</span>
-                    {upworkConfig.translateProviderId === p.id && (
-                      <Check className="size-3 text-primary" />
-                    )}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          <Button
-            size="sm"
-            variant="outline"
-            className="h-6 shrink-0 gap-1 border-emerald-600/30 bg-emerald-600/15 px-2 text-[11px] font-medium text-emerald-700 hover:bg-emerald-600/25 dark:text-emerald-300"
-            disabled={isStreaming || isTranslating}
-            onClick={() => void handleUpworkCoverLetter()}
-          >
-            <Sparkles className="size-3 text-emerald-600 dark:text-emerald-400" />
-            <span>{i18n.t("options.upwork.sidepanel.coverLetter")}</span>
-          </Button>
-        </div>
-      )}
+      <ChatUpworkBar
+        isUpworkJob={isUpworkJob}
+        upworkConfig={upworkConfig}
+        setUpworkConfig={setUpworkConfig}
+        translationProviders={translationProviders}
+        onCoverLetter={handleUpworkCoverLetter}
+        isStreaming={isStreaming}
+        isTranslating={isTranslating}
+      />
 
       {/* Input Box */}
-      <div
-        ref={inputContainerRef}
-        className="relative w-full min-w-0 border-t border-border/60 bg-background p-3"
-      >
-        {/* Custom AI Actions Floating Popover */}
-        {isSlashOpen && (
-          <SlashPromptPopover
-            query={slashQuery}
-            actions={filteredActions}
-            selectedIndex={safeSelectedActionIndex}
-            onSelect={handleSelectAction}
-            onClose={() => setIsSlashOpen(false)}
-            onHoverIndex={setSelectedActionIndex}
-          />
-        )}
-
-        <div className="relative flex w-full min-w-0 flex-col rounded-xl border border-border/80 bg-muted/20 p-2 focus-within:border-primary/50 focus-within:ring-1 focus-within:ring-primary/20">
-          <Textarea
-            ref={textareaRef}
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            placeholder="Hỏi bất kỳ điều gì, hoặc gõ '/' để chọn Custom AI Actions... (Enter để gửi)"
-            rows={2}
-            className="max-h-32 min-h-[44px] w-full resize-none border-0 bg-transparent p-1 text-xs shadow-none focus-visible:ring-0"
-          />
-          <div className="flex w-full min-w-0 items-center justify-between gap-1 pt-1">
-            <span className="flex min-w-0 items-center gap-1 truncate text-[10px] text-muted-foreground/70">
-              <span>Gõ</span>
-              <kbd className="shrink-0 rounded border border-border/50 bg-muted px-1 font-mono text-[9px]">
-                /
-              </kbd>
-              <span className="truncate">để chọn Custom AI Actions</span>
-            </span>
-            {isStreaming || isTranslating ? (
-              <Button
-                size="sm"
-                variant="destructive"
-                className="h-7 gap-1 px-2 text-xs"
-                onClick={handleStop}
-              >
-                <Square className="size-3" />
-                Dừng
-              </Button>
-            ) : (
-              <Button
-                size="icon"
-                disabled={!input.trim()}
-                className="size-7 rounded-lg"
-                onClick={() => void handleSend()}
-              >
-                <Send className="size-3.5" />
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
+      <ChatInputBox
+        input={input}
+        setInput={setInput}
+        onSend={handleSend}
+        onStop={handleStop}
+        isStreaming={isStreaming}
+        isTranslating={isTranslating}
+        selectedModel={selectedModel}
+        onSelectModel={handleSelectModel}
+        llmProviders={llmProviders}
+        usePageContext={usePageContext}
+        setUsePageContext={setUsePageContext}
+        activeTab={activeTab}
+      />
 
       {/* History Drawer Modal */}
       <ChatHistoryDrawer

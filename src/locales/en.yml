@@ -1,7 +1,7 @@
 name: Workmate AI
-extName: "Workmate AI - AI Translation & Flashcards"
-extDescription: "Bilingual AI translation for web pages and YouTube, Netflix and X subtitles. Save new words and review them as flashcards."
-uninstallSurveyUrl: https://tally.so/r/nPK6Ob
+extName: "Chat with Workmate AI Assistant"
+extDescription: "Chat with Workmate AI Assistant is an intelligent browser extension that helps you chat with AI models, translate web pages, summarize articles, and master new vocabulary with ease."
+uninstallSurveyUrl: https://vexaltrix.com/workmate-ai/survey
 account:
   login: Log in
   webApp: Web app
@@ -22,6 +22,32 @@ sidePanel:
   firefoxUserActionHint: In Firefox, open Workmate AI from the browser sidebar.
   firefoxUserActionHelpText: Learn how to open the Firefox sidebar
   firefoxUserActionHelpUrl: https://support.mozilla.org/en-US/kb/use-sidebar-access-tools-and-vertical-tabs
+  chat:
+    title: Workmate AI Assistant
+    description: Ask questions, summarize articles, or translate with intelligent AI models.
+    inputPlaceholder: "Ask anything, @ to mention, / for actions... (Enter to send)"
+    inputPlaceholderCompact: "Ask anything, @ to mention, / for actions"
+    tabContextOn: "Tab Context: On"
+    tabContextOff: "Tab Context: Off"
+    internalPage: "Internal Page"
+    stop: "Stop"
+    send: "Send"
+    actions: "Actions"
+    selectModel: "Select Model"
+    noProviderConfigured: "No provider configured. Add an API key in Settings."
+    newChat: "New Chat"
+    history: "Chat History"
+    thinking: "Thinking..."
+    noResponse: "No response"
+    copied: "Copied"
+    copy: "Copy"
+    slashHint: "Type / for Custom AI Actions"
+    slashKey: "/"
+    quickPrompts:
+      summarize: "Summarize the key points on this page"
+      explainTerms: "Explain technical terms in this article"
+      prosAndCons: "Analyze pros and cons of this topic"
+      emailSummary: "Write a summary email to send to colleagues"
 popup:
   theme: Theme
   autoLang: Auto
@@ -2012,7 +2038,7 @@ pageDiagnosis:
   framesNotIncluded: "Text inside embedded frames isn't included here."
   hint: "Click a reason to outline its paragraphs on the page."
   close: "Close"
-  unavailable: "Read Frog isn't running on this page"
+  unavailable: "Workmate AI isn't running on this page"
   reasons:
     noProse: "No words to translate"
     tooShort: "Too short to translate"
