@@ -91,9 +91,7 @@ describe("ChatContextHeader", () => {
     expect(screen.getByText("Google Gemini")).toBeDefined()
     expect(screen.getByText("VI")).toBeDefined()
     expect(screen.getByText("options.webChat.toneShort.friendly")).toBeDefined()
-    expect(screen.getAllByText("options.webChat.sidepanel.autoReply.none").length).toBeGreaterThan(
-      0,
-    )
+    expect(screen.getByText("options.webChat.sidepanel.autoReply.none")).toBeDefined()
   })
 
   it("highlights auto reply pill when enabled and handles mode change", () => {
@@ -106,8 +104,6 @@ describe("ChatContextHeader", () => {
       />,
     )
 
-    expect(screen.getAllByText("options.webChat.sidepanel.autoReply.draft").length).toBeGreaterThan(
-      0,
-    )
+    expect(screen.getByText("options.webChat.sidepanel.autoReply.draft")).toBeDefined()
   })
 })

@@ -345,45 +345,6 @@ export function ChatContextHeader({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
-
-        {/* Auto Reply Pill Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(
-              "flex h-6.5 shrink-0 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden",
-              autoReplyMode !== "none" &&
-                "border-emerald-500/40 bg-emerald-500/10 font-semibold text-emerald-600 dark:text-emerald-400",
-            )}
-            title={i18n.t("options.webChat.sidepanel.autoReply.title")}
-          >
-            <Bot
-              className={cn(
-                "size-3",
-                autoReplyMode !== "none" ? "text-emerald-500" : "text-muted-foreground",
-                isAutoReplying && "animate-spin text-emerald-500",
-              )}
-            />
-            <span className="max-w-[85px] truncate">{getAutoReplyLabel(autoReplyMode)}</span>
-            <ChevronDown className="size-2.5 opacity-60" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-56 text-xs">
-            {AUTO_REPLY_MODES.map((mode) => (
-              <DropdownMenuItem
-                key={mode}
-                onClick={() => onSelectAutoReplyMode(mode)}
-                className="flex items-center justify-between py-1.5 text-xs"
-              >
-                <div className="flex flex-col pr-2">
-                  <span className="font-medium">{getAutoReplyLabel(mode)}</span>
-                  <span className="text-[10px] text-muted-foreground">
-                    {getAutoReplyDesc(mode)}
-                  </span>
-                </div>
-                {autoReplyMode === mode && <Check className="size-3 shrink-0 text-primary" />}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
       </div>
 
       {/* Row 3: Messages Count & PII Status */}
