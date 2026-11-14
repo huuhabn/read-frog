@@ -13,6 +13,7 @@ import {
   sidepanelNavTabAtom,
 } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
+import { i18n } from "@/utils/i18n"
 import { getActiveTabContent, type ActiveTabContent } from "@/utils/sidepanel/page-context"
 
 type SummaryMode = "takeaways" | "tldr" | "outline"
@@ -114,7 +115,7 @@ export function ReadView() {
       if ((err as Error)?.name !== "AbortError") {
         setSummary(
           (prev) =>
-            `${prev}\n\n*(Lỗi tóm tắt: ${(err as Error)?.message || "Không thể kết nối model"})*`,
+            `${prev}\n\n*(${i18n.t("sidePanel.read.error", [(err as Error)?.message || ""])})*`,
         )
       }
     } finally {
@@ -139,7 +140,7 @@ export function ReadView() {
       <header className="flex h-12 items-center justify-between border-b border-border/60 px-4">
         <div className="flex items-center gap-2">
           <BookOpen className="size-4 text-primary" />
-          <h2 className="text-sm font-semibold tracking-tight">Read & Summarize</h2>
+          <h2 className="text-sm font-semibold tracking-tight">{i18n.t("sidePanel.read.title")}</h2>
         </div>
         <Button
           size="icon"
@@ -147,7 +148,7 @@ export function ReadView() {
           className="size-7.5"
           onClick={() => void loadTab()}
           disabled={isLoadingTab}
-          title="Tải lại nội dung tab"
+          title={i18n.t("sidePanel.read.reloadTab")}
         >
           <RefreshCw className={isLoadingTab ? "size-3.5 animate-spin" : "size-3.5"} />
         </Button>
@@ -159,12 +160,12 @@ export function ReadView() {
           <Globe className="mt-0.5 size-4 shrink-0 text-muted-foreground" />
           <div className="min-w-0 flex-1 space-y-1">
             <h3 className="truncate text-xs font-medium text-foreground">
-              {activeTab?.title || "Không nhận diện được tab"}
+              {activeTab?.title || i18n.t("sidePanel.read.noTab")}
             </h3>
             <p className="truncate text-[10px] text-muted-foreground">{activeTab?.url}</p>
             {activeTab?.pageText && (
               <Badge variant="outline" className="h-4 px-1.5 py-0 text-[9px]">
-                ~{activeTab.pageText.length} ký tự
+                {i18n.t("sidePanel.read.charsCount", [activeTab.pageText.length])}
               </Badge>
             )}
           </div>
@@ -179,7 +180,7 @@ export function ReadView() {
             disabled={!activeTab?.pageText || isSummarizing}
             onClick={() => void handleSummarize("takeaways")}
           >
-            Key Points
+            {i18n.t("sidePanel.read.modes.keyPoints")}
           </Button>
           <Button
             size="sm"
@@ -188,7 +189,7 @@ export function ReadView() {
             disabled={!activeTab?.pageText || isSummarizing}
             onClick={() => void handleSummarize("tldr")}
           >
-            TL;DR
+            {i18n.t("sidePanel.read.modes.tldr")}
           </Button>
           <Button
             size="sm"
@@ -197,7 +198,7 @@ export function ReadView() {
             disabled={!activeTab?.pageText || isSummarizing}
             onClick={() => void handleSummarize("outline")}
           >
-            Outline
+            {i18n.t("sidePanel.read.modes.outline")}
           </Button>
         </div>
       </div>
@@ -209,10 +210,10 @@ export function ReadView() {
             <div className="mb-3 flex items-center justify-between border-b border-border/40 pb-2">
               <span className="text-[11px] font-semibold tracking-wider text-primary uppercase">
                 {activeMode === "takeaways"
-                  ? "Key Takeaways"
+                  ? i18n.t("sidePanel.read.modeTitles.keyPoints")
                   : activeMode === "tldr"
-                    ? "Tóm tắt ngắn (TL;DR)"
-                    : "Dàn ý bài viết"}
+                    ? i18n.t("sidePanel.read.modeTitles.tldr")
+                    : i18n.t("sidePanel.read.modeTitles.outline")}
               </span>
               <div className="flex items-center gap-1">
                 {isSummarizing && (
@@ -223,7 +224,7 @@ export function ReadView() {
                     onClick={handleStop}
                   >
                     <Square className="size-2.5" />
-                    Dừng
+                    {i18n.t("sidePanel.read.stop")}
                   </Button>
                 )}
                 <Button
@@ -245,7 +246,7 @@ export function ReadView() {
         ) : (
           <div className="flex h-48 flex-col items-center justify-center gap-2 text-center text-xs text-muted-foreground">
             <FileText className="size-8 opacity-30" />
-            <p>Chọn một kiểu tóm tắt ở trên để AI phân tích trang web này.</p>
+            <p>{i18n.t("sidePanel.read.empty")}</p>
           </div>
         )}
       </div>
@@ -259,7 +260,7 @@ export function ReadView() {
           onClick={handleAskInChat}
         >
           <Sparkles className="size-3.5 text-primary" />
-          Hỏi sâu hơn về trang này trong Chat
+          {i18n.t("sidePanel.read.askInChat")}
         </Button>
       </div>
     </div>

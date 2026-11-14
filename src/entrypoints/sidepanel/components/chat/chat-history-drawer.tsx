@@ -3,6 +3,7 @@ import { MessageSquare, Plus, Trash2, X } from "lucide-react"
 import { useCallback, useEffect, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { db } from "@/utils/db/dexie/db"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 interface ChatHistoryDrawerProps {
@@ -69,7 +70,9 @@ export function ChatHistoryDrawer({
       <div className="flex items-center justify-between border-b border-border/60 px-4 py-3">
         <div className="flex items-center gap-2">
           <MessageSquare className="size-4 text-primary" />
-          <h2 className="text-sm font-semibold tracking-tight">Chat History</h2>
+          <h2 className="text-sm font-semibold tracking-tight">
+            {i18n.t("sidePanel.historyDrawer.title")}
+          </h2>
         </div>
         <div className="flex items-center gap-1">
           <Button
@@ -82,7 +85,7 @@ export function ChatHistoryDrawer({
             }}
           >
             <Plus className="size-3.5" />
-            New Chat
+            {i18n.t("sidePanel.historyDrawer.newChat")}
           </Button>
           <Button size="icon" variant="ghost" className="size-8" onClick={onClose}>
             <X className="size-4" />
@@ -94,7 +97,7 @@ export function ChatHistoryDrawer({
         {sessions.length === 0 ? (
           <div className="flex h-40 flex-col items-center justify-center gap-2 text-center text-xs text-muted-foreground">
             <MessageSquare className="size-8 opacity-40" />
-            <p>No chat history yet.</p>
+            <p>{i18n.t("sidePanel.historyDrawer.empty")}</p>
           </div>
         ) : (
           <div className="flex flex-col gap-1.5">
@@ -124,14 +127,12 @@ export function ChatHistoryDrawer({
                 >
                   <div className="flex min-w-0 flex-1 flex-col gap-1 pr-2">
                     <span className="truncate text-xs font-medium text-foreground">
-                      {session.title || "Untitled Chat"}
+                      {session.title || i18n.t("sidePanel.historyDrawer.untitled")}
                     </span>
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground">
                       <span>{dateStr}</span>
                       <span>•</span>
-                      <span>
-                        {messageCount} message{messageCount === 1 ? "" : "s"}
-                      </span>
+                      <span>{i18n.t("sidePanel.historyDrawer.messagesCount", [messageCount])}</span>
                       <span>•</span>
                       <span className="max-w-[100px] truncate">{session.model}</span>
                     </div>
@@ -141,6 +142,7 @@ export function ChatHistoryDrawer({
                     variant="ghost"
                     className="size-7 opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
                     onClick={(e) => void handleDelete(e, session.id)}
+                    title={i18n.t("sidePanel.historyDrawer.delete")}
                   >
                     <Trash2 className="size-3.5" />
                   </Button>

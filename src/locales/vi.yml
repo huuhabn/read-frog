@@ -22,6 +22,15 @@ sidePanel:
   firefoxUserActionHint: Trong Firefox, hãy mở Workmate AI từ thanh bên của trình duyệt.
   firefoxUserActionHelpText: Xem cách mở thanh bên Firefox
   firefoxUserActionHelpUrl: https://support.mozilla.org/vi/kb/use-sidebar-access-tools-and-vertical-tabs
+  nav:
+    chat: Chat AI
+    webChat: Trợ lý Web
+    read: Đọc & Tóm tắt
+    write: Viết & Soạn thảo
+    translate: Dịch thuật
+    history: Lịch sử trò chuyện
+    logs: Nhật ký kiểm toán
+    settings: Cài đặt
   chat:
     title: Workmate AI Assistant
     description: Đặt câu hỏi, tóm tắt bài viết hoặc dịch thuật với các mô hình AI thông minh.
@@ -48,6 +57,71 @@ sidePanel:
       explainTerms: "Giải thích các thuật ngữ chuyên môn trong bài"
       prosAndCons: "Phân tích ưu điểm và nhược điểm của chủ đề này"
       emailSummary: "Viết một email tóm tắt gửi cho đồng nghiệp"
+  historyDrawer:
+    title: Lịch sử trò chuyện
+    newChat: Cuộc trò chuyện mới
+    empty: Chưa có lịch sử trò chuyện nào.
+    untitled: Cuộc trò chuyện không tên
+    messagesCount: "$1 tin nhắn"
+    delete: Xóa phiên trò chuyện
+  slashMenu:
+    title: Custom AI Actions
+    select: chọn
+    use: dùng
+    close: đóng
+    closeTooltip: Đóng menu
+    noResults: 'Không tìm thấy tác vụ phù hợp với "/$1"'
+    searchHint: "Thử gõ /tom, /dich hoặc /code"
+  read:
+    title: Đọc & Tóm tắt
+    reloadTab: Tải lại nội dung tab
+    noTab: Không nhận diện được tab
+    charsCount: "~$1 ký tự"
+    modes:
+      keyPoints: Ý chính
+      tldr: "TL;DR"
+      outline: Dàn ý
+    modeTitles:
+      keyPoints: Điểm cốt lõi (Key Takeaways)
+      tldr: "Tóm tắt ngắn (TL;DR)"
+      outline: Dàn ý bài viết
+    empty: Chọn một kiểu tóm tắt ở trên để AI phân tích trang web này.
+    askInChat: Hỏi sâu hơn về trang này trong Chat
+    stop: Dừng
+    error: "Lỗi tóm tắt: $1"
+  write:
+    title: Viết & Soạn thảo
+    pasteSelection: Dán chữ bôi đen
+    originalText: "Văn bản gốc:"
+    charsCount: "$1 ký tự"
+    placeholder: "Nhập hoặc dán đoạn văn bản cần viết lại..."
+    chooseStyle: "Chọn phong cách:"
+    actions:
+      polish: Trau chuốt
+      formal: Trang trọng
+      casual: Thân mật
+      shorten: Rút gọn
+      grammar: Sửa ngữ pháp
+    outputLabel: "Kết quả chỉnh sửa:"
+    useAsInput: Chỉnh tiếp
+    useAsInputTooltip: Đặt kết quả làm văn bản gốc để chỉnh tiếp
+    stop: Dừng
+    empty: Kết quả sẽ xuất hiện ở đây
+    processing: "AI đang viết lại..."
+    error: "Lỗi: $1"
+  translate:
+    title: Dịch nhanh
+    pasteSelection: Dán chữ bôi đen
+    autoDetect: Tự động nhận diện ngôn ngữ
+    charsCount: "$1 ký tự"
+    placeholder: "Nhập nội dung cần dịch..."
+    translateTo: "Dịch sang:"
+    action: Dịch
+    stop: Dừng
+    outputLabel: "Bản dịch ($1):"
+    empty: Bản dịch sẽ hiển thị ở đây
+    translating: "Đang dịch..."
+    error: "Lỗi dịch thuật: $1"
 popup:
   theme: Chủ đề
   autoLang: Tự động

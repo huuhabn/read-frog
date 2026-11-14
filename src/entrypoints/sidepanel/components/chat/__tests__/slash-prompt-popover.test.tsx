@@ -64,7 +64,7 @@ describe("SlashPromptPopover", () => {
       />,
     )
 
-    const closeBtn = screen.getByTitle("Đóng menu")
+    const closeBtn = screen.getByTitle(/closeTooltip/i)
     fireEvent.click(closeBtn)
 
     expect(handleClose).toHaveBeenCalledOnce()
@@ -86,6 +86,6 @@ describe("SlashPromptPopover", () => {
       />,
     )
 
-    expect(screen.getByText(/Không tìm thấy action phù hợp/)).toBeDefined()
+    expect(screen.getByText(/noResults/i)).toBeDefined()
   })
 })

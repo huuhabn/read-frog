@@ -22,6 +22,15 @@ sidePanel:
   firefoxUserActionHint: In Firefox, open Workmate AI from the browser sidebar.
   firefoxUserActionHelpText: Learn how to open the Firefox sidebar
   firefoxUserActionHelpUrl: https://support.mozilla.org/en-US/kb/use-sidebar-access-tools-and-vertical-tabs
+  nav:
+    chat: Chat AI
+    webChat: Web Assistant
+    read: Read & Summarize
+    write: Write & Compose
+    translate: Translate
+    history: Chat History
+    logs: Audit Logs
+    settings: Settings
   chat:
     title: Workmate AI Assistant
     description: Ask questions, summarize articles, or translate with intelligent AI models.
@@ -48,6 +57,71 @@ sidePanel:
       explainTerms: "Explain technical terms in this article"
       prosAndCons: "Analyze pros and cons of this topic"
       emailSummary: "Write a summary email to send to colleagues"
+  historyDrawer:
+    title: Chat History
+    newChat: New Chat
+    empty: No chat history yet.
+    untitled: Untitled Chat
+    messagesCount: "$1 message(s)"
+    delete: Delete session
+  slashMenu:
+    title: Custom AI Actions
+    select: select
+    use: use
+    close: close
+    closeTooltip: Close menu
+    noResults: 'No action matching "/$1"'
+    searchHint: "Try typing /summarize, /translate or /code"
+  read:
+    title: Read & Summarize
+    reloadTab: Reload tab content
+    noTab: No active tab detected
+    charsCount: "~$1 characters"
+    modes:
+      keyPoints: Key Points
+      tldr: "TL;DR"
+      outline: Outline
+    modeTitles:
+      keyPoints: Key Takeaways
+      tldr: "Summary (TL;DR)"
+      outline: Article Outline
+    empty: Select a summary style above to analyze this page.
+    askInChat: Ask more about this page in Chat
+    stop: Stop
+    error: "Summary error: $1"
+  write:
+    title: Write & Compose
+    pasteSelection: Paste selection
+    originalText: "Original text:"
+    charsCount: "$1 characters"
+    placeholder: "Enter or paste text to rewrite..."
+    chooseStyle: "Choose style:"
+    actions:
+      polish: Polish
+      formal: Formal
+      casual: Casual
+      shorten: Shorten
+      grammar: Fix Grammar
+    outputLabel: "Rewritten result:"
+    useAsInput: Use as input
+    useAsInputTooltip: Use result as original text to rewrite further
+    stop: Stop
+    empty: Rewritten text will appear here
+    processing: "AI is rewriting..."
+    error: "Error: $1"
+  translate:
+    title: Quick Translate
+    pasteSelection: Paste selection
+    autoDetect: Auto-detect language
+    charsCount: "$1 characters"
+    placeholder: "Enter text to translate..."
+    translateTo: "Translate to:"
+    action: Translate
+    stop: Stop
+    outputLabel: "Translation ($1):"
+    empty: Translation will appear here
+    translating: "Translating..."
+    error: "Translation error: $1"
 popup:
   theme: Theme
   autoLang: Auto

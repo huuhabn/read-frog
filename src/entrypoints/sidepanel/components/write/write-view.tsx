@@ -1,23 +1,32 @@
 import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
 import { useAtomValue } from "jotai"
 import { ArrowDown, Check, Copy, FileEdit, PenTool, Sparkles, Square } from "lucide-react"
-import { useState, useRef } from "react"
+import { useRef, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Textarea } from "@/components/ui/base-ui/textarea"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { selectedChatModelAtom } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
+import { i18n } from "@/utils/i18n"
 import { getActiveTabContent } from "@/utils/sidepanel/page-context"
 
 type WriteAction = "polish" | "formal" | "casual" | "shorten" | "grammar"
 
-const ACTION_BUTTONS: Array<{ id: WriteAction; label: string; desc: string }> = [
-  { id: "polish", label: "Trau chuốt", desc: "Viết mượt mà, tự nhiên hơn" },
-  { id: "formal", label: "Trang trọng", desc: "Giọng văn chuyên nghiệp, lịch sự" },
-  { id: "casual", label: "Thân mật", desc: "Giọng văn gần gũi, thoải mái" },
-  { id: "shorten", label: "Rút gọn", desc: "Súc tích, bỏ chi tiết thừa" },
-  { id: "grammar", label: "Sửa ngữ pháp", desc: "Sửa lỗi chính tả & cấu trúc câu" },
+const ACTION_BUTTONS: Array<{
+  id: WriteAction
+  labelKey:
+    | "sidePanel.write.actions.polish"
+    | "sidePanel.write.actions.formal"
+    | "sidePanel.write.actions.casual"
+    | "sidePanel.write.actions.shorten"
+    | "sidePanel.write.actions.grammar"
+}> = [
+  { id: "polish", labelKey: "sidePanel.write.actions.polish" },
+  { id: "formal", labelKey: "sidePanel.write.actions.formal" },
+  { id: "casual", labelKey: "sidePanel.write.actions.casual" },
+  { id: "shorten", labelKey: "sidePanel.write.actions.shorten" },
+  { id: "grammar", labelKey: "sidePanel.write.actions.grammar" },
 ]
 
 function getInstructionForAction(action: WriteAction): string {
@@ -97,7 +106,7 @@ export function WriteView() {
       )
     } catch (err: unknown) {
       if ((err as Error)?.name !== "AbortError") {
-        setOutputText(`*(Lỗi: ${(err as Error)?.message || "Không thể xử lý văn bản"})*`)
+        setOutputText(`*(${i18n.t("sidePanel.write.error", [(err as Error)?.message || ""])})*`)
       }
     } finally {
       setIsProcessing(false)
@@ -116,7 +125,9 @@ export function WriteView() {
       <header className="flex h-12 items-center justify-between border-b border-border/60 px-4">
         <div className="flex items-center gap-2">
           <PenTool className="size-4 text-primary" />
-          <h2 className="text-sm font-semibold tracking-tight">Write & Compose</h2>
+          <h2 className="text-sm font-semibold tracking-tight">
+            {i18n.t("sidePanel.write.title")}
+          </h2>
         </div>
         <Button
           size="sm"
@@ -125,7 +136,7 @@ export function WriteView() {
           onClick={() => void handlePasteSelection()}
         >
           <FileEdit className="size-3" />
-          Dán chữ bôi đen
+          {i18n.t("sidePanel.write.pasteSelection")}
         </Button>
       </header>
 
@@ -133,13 +144,17 @@ export function WriteView() {
         {/* Input Text Box */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-muted-foreground">Văn bản gốc:</label>
-            <span className="text-[10px] text-muted-foreground">{inputText.length} ký tự</span>
+            <label className="text-xs font-medium text-muted-foreground">
+              {i18n.t("sidePanel.write.originalText")}
+            </label>
+            <span className="text-[10px] text-muted-foreground">
+              {i18n.t("sidePanel.write.charsCount", [inputText.length])}
+            </span>
           </div>
           <Textarea
             value={inputText}
             onChange={(e) => setInputText(e.target.value)}
-            placeholder="Nhập hoặc dán đoạn văn bản cần viết lại..."
+            placeholder={i18n.t("sidePanel.write.placeholder")}
             rows={4}
             className="resize-none text-xs"
           />
@@ -147,7 +162,9 @@ export function WriteView() {
 
         {/* Action Buttons */}
         <div className="space-y-1.5">
-          <label className="text-xs font-medium text-muted-foreground">Chọn phong cách:</label>
+          <label className="text-xs font-medium text-muted-foreground">
+            {i18n.t("sidePanel.write.chooseStyle")}
+          </label>
           <div className="grid grid-cols-2 gap-1.5">
             {ACTION_BUTTONS.map((btn) => (
               <Button
@@ -159,7 +176,7 @@ export function WriteView() {
                 onClick={() => void handleExecute(btn.id)}
               >
                 <Sparkles className="mr-1 size-3 shrink-0 text-primary" />
-                <span className="truncate">{btn.label}</span>
+                <span className="truncate">{i18n.t(btn.labelKey)}</span>
               </Button>
             ))}
           </div>
@@ -168,7 +185,9 @@ export function WriteView() {
         {/* Output Text Box */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
-            <label className="text-xs font-medium text-muted-foreground">Kết quả chỉnh sửa:</label>
+            <label className="text-xs font-medium text-muted-foreground">
+              {i18n.t("sidePanel.write.outputLabel")}
+            </label>
             <div className="flex items-center gap-1">
               {isProcessing && (
                 <Button
@@ -178,7 +197,7 @@ export function WriteView() {
                   onClick={handleStop}
                 >
                   <Square className="size-2.5" />
-                  Dừng
+                  {i18n.t("sidePanel.write.stop")}
                 </Button>
               )}
               {outputText && (
@@ -191,10 +210,10 @@ export function WriteView() {
                       setInputText(outputText)
                       setOutputText("")
                     }}
-                    title="Đặt kết quả làm văn bản gốc để chỉnh tiếp"
+                    title={i18n.t("sidePanel.write.useAsInputTooltip")}
                   >
                     <ArrowDown className="size-3" />
-                    Chỉnh tiếp
+                    {i18n.t("sidePanel.write.useAsInput")}
                   </Button>
                   <Button
                     size="icon"
@@ -218,7 +237,9 @@ export function WriteView() {
               <p className="whitespace-pre-wrap">{outputText}</p>
             ) : (
               <div className="flex h-24 items-center justify-center text-xs text-muted-foreground/60 italic">
-                {isProcessing ? "AI đang viết lại..." : "Kết quả sẽ xuất hiện ở đây"}
+                {isProcessing
+                  ? i18n.t("sidePanel.write.processing")
+                  : i18n.t("sidePanel.write.empty")}
               </div>
             )}
           </div>

@@ -14,6 +14,7 @@ import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { selectedChatModelAtom } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
+import { i18n } from "@/utils/i18n"
 import { getActiveTabContent } from "@/utils/sidepanel/page-context"
 
 interface LanguageOption {
@@ -99,7 +100,7 @@ export function TranslateView() {
     } catch (err: unknown) {
       if ((err as Error)?.name !== "AbortError") {
         setTranslatedText(
-          `*(Lỗi dịch thuật: ${(err as Error)?.message || "Không thể kết nối model"})*`,
+          `*(${i18n.t("sidePanel.translate.error", [(err as Error)?.message || ""])})*`,
         )
       }
     } finally {
@@ -119,7 +120,9 @@ export function TranslateView() {
       <header className="flex h-12 items-center justify-between border-b border-border/60 px-4">
         <div className="flex items-center gap-2">
           <Languages className="size-4 text-primary" />
-          <h2 className="text-sm font-semibold tracking-tight">Quick Translate</h2>
+          <h2 className="text-sm font-semibold tracking-tight">
+            {i18n.t("sidePanel.translate.title")}
+          </h2>
         </div>
         <Button
           size="sm"
@@ -128,7 +131,7 @@ export function TranslateView() {
           onClick={() => void handlePasteSelection()}
         >
           <FileEdit className="size-3" />
-          Dán chữ bôi đen
+          {i18n.t("sidePanel.translate.pasteSelection")}
         </Button>
       </header>
 
@@ -137,14 +140,16 @@ export function TranslateView() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">
-              Tự động nhận diện ngôn ngữ
+              {i18n.t("sidePanel.translate.autoDetect")}
             </span>
-            <span className="text-[10px] text-muted-foreground">{sourceText.length} ký tự</span>
+            <span className="text-[10px] text-muted-foreground">
+              {i18n.t("sidePanel.translate.charsCount", [sourceText.length])}
+            </span>
           </div>
           <Textarea
             value={sourceText}
             onChange={(e) => setSourceText(e.target.value)}
-            placeholder="Nhập nội dung cần dịch..."
+            placeholder={i18n.t("sidePanel.translate.placeholder")}
             rows={4}
             className="resize-none text-xs"
           />
@@ -153,7 +158,9 @@ export function TranslateView() {
         {/* Language & Action Controls */}
         <div className="flex items-center justify-between border-y border-border/40 py-2.5">
           <div className="flex items-center gap-2">
-            <span className="text-xs text-muted-foreground">Dịch sang:</span>
+            <span className="text-xs text-muted-foreground">
+              {i18n.t("sidePanel.translate.translateTo")}
+            </span>
             <DropdownMenu>
               <DropdownMenuTrigger className="flex h-7 items-center justify-between gap-1.5 rounded-md border border-input bg-transparent px-2.5 text-xs font-medium hover:bg-muted">
                 {targetLang.name}
@@ -181,7 +188,7 @@ export function TranslateView() {
               onClick={handleStop}
             >
               <Square className="size-3" />
-              Dừng
+              {i18n.t("sidePanel.translate.stop")}
             </Button>
           ) : (
             <Button
@@ -191,7 +198,7 @@ export function TranslateView() {
               onClick={() => void handleTranslate()}
             >
               <Sparkles className="size-3" />
-              Dịch
+              {i18n.t("sidePanel.translate.action")}
             </Button>
           )}
         </div>
@@ -200,7 +207,7 @@ export function TranslateView() {
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">
             <span className="text-xs font-medium text-muted-foreground">
-              Bản dịch ({targetLang.name}):
+              {i18n.t("sidePanel.translate.outputLabel", [targetLang.name])}
             </span>
             {translatedText && (
               <Button
@@ -222,7 +229,9 @@ export function TranslateView() {
               <p className="whitespace-pre-wrap">{translatedText}</p>
             ) : (
               <div className="flex h-24 items-center justify-center text-xs text-muted-foreground/60 italic">
-                {isTranslating ? "Đang dịch..." : "Bản dịch sẽ hiển thị ở đây"}
+                {isTranslating
+                  ? i18n.t("sidePanel.translate.translating")
+                  : i18n.t("sidePanel.translate.empty")}
               </div>
             )}
           </div>

@@ -2,6 +2,7 @@ import type { CustomAIAction } from "./custom-ai-actions"
 import { Sparkles, X } from "lucide-react"
 import { useEffect, useRef } from "react"
 import { Kbd } from "@/components/ui/base-ui/kbd"
+import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
 
 interface SlashPromptPopoverProps {
@@ -58,17 +59,17 @@ export function SlashPromptPopover({
         <div className="flex items-center gap-2">
           <div className="hidden items-center gap-1 text-[10px] text-muted-foreground sm:flex">
             <Kbd className="h-4 px-1 text-[9px]">↑↓</Kbd>
-            <span>chọn</span>
+            <span>{i18n.t("sidePanel.slashMenu.select")}</span>
             <Kbd className="h-4 px-1 text-[9px]">Enter</Kbd>
-            <span>dùng</span>
+            <span>{i18n.t("sidePanel.slashMenu.use")}</span>
             <Kbd className="h-4 px-1 text-[9px]">Esc</Kbd>
-            <span>đóng</span>
+            <span>{i18n.t("sidePanel.slashMenu.close")}</span>
           </div>
           <button
             type="button"
             onClick={onClose}
             className="rounded p-0.5 text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            title="Đóng menu"
+            title={i18n.t("sidePanel.slashMenu.closeTooltip")}
           >
             <X className="size-3.5" />
           </button>
@@ -80,12 +81,10 @@ export function SlashPromptPopover({
         {actions.length === 0 ? (
           <div className="px-3 py-6 text-center">
             <p className="text-xs font-medium text-foreground">
-              Không tìm thấy action phù hợp với &ldquo;/{query}&rdquo;
+              {i18n.t("sidePanel.slashMenu.noResults", [query])}
             </p>
             <p className="mt-1 text-[11px] text-muted-foreground">
-              Thử gõ <span className="font-mono text-primary">/tom</span>,{" "}
-              <span className="font-mono text-primary">/dich</span> hoặc{" "}
-              <span className="font-mono text-primary">/code</span>
+              {i18n.t("sidePanel.slashMenu.searchHint")}
             </p>
           </div>
         ) : (

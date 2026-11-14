@@ -24,17 +24,23 @@ import { cn } from "@/utils/styles/utils"
 
 interface NavItem {
   id: SidePanelNavTab
-  label: string
+  labelKey:
+    | "sidePanel.nav.chat"
+    | "sidePanel.nav.webChat"
+    | "sidePanel.nav.read"
+    | "sidePanel.nav.write"
+    | "sidePanel.nav.translate"
+    | "sidePanel.nav.history"
   icon: typeof MessageSquare
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { id: "chat", label: "Chat AI", icon: MessageSquare },
-  { id: "web-chat", label: "Web Assistant", icon: BotMessageSquare },
-  { id: "read", label: "Read & Summarize", icon: BookOpen },
-  { id: "write", label: "Write & Compose", icon: PenTool },
-  { id: "translate", label: "Translate", icon: Languages },
-  { id: "history", label: "Chat History", icon: History },
+  { id: "chat", labelKey: "sidePanel.nav.chat", icon: MessageSquare },
+  { id: "web-chat", labelKey: "sidePanel.nav.webChat", icon: BotMessageSquare },
+  { id: "read", labelKey: "sidePanel.nav.read", icon: BookOpen },
+  { id: "write", labelKey: "sidePanel.nav.write", icon: PenTool },
+  { id: "translate", labelKey: "sidePanel.nav.translate", icon: Languages },
+  { id: "history", labelKey: "sidePanel.nav.history", icon: History },
 ]
 
 export function SidePanelNavBar() {
@@ -73,9 +79,7 @@ export function SidePanelNavBar() {
                     <Icon className="size-4" />
                   </TooltipTrigger>
                   <TooltipContent side="left" sideOffset={6} className="text-xs font-medium">
-                    {item.id === "web-chat"
-                      ? i18n.t("options.webChat.sidepanel.tabLabel")
-                      : item.label}
+                    {i18n.t(item.labelKey)}
                   </TooltipContent>
                 </Tooltip>
               )
@@ -94,7 +98,7 @@ export function SidePanelNavBar() {
               <ScrollText className="size-4" />
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6} className="text-xs font-medium">
-              Request Audit Logs
+              {i18n.t("sidePanel.nav.logs")}
             </TooltipContent>
           </Tooltip>
 
@@ -106,7 +110,7 @@ export function SidePanelNavBar() {
               <Settings className="size-4" />
             </TooltipTrigger>
             <TooltipContent side="left" sideOffset={6} className="text-xs font-medium">
-              Settings & Providers
+              {i18n.t("sidePanel.nav.settings")}
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
