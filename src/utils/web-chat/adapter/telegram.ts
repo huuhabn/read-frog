@@ -55,9 +55,13 @@ export class TelegramChatAdapter implements IChatAdapter {
     }
 
     if (success && options?.autoSend) {
-      setTimeout(() => {
-        this.submitSend()
-      }, 150)
+      // Retry send over multiple ticks so Teact has time to update state from record to send button
+      const timeouts = [150, 400, 800]
+      timeouts.forEach((delay) => {
+        setTimeout(() => {
+          this.submitSend()
+        }, delay)
+      })
     }
     return success
   }
@@ -79,6 +83,10 @@ export class TelegramChatAdapter implements IChatAdapter {
           bubbles: true,
           cancelable: true,
           composed: true,
+          shiftKey: false,
+          ctrlKey: false,
+          altKey: false,
+          metaKey: false,
         }
         input.dispatchEvent(new KeyboardEvent("keydown", enterOpts))
         try {
@@ -88,11 +96,6 @@ export class TelegramChatAdapter implements IChatAdapter {
       } catch {}
     }
 
-    if (!sent && input) {
-      setTimeout(() => {
-        triggerDOMSend(input, config.sendButtonSelector)
-      }, 120)
-    }
     return sent || Boolean(input)
   }
 

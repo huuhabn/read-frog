@@ -193,6 +193,11 @@ export function WebChatView() {
         } catch (err) {
           log.error("Failed to execute auto reply", { err, lastMsgId: lastMsg.id })
           lastRepliedMessageIdRef.current = ""
+          if (isSubscribed) {
+            const errStr = (err as Error)?.message || String(err)
+            setResultContent(`[Auto Reply Error]: ${errStr}`)
+            setSecondaryResult(undefined)
+          }
         } finally {
           if (isSubscribed) {
             setIsAutoReplying(false)

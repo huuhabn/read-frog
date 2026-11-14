@@ -537,6 +537,10 @@ export async function insertTextToActiveChatTab(
               bubbles: true,
               cancelable: true,
               composed: true,
+              shiftKey: false,
+              ctrlKey: false,
+              altKey: false,
+              metaKey: false,
             }
             target.dispatchEvent(new KeyboardEvent("keydown", enterOpts))
             try {
