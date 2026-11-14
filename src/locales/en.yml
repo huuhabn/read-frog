@@ -64,6 +64,9 @@ sidePanel:
     untitled: Untitled Chat
     messagesCount: "$1 message(s)"
     delete: Delete session
+    search: Search conversations...
+    noResults: No conversations found.
+    clearAll: Clear all history
   slashMenu:
     title: Custom AI Actions
     select: select

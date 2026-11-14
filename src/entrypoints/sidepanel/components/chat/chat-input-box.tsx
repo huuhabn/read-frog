@@ -1,19 +1,16 @@
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { SelectedModelConfig } from "@/utils/sidepanel/chat-model-storage"
 import type { ActiveTabContent } from "@/utils/sidepanel/page-context"
-import { ArrowRight, ChevronDown, Globe, Plus, Square } from "lucide-react"
+import { ArrowRight, Globe, Plus, Square } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/base-ui/dropdown-menu"
 import { Textarea } from "@/components/ui/base-ui/textarea"
 import { i18n } from "@/utils/i18n"
+import { useActiveTabSelection } from "@/utils/sidepanel/active-tab-selection"
 import { isRestrictedUrl } from "@/utils/sidepanel/page-context"
 import { cn } from "@/utils/styles/utils"
+import { ModelSelectorDropdown } from "../common/model-selector-dropdown"
+import { SelectionSnippetCard } from "../common/selection-snippet-card"
 import { filterCustomAIActions, type CustomAIAction } from "./custom-ai-actions"
 import { SlashPromptPopover } from "./slash-prompt-popover"
 
@@ -54,6 +51,12 @@ export function ChatInputBox({
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
   const isRestricted = Boolean(activeTab?.url && isRestrictedUrl(activeTab.url))
+
+  const { selectedSnippet, clearSelection } = useActiveTabSelection()
+
+  const handleClearSnippet = () => {
+    clearSelection()
+  }
 
   const filteredActions = useMemo(() => {
     return filterCustomAIActions(slashQuery)
@@ -105,35 +108,24 @@ export function ChatInputBox({
   const handleSelectAction = useCallback(
     (action: CustomAIAction) => {
       setIsSlashOpen(false)
-      const textarea = textareaRef.current
-      if (!textarea) return
-
-      const val = textarea.value
-      const cursorPos = textarea.selectionStart ?? val.length
-      const textBeforeCursor = val.slice(0, cursorPos)
-      const textAfterCursor = val.slice(cursorPos)
-
-      const slashMatch = textBeforeCursor.match(/(?:^|\s)\/([a-zA-Z0-9_-]*)$/)
-      if (slashMatch) {
-        const matchIndex = textBeforeCursor.lastIndexOf(slashMatch[0])
-        const prefix = textBeforeCursor.slice(0, matchIndex)
-        const spacer = matchIndex > 0 && !prefix.endsWith(" ") ? " " : ""
-        const newInput = prefix + spacer + action.prompt + " " + textAfterCursor
-        setInput(newInput)
-      } else {
-        setInput(action.prompt + " ")
-      }
-
-      setTimeout(() => {
-        if (textareaRef.current) {
-          textareaRef.current.focus()
-          const len = action.prompt.length
-          textareaRef.current.setSelectionRange(len, len)
-        }
-      }, 0)
+      const promptToSet = action.prompt
+      setInput(promptToSet)
+      textareaRef.current?.focus()
     },
     [setInput],
   )
+
+  const handleSendAction = () => {
+    if (!input.trim() && !selectedSnippet) return
+    const textToSend = input.trim()
+      ? selectedSnippet
+        ? `${input.trim()}\n\n> ${selectedSnippet}`
+        : input.trim()
+      : selectedSnippet || ""
+    void onSend(textToSend)
+    setInput("")
+    clearSelection()
+  }
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (isSlashOpen && filteredActions.length > 0) {
@@ -166,7 +158,7 @@ export function ChatInputBox({
 
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault()
-      void onSend()
+      handleSendAction()
     }
   }
 
@@ -211,6 +203,11 @@ export function ChatInputBox({
 
       {/* Main Input Container */}
       <div className="relative flex w-full min-w-0 flex-col rounded-2xl border border-border/70 bg-muted/25 p-2 transition-all focus-within:border-primary/50 focus-within:bg-background focus-within:ring-1 focus-within:ring-primary/20">
+        {/* Selection Snippet Card */}
+        {selectedSnippet && (
+          <SelectionSnippetCard text={selectedSnippet} onClear={handleClearSnippet} />
+        )}
+
         {/* Textarea */}
         <Textarea
           ref={textareaRef}
@@ -257,36 +254,13 @@ export function ChatInputBox({
             </button>
 
             {/* Model Selector Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger className="flex h-6.5 max-w-[150px] cursor-pointer items-center gap-1 rounded-lg px-2 text-xs font-medium text-foreground/85 outline-hidden transition-colors hover:bg-muted hover:text-foreground">
-                <span className="truncate">
-                  {selectedModel.model || i18n.t("sidePanel.chat.selectModel")}
-                </span>
-                <ChevronDown className="size-3 shrink-0 opacity-50" />
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="start" className="w-56 text-xs">
-                {llmProviders.length === 0 ? (
-                  <div className="p-2 text-center text-muted-foreground">
-                    {i18n.t("sidePanel.chat.noProviderConfigured")}
-                  </div>
-                ) : (
-                  llmProviders.map((p) => {
-                    const modelName =
-                      typeof p.model === "string" ? p.model : p.model.customModel || p.model.model
-                    return (
-                      <DropdownMenuItem
-                        key={p.id}
-                        onClick={() => void onSelectModel(p.id, modelName)}
-                        className="flex items-center justify-between py-1.5 text-xs"
-                      >
-                        <span className="truncate font-medium">{p.name || p.id}</span>
-                        <span className="text-[10px] text-muted-foreground">{modelName}</span>
-                      </DropdownMenuItem>
-                    )
-                  })
-                )}
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <ModelSelectorDropdown
+              selectedProviderId={selectedModel.providerId}
+              selectedModelName={selectedModel.model}
+              onSelectModel={onSelectModel}
+              llmProviders={llmProviders}
+              variant="subtle"
+            />
           </div>
 
           {/* Right Controls: Submit or Stop Button */}
@@ -306,9 +280,9 @@ export function ChatInputBox({
               <Button
                 type="button"
                 size="icon"
-                disabled={!input.trim()}
+                disabled={!input.trim() && !selectedSnippet}
                 className="size-6 rounded-full shadow-xs transition-transform hover:scale-105 active:scale-95 disabled:pointer-events-none disabled:opacity-30"
-                onClick={() => void onSend()}
+                onClick={handleSendAction}
                 title={i18n.t("sidePanel.chat.send")}
               >
                 <ArrowRight className="size-4" />

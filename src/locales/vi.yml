@@ -64,6 +64,9 @@ sidePanel:
     untitled: Cuộc trò chuyện không tên
     messagesCount: "$1 tin nhắn"
     delete: Xóa phiên trò chuyện
+    search: Tìm kiếm cuộc trò chuyện...
+    noResults: Không tìm thấy cuộc trò chuyện nào.
+    clearAll: Xóa toàn bộ lịch sử
   slashMenu:
     title: Custom AI Actions
     select: chọn

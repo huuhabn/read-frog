@@ -204,7 +204,7 @@ export function ReadView() {
       </div>
 
       {/* Summary Content Body */}
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="scrollbar-slim flex-1 overflow-y-auto p-4">
         {summary ? (
           <div className="group/sum relative rounded-xl border border-border/60 bg-muted/20 p-3 text-xs leading-relaxed">
             <div className="mb-3 flex items-center justify-between border-b border-border/40 pb-2">

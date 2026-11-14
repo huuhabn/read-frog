@@ -6,6 +6,10 @@ import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ChatInputBox } from "../chat-input-box"
 
+vi.mock("@/components/providers/theme-provider", () => ({
+  useTheme: () => ({ theme: "light" as const, setTheme: vi.fn<() => void>() }),
+}))
+
 describe("ChatInputBox", () => {
   const mockModel: SelectedModelConfig = {
     providerId: "openai",

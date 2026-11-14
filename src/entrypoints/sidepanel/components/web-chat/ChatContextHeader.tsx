@@ -5,7 +5,6 @@ import {
   Bot,
   Check,
   ChevronDown,
-  Languages,
   RefreshCw,
   RotateCcw,
   ShieldCheck,
@@ -13,6 +12,7 @@ import {
   Sparkles,
 } from "lucide-react"
 import { useMemo } from "react"
+import { IconTooltip } from "@/components/icon-tooltip"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
 import {
@@ -21,10 +21,10 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import { i18n } from "@/utils/i18n"
-import { isSystemProviderSelectorItem } from "@/utils/providers/provider-display"
 import { cn } from "@/utils/styles/utils"
+import { LanguageSelectorDropdown } from "../common/language-selector-dropdown"
+import { ModelSelectorDropdown } from "../common/model-selector-dropdown"
 
 export interface ChatContextHeaderProps {
   room: ChatRoom | null
@@ -96,14 +96,6 @@ function getAutoReplyDesc(mode: WebChatAutoReplyMode): string {
   }
 }
 
-function getProviderModelName(p: ProviderSelectorOption): string {
-  if (isSystemProviderSelectorItem(p)) return ""
-  if (isLLMProviderConfig(p)) {
-    return typeof p.model === "string" ? p.model : p.model.customModel || p.model.model
-  }
-  return ""
-}
-
 const CHAT_LANGUAGES = [
   { code: "vi", name: "Tiếng Việt" },
   { code: "en", name: "English" },
@@ -154,12 +146,6 @@ export function ChatContextHeader({
     rawName.toLowerCase() !== "null"
       ? rawName
       : i18n.t("options.webChat.sidepanel.noRoomDetected")
-
-  const activeProvider = availableProviders.find((p) => p.id === selectedProviderId)
-  const activeModelDisplay =
-    activeProvider?.name ||
-    (activeProvider ? getProviderModelName(activeProvider) : null) ||
-    i18n.t("options.webChat.sidepanel.model")
 
   const displayLanguages = useMemo(() => {
     const exists = CHAT_LANGUAGES.some((l) => l.code.toLowerCase() === selectedLang.toLowerCase())
@@ -215,73 +201,25 @@ export function ChatContextHeader({
       {/* Row 2: Custom Options Toolbar (Model, Language, Tone) */}
       <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto py-0.5">
         {/* Model Pill Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className={cn(
-              "flex h-6.5 shrink-0 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden",
-              selectedProviderId && "border-primary/30 text-foreground",
-            )}
-            title={i18n.t("options.webChat.sidepanel.model")}
-          >
-            <Sparkles className="size-3 text-primary" />
-            <span className="max-w-[85px] truncate">{activeModelDisplay}</span>
-            <ChevronDown className="size-2.5 opacity-60" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-52 text-xs">
-            {availableProviders.length === 0 ? (
-              <div className="p-2 text-center text-muted-foreground">
-                {i18n.t("options.webChat.provider.placeholder")}
-              </div>
-            ) : (
-              availableProviders.map((p) => {
-                const modelName = getProviderModelName(p)
-                return (
-                  <DropdownMenuItem
-                    key={p.id}
-                    onClick={() => onSelectProvider(p.id)}
-                    className="flex items-center justify-between py-1.5 text-xs"
-                  >
-                    <div className="flex min-w-0 flex-col">
-                      <span className="truncate font-medium">{p.name || p.id}</span>
-                      {modelName ? (
-                        <span className="truncate text-[10px] text-muted-foreground">
-                          {modelName}
-                        </span>
-                      ) : null}
-                    </div>
-                    {selectedProviderId === p.id && <Check className="size-3 text-primary" />}
-                  </DropdownMenuItem>
-                )
-              })
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <ModelSelectorDropdown
+          selectedProviderId={selectedProviderId}
+          onSelectModel={(id) => onSelectProvider(id)}
+          availableProviders={availableProviders}
+          variant="compact"
+          title={i18n.t("options.webChat.sidepanel.model")}
+        />
 
         {/* Target Language Pill Dropdown */}
-        <DropdownMenu>
-          <DropdownMenuTrigger
-            className="flex h-6.5 shrink-0 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden"
-            title={i18n.t("options.webChat.sidepanel.language")}
-          >
-            <Languages className="size-3 text-primary" />
-            <span className="font-semibold">{selectedLang.toUpperCase()}</span>
-            <ChevronDown className="size-2.5 opacity-60" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="max-h-60 w-48 overflow-y-auto text-xs">
-            {displayLanguages.map((lang) => (
-              <DropdownMenuItem
-                key={lang.code}
-                onClick={() => onSelectLang(lang.code)}
-                className="flex items-center justify-between py-1.5 text-xs"
-              >
-                <span>{lang.name}</span>
-                {selectedLang.toLowerCase() === lang.code.toLowerCase() && (
-                  <Check className="size-3 text-primary" />
-                )}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <LanguageSelectorDropdown
+          selectedCode={selectedLang}
+          onSelect={(lang) => onSelectLang(lang.code)}
+          options={displayLanguages}
+          variant="pill"
+          displayMode="code"
+          showIcon
+          title={i18n.t("options.webChat.sidepanel.language")}
+          ariaLabel={i18n.t("options.webChat.sidepanel.language")}
+        />
 
         {/* Tone Pill Dropdown */}
         <DropdownMenu>
@@ -353,7 +291,17 @@ export function ChatContextHeader({
           <span>{i18n.t("options.webChat.sidepanel.messagesCount", [messageCount])}</span>
           <span>•</span>
           <span className="flex items-center gap-1 text-emerald-500">
-            <ShieldCheck className="size-3" />
+            <IconTooltip
+              icon={
+                <ShieldCheck
+                  className="size-3 cursor-help text-muted-foreground"
+                  aria-hidden="true"
+                />
+              }
+              aria-label={i18n.t("options.webChat.sidepanel.piiMasked")}
+            >
+              {i18n.t("options.webChat.sidepanel.piiMasked")}
+            </IconTooltip>
             {i18n.t("options.webChat.sidepanel.piiMasked")}
           </span>
         </div>

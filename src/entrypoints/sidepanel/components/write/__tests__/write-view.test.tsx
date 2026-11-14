@@ -14,7 +14,6 @@ describe("WriteView", () => {
     render(<WriteView />)
 
     expect(screen.getByText("sidePanel.write.title")).toBeDefined()
-    expect(screen.getByText("sidePanel.write.pasteSelection")).toBeDefined()
     expect(screen.getByText("sidePanel.write.actions.polish")).toBeDefined()
     expect(screen.getByText("sidePanel.write.actions.formal")).toBeDefined()
     expect(screen.getByText("sidePanel.write.actions.casual")).toBeDefined()

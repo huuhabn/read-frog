@@ -370,7 +370,7 @@ export function WebChatView() {
         onSelectAction={(action) => void handleActionSelect(action)}
       />
 
-      <div className="flex-1 overflow-y-auto">
+      <div className="scrollbar-slim flex-1 overflow-y-auto">
         <ResultStream
           content={resultContent}
           secondaryContent={secondaryResult}

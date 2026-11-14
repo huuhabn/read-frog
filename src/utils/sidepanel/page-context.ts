@@ -42,7 +42,10 @@ export async function getActiveTabInfo(
   fallbackToNonRestricted = true,
 ): Promise<ActiveTabInfo | null> {
   try {
-    const tabs = await browser.tabs.query({ active: true, currentWindow: true })
+    let tabs = await browser.tabs.query({ active: true, currentWindow: true })
+    if (!tabs || tabs.length === 0 || !tabs[0]?.id) {
+      tabs = await browser.tabs.query({ active: true, lastFocusedWindow: true })
+    }
     const activeTab = tabs[0]
 
     // If active tab exists and is NOT restricted, return it directly
@@ -123,7 +126,29 @@ export async function getActiveTabContent(
     const results = await browser.scripting.executeScript({
       target: { tabId: tabInfo.id },
       func: () => {
-        const selection = window.getSelection()?.toString().trim() || ""
+        let selection = window.getSelection()?.toString().trim() || ""
+
+        // Check if active element is an input or textarea
+        if (!selection && document.activeElement) {
+          const el = document.activeElement as HTMLInputElement | HTMLTextAreaElement
+          if (
+            (el.tagName === "INPUT" || el.tagName === "TEXTAREA") &&
+            typeof el.selectionStart === "number" &&
+            typeof el.selectionEnd === "number"
+          ) {
+            selection = el.value.substring(el.selectionStart, el.selectionEnd).trim()
+          }
+        }
+
+        // Check shadowRoot if present
+        if (!selection && document.activeElement?.shadowRoot) {
+          try {
+            const shadowRoot = document.activeElement.shadowRoot as unknown as {
+              getSelection?: () => Selection | null
+            }
+            selection = shadowRoot.getSelection?.()?.toString().trim() || ""
+          } catch {}
+        }
 
         // Clone and clean body text to remove scripts, styles and noise
         const bodyClone = document.body.cloneNode(true) as HTMLElement
@@ -165,5 +190,53 @@ export async function getActiveTabContent(
           isRestricted: isRestrictedUrl(fallback.url),
         }
       : null
+  }
+}
+
+/**
+ * Lightweight helper to retrieve ONLY the selected text from the active tab.
+ * Does NOT clone the DOM or compute innerText, keeping overhead near zero.
+ */
+export async function getActiveTabSelectedText(fallbackToNonRestricted = false): Promise<string> {
+  try {
+    const tabInfo = await getActiveTabInfo(fallbackToNonRestricted)
+    if (!tabInfo?.id || !tabInfo.url || isRestrictedUrl(tabInfo.url)) {
+      return ""
+    }
+
+    const results = await browser.scripting.executeScript({
+      target: { tabId: tabInfo.id },
+      func: () => {
+        let selection = window.getSelection()?.toString().trim() || ""
+
+        // Check if active element is an input or textarea
+        if (!selection && document.activeElement) {
+          const el = document.activeElement as HTMLInputElement | HTMLTextAreaElement
+          if (
+            (el.tagName === "INPUT" || el.tagName === "TEXTAREA") &&
+            typeof el.selectionStart === "number" &&
+            typeof el.selectionEnd === "number"
+          ) {
+            selection = el.value.substring(el.selectionStart, el.selectionEnd).trim()
+          }
+        }
+
+        // Check shadowRoot if present
+        if (!selection && document.activeElement?.shadowRoot) {
+          try {
+            const shadowRoot = document.activeElement.shadowRoot as unknown as {
+              getSelection?: () => Selection | null
+            }
+            selection = shadowRoot.getSelection?.()?.toString().trim() || ""
+          } catch {}
+        }
+
+        return selection
+      },
+    })
+
+    return results?.[0]?.result || ""
+  } catch {
+    return ""
   }
 }

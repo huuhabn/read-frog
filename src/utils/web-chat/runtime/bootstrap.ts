@@ -8,7 +8,7 @@ import { translateChatText } from "../ai/service"
 import { initRemoteConfig } from "../remote-config/loader"
 import { SlashCommandPalette } from "../slash/palette"
 import { createInboundTranslationController } from "../translate/inbound/injector"
-import { floatingChatMenu } from "../ui/floating-menu"
+// import { floatingChatMenu } from "../ui/floating-menu"
 
 let webChatBootstrapped = false
 
@@ -48,8 +48,8 @@ export async function bootstrapWebChat(ctx?: ContentScriptContext): Promise<() =
   const cleanups: (() => void)[] = []
 
   // 3. Floating Menu
-  floatingChatMenu.init()
-  cleanups.push(() => floatingChatMenu.destroy())
+  // floatingChatMenu.init()
+  // cleanups.push(() => floatingChatMenu.destroy())
 
   // 4. Slash Command Palette
   if (webChatConfig.slashCommandsEnabled) {

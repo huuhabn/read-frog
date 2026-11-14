@@ -24,7 +24,7 @@ export const DEFAULT_WEB_CHAT_CONFIG = {
   enableSlack: true,
   enableGeneric: true,
   remoteConfigUrl:
-    "https://raw.githubusercontent.com/huuha/workmate-rules/main/chat-selectors.json",
+    "https://raw.githubusercontent.com/huuhabn/workmate-artifacts/main/chat-selectors.json",
   // Privacy & PII
   piiMaskingEnabled: true,
   maskPhone: true,

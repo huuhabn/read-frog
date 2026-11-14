@@ -79,10 +79,17 @@ export function ThemeProvider({
   return <ThemeContext value={contextValue}>{children}</ThemeContext>
 }
 
+const DEFAULT_THEME_CONTEXT: ThemeContextI = {
+  theme: "light",
+  themeName: "default",
+  themeMode: "system",
+  scaled: false,
+  setThemeName: async () => {},
+  setThemeMode: async () => {},
+  setScaled: async () => {},
+}
+
 export function useTheme(): ThemeContextI {
   const context = use(ThemeContext)
-  if (!context) {
-    throw new Error("useTheme must be used within a ThemeProvider")
-  }
-  return context
+  return context ?? DEFAULT_THEME_CONTEXT
 }

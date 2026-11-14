@@ -1,7 +1,8 @@
 import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
-import { useAtomValue } from "jotai"
-import { ArrowDown, Check, Copy, FileEdit, PenTool, Sparkles, Square } from "lucide-react"
-import { useRef, useState } from "react"
+import type { LLMProviderConfig } from "@/types/config/provider"
+import { useAtom, useAtomValue } from "jotai"
+import { ArrowDown, Check, Copy, PenTool, Sparkles, Square } from "lucide-react"
+import { useEffect, useMemo, useRef, useState } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { Textarea } from "@/components/ui/base-ui/textarea"
 import { isLLMProviderConfig } from "@/types/config/provider"
@@ -9,7 +10,9 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { selectedChatModelAtom } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { i18n } from "@/utils/i18n"
-import { getActiveTabContent } from "@/utils/sidepanel/page-context"
+import { useActiveTabSelection } from "@/utils/sidepanel/active-tab-selection"
+import { setLocalSelectedChatModel } from "@/utils/sidepanel/chat-model-storage"
+import { ModelSelectorDropdown } from "../common/model-selector-dropdown"
 
 type WriteAction = "polish" | "formal" | "casual" | "shorten" | "grammar"
 
@@ -47,7 +50,7 @@ function getInstructionForAction(action: WriteAction): string {
 }
 
 export function WriteView() {
-  const selectedModel = useAtomValue(selectedChatModelAtom)
+  const [selectedModel, setSelectedModel] = useAtom(selectedChatModelAtom)
   const providersConfig = useAtomValue(configFieldsAtomMap.providersConfig)
 
   const [inputText, setInputText] = useState("")
@@ -57,13 +60,31 @@ export function WriteView() {
   const [isCopied, setIsCopied] = useState(false)
 
   const abortControllerRef = useRef<AbortController | null>(null)
+  const lastInsertedSnippetRef = useRef<string | null>(null)
 
-  const handlePasteSelection = async () => {
-    const tabInfo = await getActiveTabContent()
-    if (tabInfo?.selectedText) {
-      setInputText(tabInfo.selectedText)
-    }
+  const { selectedSnippet, clearSelection } = useActiveTabSelection()
+
+  // Filter available LLM providers
+  const llmProviders = useMemo(
+    () =>
+      providersConfig.filter((p): p is LLMProviderConfig => isLLMProviderConfig(p) && p.enabled),
+    [providersConfig],
+  )
+
+  const handleSelectModel = (providerId: string, model: string) => {
+    setSelectedModel({ providerId, model })
+    void setLocalSelectedChatModel({ providerId, model })
   }
+
+  // Auto-fill selected text into textarea when selecting text on page
+  useEffect(() => {
+    if (selectedSnippet) {
+      if (!inputText.trim() || inputText === lastInsertedSnippetRef.current) {
+        setInputText(selectedSnippet)
+        lastInsertedSnippetRef.current = selectedSnippet
+      }
+    }
+  }, [selectedSnippet, inputText])
 
   const handleCopy = async () => {
     if (!outputText) return
@@ -75,6 +96,8 @@ export function WriteView() {
   const handleExecute = async (action: WriteAction) => {
     if (!inputText.trim() || isProcessing) return
 
+    clearSelection()
+    lastInsertedSnippetRef.current = null
     setCurrentAction(action)
     setOutputText("")
     setIsProcessing(true)
@@ -129,18 +152,16 @@ export function WriteView() {
             {i18n.t("sidePanel.write.title")}
           </h2>
         </div>
-        <Button
-          size="sm"
-          variant="outline"
-          className="h-7 gap-1 text-[11px]"
-          onClick={() => void handlePasteSelection()}
-        >
-          <FileEdit className="size-3" />
-          {i18n.t("sidePanel.write.pasteSelection")}
-        </Button>
+        <ModelSelectorDropdown
+          selectedProviderId={selectedModel.providerId}
+          selectedModelName={selectedModel.model}
+          onSelectModel={handleSelectModel}
+          llmProviders={llmProviders}
+          variant="subtle"
+        />
       </header>
 
-      <div className="flex-1 space-y-4 overflow-y-auto p-4">
+      <div className="scrollbar-slim flex-1 space-y-4 overflow-y-auto p-4">
         {/* Input Text Box */}
         <div className="space-y-1.5">
           <div className="flex items-center justify-between">

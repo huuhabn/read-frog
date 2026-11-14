@@ -57,7 +57,7 @@ describe("ChatContextHeader", () => {
     expect(screen.getByText("zalo")).toBeDefined()
     expect(screen.getByText("Gia đình")).toBeDefined()
     expect(screen.getByText("10 messages")).toBeDefined()
-    expect(screen.getByText("options.webChat.sidepanel.piiMasked")).toBeDefined()
+    expect(screen.getByLabelText("options.webChat.sidepanel.piiMasked")).toBeDefined()
   })
 
   it("falls back to noRoomDetected when room name is undefined string", () => {

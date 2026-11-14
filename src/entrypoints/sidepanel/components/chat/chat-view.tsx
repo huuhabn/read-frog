@@ -1,12 +1,9 @@
 import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
-import type { ChatMessageItem } from "@/utils/db/dexie/tables/chat-session"
-import { Icon } from "@iconify/react"
+import type { ChatMessageItem as ChatMessageType } from "@/utils/db/dexie/tables/chat-session"
 import { useAtom, useAtomValue } from "jotai"
-import { Check, Copy, Languages, Sparkles } from "lucide-react"
+import { Languages } from "lucide-react"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { browser } from "#imports"
-import { MarkdownRenderer } from "@/components/markdown-renderer"
-import { Button } from "@/components/ui/base-ui/button"
 import { isLLMProviderConfig, type LLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import {
@@ -27,6 +24,7 @@ import {
 } from "@/utils/sidepanel/chat-model-storage"
 import {
   getActiveTabContent,
+  getActiveTabInfo,
   isRestrictedUrl,
   type ActiveTabContent,
 } from "@/utils/sidepanel/page-context"
@@ -39,18 +37,11 @@ import {
   UPWORK_QUICK_PROMPT_ANALYZE_JOB,
   UPWORK_QUICK_PROMPT_COVER_LETTER,
 } from "@/utils/sidepanel/upwork"
-import { cn } from "@/utils/styles/utils"
+import { ChatEmptyState, QUICK_PROMPT_KEYS } from "./chat-empty-state"
 import { ChatHeader } from "./chat-header"
 import { ChatHistoryDrawer } from "./chat-history-drawer"
 import { ChatInputBox } from "./chat-input-box"
-import { ChatUpworkBar } from "./chat-upwork-bar"
-
-const QUICK_PROMPT_KEYS = [
-  "sidePanel.chat.quickPrompts.summarize",
-  "sidePanel.chat.quickPrompts.explainTerms",
-  "sidePanel.chat.quickPrompts.prosAndCons",
-  "sidePanel.chat.quickPrompts.emailSummary",
-] as const
+import { ChatMessageItem } from "./chat-message-item"
 
 const log = createLogger("sidepanel:chat")
 
@@ -71,7 +62,7 @@ export function ChatView() {
     [providersConfig],
   )
 
-  const [messages, setMessages] = useState<ChatMessageItem[]>([])
+  const [messages, setMessages] = useState<ChatMessageType[]>([])
   const [input, setInput] = useState("")
   const [isStreaming, setIsStreaming] = useState(false)
   const [isTranslating, setIsTranslating] = useState(false)
@@ -138,10 +129,16 @@ export function ChatView() {
     let isSubscribed = true
 
     const updateTabContent = () => {
-      void getActiveTabContent(true).then((content) => {
-        if (isSubscribed && content) {
-          setActiveTab(content)
-          if (content.url && !isRestrictedUrl(content.url)) {
+      void getActiveTabInfo(true).then((info) => {
+        if (isSubscribed && info) {
+          const isRestricted = isRestrictedUrl(info.url)
+          setActiveTab({
+            id: info.id,
+            title: info.title,
+            url: info.url,
+            isRestricted,
+          })
+          if (!isRestricted) {
             setUsePageContext(true)
           }
         }
@@ -262,16 +259,18 @@ export function ChatView() {
     setSelectedModel(savedModel)
   }, [isStreaming, setActiveSessionId, setSelectedModel])
 
-  const handleCopy = async (text: string, idx: number) => {
+  const handleToggleOriginal = useCallback((msgId: string) => {
+    setShowOriginalMap((prev) => ({
+      ...prev,
+      [msgId]: !prev[msgId],
+    }))
+  }, [])
+
+  const handleCopy = useCallback(async (text: string, idx: number) => {
     await navigator.clipboard.writeText(text)
     setCopiedIndex(idx)
     setTimeout(() => setCopiedIndex(null), 2000)
-  }
-
-  const handleUpworkCoverLetter = async () => {
-    if (isStreaming) return
-    await handleSend(UPWORK_QUICK_PROMPT_COVER_LETTER)
-  }
+  }, [])
 
   const handleFillCoverLetter = async (content: string, idx: number) => {
     if (!activeTab?.id) return
@@ -296,7 +295,7 @@ export function ChatView() {
     }
   }
 
-  const handleToggleResponseTranslation = async (msg: ChatMessageItem) => {
+  const handleToggleResponseTranslation = async (msg: ChatMessageType) => {
     if (showTranslatedResponseMap[msg.id]) {
       setShowTranslatedResponseMap((prev) => ({ ...prev, [msg.id]: false }))
       return
@@ -375,13 +374,13 @@ export function ChatView() {
         setActiveSessionId(currentId)
       }
 
-      const userMsg: ChatMessageItem = {
+      const userMsg: ChatMessageType = {
         id: crypto.randomUUID(),
         role: "user",
         content: rawText,
         createdAt: getTimestamp(),
       }
-      const assistantMsg: ChatMessageItem = {
+      const assistantMsg: ChatMessageType = {
         id: crypto.randomUUID(),
         role: "assistant",
         content: `⚠️ Không thể lấy nội dung từ trang cài đặt extension hoặc trang nội bộ trình duyệt (${tab?.url || "chrome://"}). Vui lòng mở hoặc chuyển sang một trang web thông thường (http/https) để sử dụng tính năng tóm tắt này.`,
@@ -515,7 +514,7 @@ export function ChatView() {
         ? `${rawText}\n\n*Nguồn: [${tab.title || tab.url}](${tab.url})*`
         : rawText
 
-    const userMessage: ChatMessageItem = {
+    const userMessage: ChatMessageType = {
       id: crypto.randomUUID(),
       role: "user",
       content: textToSend,
@@ -557,7 +556,7 @@ export function ChatView() {
     }
 
     // Assistant placeholder message
-    const assistantMessage: ChatMessageItem = {
+    const assistantMessage: ChatMessageType = {
       id: crypto.randomUUID(),
       role: "assistant",
       content: "",
@@ -692,7 +691,7 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
 
       // Final save to Dexie and state sync
       const finalContent = accumulatedText || "Không nhận được phản hồi."
-      const finalAssistant: ChatMessageItem = {
+      const finalAssistant: ChatMessageType = {
         ...assistantMessage,
         content: finalContent,
       }
@@ -740,238 +739,34 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
       <div
         ref={scrollContainerRef}
         onScroll={handleScroll}
-        className="w-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-3"
+        className="scrollbar-slim w-full min-w-0 flex-1 overflow-x-hidden overflow-y-auto px-4 py-3"
       >
         {messages.length === 0 ? (
-          <div className="flex h-full flex-col items-center justify-center gap-4 text-center">
-            <div className="flex size-11 items-center justify-center rounded-2xl bg-primary/10 text-primary">
-              <Sparkles className="size-6" />
-            </div>
-            <div className="space-y-1">
-              <h3 className="text-sm font-semibold tracking-tight">
-                {i18n.t("sidePanel.chat.title")}
-              </h3>
-              <p className="max-w-[240px] text-xs text-muted-foreground">
-                {i18n.t("sidePanel.chat.description")}
-              </p>
-            </div>
-
-            {/* Quick prompt suggestions */}
-            <div className="grid w-full grid-cols-1 gap-2 pt-2 text-left">
-              {isUpworkJob && (
-                <>
-                  <button
-                    type="button"
-                    onClick={() => void handleSend(UPWORK_QUICK_PROMPT_COVER_LETTER)}
-                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-600/40 bg-emerald-500/10 p-2.5 text-xs font-medium text-emerald-800 transition-all hover:border-emerald-600/60 hover:bg-emerald-500/20 dark:text-emerald-300"
-                  >
-                    <Icon
-                      icon="tabler:briefcase"
-                      className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
-                    />
-                    <span>{UPWORK_QUICK_PROMPT_COVER_LETTER}</span>
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => void handleSend(UPWORK_QUICK_PROMPT_ANALYZE_JOB)}
-                    className="flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-600/30 bg-emerald-500/5 p-2.5 text-xs text-emerald-700 transition-all hover:border-emerald-600/50 hover:bg-emerald-500/15 dark:text-emerald-400"
-                  >
-                    <Icon
-                      icon="tabler:file-search"
-                      className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
-                    />
-                    <span>{UPWORK_QUICK_PROMPT_ANALYZE_JOB}</span>
-                  </button>
-                </>
-              )}
-              {QUICK_PROMPT_KEYS.map((key) => {
-                const promptText = i18n.t(key)
-                return (
-                  <button
-                    type="button"
-                    key={key}
-                    onClick={() => void handleSend(promptText)}
-                    className="cursor-pointer rounded-lg border border-border/60 bg-muted/30 p-2.5 text-left text-xs text-muted-foreground transition-all hover:border-primary/40 hover:bg-muted/70 hover:text-foreground"
-                  >
-                    {promptText}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
+          <ChatEmptyState
+            isUpworkJob={isUpworkJob}
+            onSendPrompt={(prompt) => void handleSend(prompt)}
+          />
         ) : (
           <div className="space-y-4">
-            {messages.map((msg, idx) => {
-              const isUser = msg.role === "user"
-              const displayedUserContent =
-                showOriginalMap[msg.id] && msg.originalContent ? msg.originalContent : msg.content
-              return (
-                <div
-                  key={msg.id || idx}
-                  className={cn(
-                    "flex w-full min-w-0 flex-col gap-1",
-                    isUser ? "items-end" : "items-start",
-                  )}
-                >
-                  <div
-                    className={cn(
-                      "max-w-[88%] min-w-0 rounded-xl px-3 py-2 text-xs leading-relaxed [overflow-wrap:anywhere] break-words",
-                      isUser
-                        ? "bg-primary text-primary-foreground shadow-xs"
-                        : "border border-border/50 bg-muted/40 text-foreground",
-                    )}
-                  >
-                    {isUser ? (
-                      <div className="group/user-msg flex min-w-0 flex-col gap-1.5">
-                        <p className="[overflow-wrap:anywhere] break-words whitespace-pre-wrap">
-                          {displayedUserContent}
-                        </p>
-                        <div
-                          className={cn(
-                            "flex items-center justify-end gap-2 pt-1 transition-opacity",
-                            msg.originalContent
-                              ? "border-t border-primary-foreground/20"
-                              : "opacity-70 group-hover/user-msg:opacity-100 hover:opacity-100",
-                          )}
-                        >
-                          {msg.originalContent && (
-                            <button
-                              type="button"
-                              onClick={() =>
-                                setShowOriginalMap((prev) => ({
-                                  ...prev,
-                                  [msg.id]: !prev[msg.id],
-                                }))
-                              }
-                              className="flex cursor-pointer items-center gap-1 text-[10px] text-primary-foreground/85 underline decoration-dotted underline-offset-2 hover:text-primary-foreground"
-                            >
-                              <Languages className="size-3 shrink-0" />
-                              <span className="truncate">
-                                {showOriginalMap[msg.id]
-                                  ? i18n.t("options.upwork.sidepanel.viewTranslated")
-                                  : i18n.t("options.upwork.sidepanel.viewOriginal")}
-                              </span>
-                            </button>
-                          )}
-                          <button
-                            type="button"
-                            onClick={() => void handleCopy(displayedUserContent, idx)}
-                            className="flex cursor-pointer items-center gap-1 text-[10px] text-primary-foreground/85 hover:text-primary-foreground"
-                            title={i18n.t("sidePanel.chat.copy")}
-                          >
-                            {copiedIndex === idx ? (
-                              <Check className="size-3 text-emerald-300" />
-                            ) : (
-                              <Copy className="size-3 shrink-0" />
-                            )}
-                            <span>
-                              {copiedIndex === idx
-                                ? i18n.t("sidePanel.chat.copied")
-                                : i18n.t("sidePanel.chat.copy")}
-                            </span>
-                          </button>
-                        </div>
-                      </div>
-                    ) : (
-                      <div className="group/msg relative max-w-full min-w-0 [overflow-wrap:anywhere] break-words">
-                        {msg.content ? (
-                          <MarkdownRenderer
-                            content={
-                              showTranslatedResponseMap[msg.id] && msg.translatedContent
-                                ? msg.translatedContent
-                                : msg.content
-                            }
-                            className="max-w-full min-w-0 [overflow-wrap:anywhere] break-words"
-                          />
-                        ) : isStreaming && idx === messages.length - 1 ? (
-                          <div className="flex items-center gap-1.5 py-1 text-muted-foreground">
-                            <span className="size-1.5 animate-pulse rounded-full bg-primary" />
-                            <span className="size-1.5 animate-pulse rounded-full bg-primary [animation-delay:200ms]" />
-                            <span className="size-1.5 animate-pulse rounded-full bg-primary [animation-delay:400ms]" />
-                            <span className="ml-1 text-[11px]">
-                              {i18n.t("sidePanel.chat.thinking")}
-                            </span>
-                          </div>
-                        ) : (
-                          <span className="text-[11px] text-muted-foreground italic">
-                            {i18n.t("sidePanel.chat.noResponse")}
-                          </span>
-                        )}
-                        {msg.content && (
-                          <div className="mt-2 flex items-center justify-end gap-1 pt-1 opacity-70 transition-opacity group-hover/msg:opacity-100 hover:opacity-100">
-                            <Button
-                              size="sm"
-                              variant="ghost"
-                              className="h-6 gap-1 px-1.5 text-[11px] text-muted-foreground hover:text-foreground"
-                              disabled={translatingMsgId === msg.id}
-                              onClick={() => void handleToggleResponseTranslation(msg)}
-                              title={
-                                showTranslatedResponseMap[msg.id]
-                                  ? i18n.t("options.upwork.sidepanel.viewOriginal")
-                                  : i18n.t("options.upwork.sidepanel.viewTranslated")
-                              }
-                            >
-                              <Languages
-                                className={cn(
-                                  "size-3",
-                                  translatingMsgId === msg.id && "animate-spin text-primary",
-                                )}
-                              />
-                              <span>
-                                {translatingMsgId === msg.id
-                                  ? i18n.t("options.upwork.sidepanel.translating")
-                                  : showTranslatedResponseMap[msg.id]
-                                    ? i18n.t("options.upwork.sidepanel.viewOriginal")
-                                    : i18n.t("options.upwork.sidepanel.viewTranslated")}
-                              </span>
-                            </Button>
-                            {isUpworkJob && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-6 gap-1 px-1.5 text-[11px] text-emerald-700 hover:bg-emerald-500/10 hover:text-emerald-800 dark:text-emerald-400"
-                                onClick={() => void handleFillCoverLetter(msg.content, idx)}
-                                title={i18n.t("options.upwork.sidepanel.fillIntoUpwork")}
-                              >
-                                <Icon
-                                  icon="tabler:arrow-down-to-arc"
-                                  className="size-3 text-emerald-600 dark:text-emerald-400"
-                                />
-                                <span>
-                                  {fillStatusIndex?.index === idx
-                                    ? fillStatusIndex.text
-                                    : i18n.t("options.upwork.sidepanel.fillIntoUpwork")}
-                                </span>
-                              </Button>
-                            )}
-                            <Button
-                              size="icon"
-                              variant="ghost"
-                              className="size-6 text-muted-foreground hover:text-foreground"
-                              onClick={() =>
-                                void handleCopy(
-                                  showTranslatedResponseMap[msg.id] && msg.translatedContent
-                                    ? msg.translatedContent
-                                    : msg.content,
-                                  idx,
-                                )
-                              }
-                              title={i18n.t("sidePanel.chat.copy")}
-                            >
-                              {copiedIndex === idx ? (
-                                <Check className="size-3 text-emerald-500" />
-                              ) : (
-                                <Copy className="size-3" />
-                              )}
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )
-            })}
+            {messages.map((msg, idx) => (
+              <ChatMessageItem
+                key={msg.id || idx}
+                message={msg}
+                index={idx}
+                isStreaming={isStreaming}
+                isLast={idx === messages.length - 1}
+                isCopied={copiedIndex === idx}
+                isTranslating={translatingMsgId === msg.id}
+                showOriginal={Boolean(showOriginalMap[msg.id])}
+                showTranslatedResponse={Boolean(showTranslatedResponseMap[msg.id])}
+                isUpworkJob={isUpworkJob}
+                fillStatusText={fillStatusIndex?.index === idx ? fillStatusIndex.text : null}
+                onCopy={handleCopy}
+                onToggleOriginal={handleToggleOriginal}
+                onToggleTranslateResponse={handleToggleResponseTranslation}
+                onFillCoverLetter={handleFillCoverLetter}
+              />
+            ))}
             {isTranslating && (
               <div className="flex items-center gap-1.5 py-1 text-muted-foreground">
                 <Languages className="size-3.5 animate-pulse text-primary" />
@@ -984,17 +779,6 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
           </div>
         )}
       </div>
-
-      {/* Upwork Job Quick Action Bar */}
-      <ChatUpworkBar
-        isUpworkJob={isUpworkJob}
-        upworkConfig={upworkConfig}
-        setUpworkConfig={setUpworkConfig}
-        translationProviders={translationProviders}
-        onCoverLetter={handleUpworkCoverLetter}
-        isStreaming={isStreaming}
-        isTranslating={isTranslating}
-      />
 
       {/* Input Box */}
       <ChatInputBox
