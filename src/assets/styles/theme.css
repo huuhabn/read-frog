@@ -202,7 +202,7 @@
     0 56px 67px 0 rgb(var(--rf-elevation-ink) / calc(0.08 * var(--rf-elevation-strength)));
 }
 
-:where([data-theme="default"]) {
+:where([data-theme="default"], [data-theme="poli"]) {
   /* Latin → Inter Variable (bundled via @fontsource-variable/inter, imported
      only in the extension's own pages — not content scripts). CJK stays on the
      lang-correct native font via system-ui (PingFang / 微软雅黑 on macOS/
@@ -231,6 +231,19 @@
   --rf-neutral-800: var(--color-neutral-800);
   --rf-neutral-900: var(--color-neutral-900);
   --rf-neutral-950: var(--color-neutral-950);
+
+  /* pilo: Upwork / Poli green scale */
+  --rf-pilo-50: #e8f6e6;
+  --rf-pilo-100: #c9e9c4;
+  --rf-pilo-200: #a3d99c;
+  --rf-pilo-300: #75c76a;
+  --rf-pilo-400: #4eab41;
+  --rf-pilo-500: #14a800;
+  --rf-pilo-600: #108a00;
+  --rf-pilo-700: #0f7500;
+  --rf-pilo-800: #0c6600;
+  --rf-pilo-900: #0b5c00;
+  --rf-pilo-950: #094d00;
 
   /* lemon: Tailwind yellow's lightness and hue curve turned 3 degrees toward lemon, with
      Tailwind's chroma capped at 95% of the sRGB edge. The 50-steps are inserted halfway steps:
@@ -464,6 +477,159 @@
     0 20px 24px 0 rgb(var(--rf-elevation-ink) / calc(0.05 * var(--rf-elevation-strength)));
   /* Mirrors `dark:aria-invalid:*` on `Input`: a softened border and a stronger ring, because
      the light-theme pair is too hot against a near-black surface. */
+  --rf-ring-flash-border: color-mix(in oklab, var(--rf-destructive) 50%, transparent);
+  --rf-ring-flash-ring: color-mix(in oklab, var(--rf-destructive) 40%, transparent);
+}
+
+:where([data-theme="poli"]) {
+  --rf-background: var(--color-white);
+  --rf-foreground: var(--rf-neutral-950);
+  --rf-card: var(--color-white);
+  --rf-card-foreground: var(--rf-neutral-950);
+  --rf-popover: var(--color-white);
+  --rf-popover-foreground: var(--rf-neutral-950);
+  --rf-elevation-ink: 25 25 25;
+  --rf-elevation-strength: 1;
+  --rf-primary: var(--rf-pilo-500);
+  --rf-primary-foreground: var(--color-white);
+  --rf-secondary: var(--rf-pilo-50);
+  --rf-secondary-foreground: var(--rf-pilo-900);
+  --rf-muted: var(--rf-pilo-50);
+  --rf-muted-foreground: var(--rf-neutral-600);
+  --rf-accent: var(--rf-pilo-600);
+  --rf-accent-foreground: var(--color-white);
+  --rf-brand: var(--rf-pilo-500);
+  --rf-brand-foreground: var(--color-white);
+  --rf-destructive: oklch(66% 0.18 18);
+  --rf-success: var(--rf-pilo-500);
+  --rf-warning: oklch(65.3% 0.155 54);
+  --rf-border: var(--rf-neutral-200);
+  --rf-input: var(--rf-neutral-200);
+  --rf-ring: var(--rf-pilo-400);
+  --rf-link: var(--rf-pilo-600);
+
+  --rf-primary-hover: var(--rf-pilo-600);
+  --rf-primary-active: var(--rf-pilo-700);
+  --rf-primary-edge: color-mix(in oklab, var(--rf-pilo-600) 40%, transparent);
+  --rf-primary-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 35%), inset 0 6px 10px -5px oklch(1 0 0 / 20%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-pilo-700) 40%, transparent),
+    0 1px 2px color-mix(in oklab, var(--rf-pilo-700) 20%, transparent),
+    0 2px 6px -2px color-mix(in oklab, var(--rf-pilo-700) 25%, transparent);
+  --rf-primary-press: inset 0 1px 3px color-mix(in oklab, var(--rf-pilo-800) 40%, transparent);
+
+  --rf-brand-hover: var(--rf-pilo-400);
+  --rf-brand-active: var(--rf-pilo-600);
+  --rf-brand-edge: color-mix(in oklab, var(--rf-pilo-600) 40%, transparent);
+  --rf-brand-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 55%), inset 0 6px 10px -5px oklch(1 0 0 / 32%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-pilo-700) 35%, transparent),
+    0 1px 2px color-mix(in oklab, var(--rf-pilo-700) 20%, transparent),
+    0 2px 6px -2px color-mix(in oklab, var(--rf-pilo-700) 26%, transparent);
+  --rf-brand-press: inset 0 1px 3px color-mix(in oklab, var(--rf-pilo-700) 40%, transparent);
+
+  --rf-accent-hover: var(--rf-pilo-500);
+  --rf-accent-active: var(--rf-pilo-700);
+  --rf-accent-edge: color-mix(in oklab, var(--rf-pilo-700) 40%, transparent);
+  --rf-accent-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 32%), inset 0 6px 10px -5px oklch(1 0 0 / 20%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-pilo-700) 45%, transparent),
+    0 1px 2px color-mix(in oklab, var(--rf-pilo-700) 18%, transparent),
+    0 2px 6px -2px color-mix(in oklab, var(--rf-pilo-700) 24%, transparent);
+  --rf-accent-press: inset 0 1px 3px color-mix(in oklab, var(--rf-pilo-800) 40%, transparent);
+
+  --rf-chart-1: var(--rf-pilo-500);
+  --rf-chart-2: var(--rf-pilo-400);
+  --rf-chart-3: var(--rf-pilo-600);
+  --rf-chart-4: var(--rf-pilo-700);
+  --rf-chart-5: var(--rf-pilo-800);
+  --rf-radius: 0.625rem;
+  --rf-sidebar: var(--rf-neutral-50);
+  --rf-sidebar-foreground: var(--rf-neutral-950);
+  --rf-sidebar-primary: var(--rf-pilo-500);
+  --rf-sidebar-primary-foreground: var(--color-white);
+  --rf-sidebar-accent: var(--rf-pilo-50);
+  --rf-sidebar-accent-foreground: var(--rf-pilo-900);
+  --rf-sidebar-border: var(--rf-neutral-200);
+  --rf-sidebar-ring: var(--rf-pilo-400);
+
+  --rf-elevation-floating:
+    0 5px 8px 0 rgb(var(--rf-elevation-ink) / calc(0.04 * var(--rf-elevation-strength))),
+    0 20px 24px 0 rgb(var(--rf-elevation-ink) / calc(0.08 * var(--rf-elevation-strength)));
+  --rf-ring-flash-border: var(--rf-destructive);
+  --rf-ring-flash-ring: color-mix(in oklab, var(--rf-destructive) 20%, transparent);
+}
+
+:where([data-theme="poli"].dark) {
+  --rf-background: var(--rf-neutral-950);
+  --rf-foreground: var(--rf-neutral-50);
+  --rf-card: var(--rf-neutral-900);
+  --rf-card-foreground: var(--rf-neutral-50);
+  --rf-popover: var(--rf-neutral-900);
+  --rf-popover-foreground: var(--rf-neutral-50);
+  --rf-elevation-ink: 0 0 0;
+  --rf-elevation-strength: 8;
+  --rf-primary: var(--rf-pilo-500);
+  --rf-primary-foreground: var(--color-white);
+  --rf-secondary: var(--rf-neutral-800);
+  --rf-secondary-foreground: var(--rf-pilo-100);
+  --rf-muted: var(--rf-neutral-800);
+  --rf-muted-foreground: var(--rf-neutral-400);
+  --rf-accent: var(--rf-pilo-400);
+  --rf-accent-foreground: var(--rf-neutral-950);
+  --rf-brand: var(--rf-pilo-400);
+  --rf-brand-foreground: var(--rf-neutral-950);
+  --rf-destructive: oklch(78.2% 0.121 18);
+  --rf-success: var(--rf-pilo-400);
+  --rf-warning: oklch(77.7% 0.142 54);
+  --rf-border: oklch(1 0 0 / 10%);
+  --rf-input: oklch(1 0 0 / 15%);
+  --rf-ring: var(--rf-pilo-500);
+  --rf-link: var(--rf-pilo-300);
+
+  --rf-primary-hover: var(--rf-pilo-400);
+  --rf-primary-active: var(--rf-pilo-600);
+  --rf-primary-edge: oklch(0 0 0 / 8%);
+  --rf-primary-bevel:
+    inset 0 2px 1px -0.5px var(--color-white), inset 0 -3px 6px -1px oklch(0 0 0 / 12%),
+    0 1px 2px oklch(0 0 0 / 60%);
+  --rf-primary-press: inset 0 1px 3px oklch(0 0 0 / 22%);
+
+  --rf-brand-hover: var(--rf-pilo-300);
+  --rf-brand-active: var(--rf-pilo-500);
+  --rf-brand-edge: oklch(1 0 0 / 14%);
+  --rf-brand-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 40%), inset 0 6px 10px -5px oklch(1 0 0 / 20%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-pilo-700) 50%, transparent),
+    0 1px 2px oklch(0 0 0 / 60%);
+  --rf-brand-press: inset 0 1px 3px color-mix(in oklab, var(--rf-pilo-800) 45%, transparent);
+
+  --rf-accent-hover: var(--rf-pilo-300);
+  --rf-accent-active: var(--rf-pilo-500);
+  --rf-accent-edge: oklch(1 0 0 / 12%);
+  --rf-accent-bevel:
+    inset 0 1px 0 oklch(1 0 0 / 25%), inset 0 6px 10px -5px oklch(1 0 0 / 14%),
+    inset 0 -4px 7px -2px color-mix(in oklab, var(--rf-pilo-700) 55%, transparent),
+    0 1px 2px oklch(0 0 0 / 60%);
+  --rf-accent-press: inset 0 1px 3px color-mix(in oklab, var(--rf-pilo-800) 60%, transparent);
+
+  --rf-chart-1: var(--rf-pilo-400);
+  --rf-chart-2: var(--rf-pilo-300);
+  --rf-chart-3: var(--rf-pilo-500);
+  --rf-chart-4: var(--rf-pilo-600);
+  --rf-chart-5: var(--rf-pilo-700);
+  --rf-sidebar: var(--rf-neutral-900);
+  --rf-sidebar-foreground: var(--rf-neutral-50);
+  --rf-sidebar-primary: var(--rf-pilo-500);
+  --rf-sidebar-primary-foreground: var(--color-white);
+  --rf-sidebar-accent: var(--rf-neutral-800);
+  --rf-sidebar-accent-foreground: var(--rf-pilo-100);
+  --rf-sidebar-border: oklch(1 0 0 / 10%);
+  --rf-sidebar-ring: var(--rf-pilo-500);
+
+  --rf-elevation-floating:
+    0 5px 8px 0 rgb(var(--rf-elevation-ink) / calc(0.027 * var(--rf-elevation-strength))),
+    0 20px 24px 0 rgb(var(--rf-elevation-ink) / calc(0.05 * var(--rf-elevation-strength)));
   --rf-ring-flash-border: color-mix(in oklab, var(--rf-destructive) 50%, transparent);
   --rf-ring-flash-ring: color-mix(in oklab, var(--rf-destructive) 40%, transparent);
 }

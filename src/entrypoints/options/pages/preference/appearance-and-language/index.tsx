@@ -1,14 +1,14 @@
 import { useTheme } from "@/components/providers/theme-provider"
 import { Switch } from "@/components/ui/base-ui/switch"
-import { THEMES } from "@/types/config/theme"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
 import { ThemeModeSelect } from "./theme-mode-select"
+import { ThemeNameSelect } from "./theme-name-select"
 import { UiLanguageSelect } from "./ui-language-select"
 
 export function AppearanceAndLanguageSection() {
-  const { themeName, scaled, setScaled } = useTheme()
+  const { scaled, setScaled } = useTheme()
   return (
     <ConfigSection title={i18n.t("options.preference.appearanceAndLanguage.title")}>
       <ConfigItem
@@ -16,7 +16,7 @@ export function AppearanceAndLanguageSection() {
         title={i18n.t("options.preference.appearanceAndLanguage.theme.title")}
         description={i18n.t("options.preference.appearanceAndLanguage.theme.description")}
       >
-        <span className="text-sm font-medium">{THEMES[themeName].name}</span>
+        <ThemeNameSelect size="sm" />
       </ConfigItem>
       <ConfigItem
         id="theme-mode"

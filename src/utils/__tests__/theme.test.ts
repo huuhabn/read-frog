@@ -66,6 +66,15 @@ describe("theme DOM helpers", () => {
     expect(root.classList.contains("theme-scaled")).toBe(true)
     expect(root.dir).toBe("rtl")
     expect(root.style.colorScheme).toBe("dark")
+
+    // Test poli theme
+    const poliRoot = document.createElement("div")
+    applyTheme(poliRoot, { theme: "poli", mode: "light", scaled: false }, "en-US")
+    expect(poliRoot.dataset.theme).toBe("poli")
+    expect(poliRoot.classList.contains("dark")).toBe(false)
+    expect(poliRoot.classList.contains("theme-scaled")).toBe(false)
+    expect(poliRoot.dir).toBe("ltr")
+    expect(poliRoot.style.colorScheme).toBe("light")
   })
 
   it("resolves system mode through matchMedia", () => {
