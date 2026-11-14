@@ -1,4 +1,4 @@
-import type { WebChatTone } from "@/types/config/web-chat"
+import type { WebChatAutoReplyMode, WebChatTone } from "@/types/config/web-chat"
 import type { ChatMessage, ChatRoom } from "@/utils/web-chat/adapter/types"
 import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
@@ -36,16 +36,34 @@ export function WebChatView() {
   const [sessionModel, setSessionModel] = useState<string | null>(null)
   const [sessionLang, setSessionLang] = useState<string | null>(null)
   const [sessionTone, setSessionTone] = useState<WebChatTone | null>(null)
+  const [autoReplyMode, setAutoReplyMode] = useState<WebChatAutoReplyMode>("none")
+  const [isAutoReplying, setIsAutoReplying] = useState(false)
+  const lastRepliedMessageIdRef = useRef<string | null>(null)
 
   const effectiveModel = sessionModel ?? webChatConfig?.providerId ?? ""
   const effectiveLang = sessionLang ?? webChatConfig?.outboundTargetLang ?? "vi"
   const effectiveTone: WebChatTone = sessionTone ?? webChatConfig?.tone ?? "friendly"
-  const isOverridden = sessionModel !== null || sessionLang !== null || sessionTone !== null
+  const isOverridden =
+    sessionModel !== null ||
+    sessionLang !== null ||
+    sessionTone !== null ||
+    autoReplyMode !== "none"
 
   const handleResetDefaults = () => {
     setSessionModel(null)
     setSessionLang(null)
     setSessionTone(null)
+    setAutoReplyMode("none")
+  }
+
+  const handleSelectAutoReplyMode = (mode: WebChatAutoReplyMode) => {
+    setAutoReplyMode(mode)
+    if (mode !== "none") {
+      const lastMsg = messages[messages.length - 1]
+      if (lastMsg?.id) {
+        lastRepliedMessageIdRef.current = lastMsg.id
+      }
+    }
   }
 
   const [currentTabId, setCurrentTabId] = useState<number | null>(null)
@@ -60,42 +78,53 @@ export function WebChatView() {
   // Room cache: Map<roomId, RoomCacheData>
   const roomCacheRef = useRef<Map<string, RoomCacheData>>(new Map())
 
-  const loadActiveChat = useCallback(async (forceRefresh = false) => {
-    setLoading(true)
-    try {
-      const tabInfo = await getActiveTabInfo(true)
-      if (!tabInfo?.id) {
-        setLoading(false)
-        return
-      }
-
-      setCurrentTabId(tabInfo.id)
-      setCurrentTabUrl(tabInfo.url)
-      const data = await getActiveChatMessagesFromTab(tabInfo.id)
-      const currentRoom = data.room
-      setRoom(currentRoom)
-      setMessages(data.messages)
-
-      const roomId = currentRoom?.id || "unknown"
-      const cached = roomCacheRef.current.get(roomId)
-
-      if (cached && !forceRefresh) {
-        // Restore from cache, do NOT call LLM
-        setResultContent(cached.lastResult || "")
-        setSecondaryResult(cached.lastSecondaryResult)
-        setActiveAction(cached.activeAction || null)
-      } else if (forceRefresh || !cached) {
-        // Reset results on room switch if not in cache
-        if (!cached) {
-          setResultContent("")
-          setSecondaryResult(undefined)
-          setActiveAction(null)
+  const loadActiveChat = useCallback(
+    async (forceRefresh = false) => {
+      setLoading(true)
+      try {
+        const tabInfo = await getActiveTabInfo(true)
+        if (!tabInfo?.id) {
+          setLoading(false)
+          return
         }
+
+        setCurrentTabId(tabInfo.id)
+        setCurrentTabUrl(tabInfo.url)
+        const data = await getActiveChatMessagesFromTab(tabInfo.id)
+        const currentRoom = data.room
+        setRoom(currentRoom)
+        setMessages(data.messages)
+
+        const roomId = currentRoom?.id || "unknown"
+        const cached = roomCacheRef.current.get(roomId)
+
+        if (cached && !forceRefresh) {
+          // Restore from cache, do NOT call LLM
+          setResultContent(cached.lastResult || "")
+          setSecondaryResult(cached.lastSecondaryResult)
+          setActiveAction(cached.activeAction || null)
+        } else if (forceRefresh || !cached) {
+          // Reset results on room switch if not in cache
+          if (!cached) {
+            setResultContent("")
+            setSecondaryResult(undefined)
+            setActiveAction(null)
+          }
+        }
+      } finally {
+        setLoading(false)
       }
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+    },
+    [
+      setCurrentTabId,
+      setCurrentTabUrl,
+      setRoom,
+      setMessages,
+      setResultContent,
+      setSecondaryResult,
+      setActiveAction,
+    ],
+  )
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -103,6 +132,82 @@ export function WebChatView() {
     }, 0)
     return () => clearTimeout(timer)
   }, [loadActiveChat])
+
+  // Periodic Auto Reply checker
+  useEffect(() => {
+    if (autoReplyMode === "none") {
+      return () => {}
+    }
+
+    let isSubscribed = true
+
+    const checkAndAutoReply = async () => {
+      if (isAutoReplying || !isSubscribed) return
+      const tabInfo = await getActiveTabInfo(true)
+      if (!tabInfo?.id || !isSubscribed) return
+
+      const data = await getActiveChatMessagesFromTab(tabInfo.id)
+      const msgs = data.messages
+      if (!msgs || msgs.length === 0 || !isSubscribed) return
+
+      const lastMsg = msgs[msgs.length - 1]
+      if (
+        lastMsg &&
+        !lastMsg.isOwn &&
+        lastMsg.id &&
+        lastMsg.id !== lastRepliedMessageIdRef.current &&
+        lastMsg.content.trim().length > 0
+      ) {
+        lastRepliedMessageIdRef.current = lastMsg.id
+        setIsAutoReplying(true)
+        try {
+          const res = await generateSmartReply({
+            contextMessages: msgs.slice(-5),
+            targetLang: effectiveLang,
+            tone: effectiveTone,
+            rules: webChatConfig?.rules,
+            providerId: effectiveModel || undefined,
+            sourceFeature: `Web Chat (Auto Reply - ${autoReplyMode})`,
+            url: tabInfo.url,
+          })
+
+          if (res.replyText && isSubscribed) {
+            await insertTextToActiveChatTab(tabInfo.id, res.replyText, {
+              autoSend: autoReplyMode === "send",
+            })
+            setResultContent(res.replyText)
+            setSecondaryResult(
+              autoReplyMode === "send"
+                ? i18n.t("options.webChat.sidepanel.autoReply.statusSent")
+                : i18n.t("options.webChat.sidepanel.autoReply.statusDrafted"),
+            )
+          }
+        } catch {
+          // Ignore auto-reply network/LLM errors silently
+        } finally {
+          if (isSubscribed) {
+            setIsAutoReplying(false)
+          }
+        }
+      }
+    }
+
+    const interval = setInterval(() => {
+      void checkAndAutoReply()
+    }, 3500)
+
+    return () => {
+      isSubscribed = false
+      clearInterval(interval)
+    }
+  }, [
+    autoReplyMode,
+    isAutoReplying,
+    effectiveLang,
+    effectiveTone,
+    effectiveModel,
+    webChatConfig?.rules,
+  ])
 
   const handleActionSelect = async (action: WebChatActionType) => {
     setActiveAction(action)
@@ -242,6 +347,9 @@ export function WebChatView() {
         onSelectLang={(lang) => setSessionLang(lang)}
         selectedTone={effectiveTone}
         onSelectTone={(tone) => setSessionTone(tone)}
+        autoReplyMode={autoReplyMode}
+        onSelectAutoReplyMode={handleSelectAutoReplyMode}
+        isAutoReplying={isAutoReplying}
         isOverridden={isOverridden}
         onResetDefaults={handleResetDefaults}
       />

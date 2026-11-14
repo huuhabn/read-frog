@@ -1,6 +1,6 @@
 // @vitest-environment jsdom
 import type { LLMProviderConfig } from "@/types/config/provider"
-import type { WebChatTone } from "@/types/config/web-chat"
+import type { WebChatAutoReplyMode, WebChatTone } from "@/types/config/web-chat"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
 import { ChatContextHeader } from "../ChatContextHeader"
@@ -40,6 +40,9 @@ describe("ChatContextHeader", () => {
     onSelectLang: vi.fn<(lang: string) => void>(),
     selectedTone: "friendly" as WebChatTone,
     onSelectTone: vi.fn<(tone: WebChatTone) => void>(),
+    autoReplyMode: "none" as WebChatAutoReplyMode,
+    onSelectAutoReplyMode: vi.fn<(mode: WebChatAutoReplyMode) => void>(),
+    isAutoReplying: false,
     isOverridden: false,
     onResetDefaults: vi.fn<() => void>(),
   }
@@ -78,11 +81,25 @@ describe("ChatContextHeader", () => {
     expect(onReset).toHaveBeenCalledTimes(1)
   })
 
-  it("renders model, language, and tone controls", () => {
+  it("renders model, language, tone, and auto reply controls", () => {
     render(<ChatContextHeader {...defaultProps} />)
 
     expect(screen.getByText("Google Gemini")).toBeDefined()
     expect(screen.getByText("VI")).toBeDefined()
     expect(screen.getByText("options.webChat.toneShort.friendly")).toBeDefined()
+    expect(screen.getByText("options.webChat.sidepanel.autoReply.none")).toBeDefined()
+  })
+
+  it("highlights auto reply pill when enabled and handles mode change", () => {
+    const onSelectAutoReply = vi.fn<(mode: WebChatAutoReplyMode) => void>()
+    render(
+      <ChatContextHeader
+        {...defaultProps}
+        autoReplyMode="draft"
+        onSelectAutoReplyMode={onSelectAutoReply}
+      />,
+    )
+
+    expect(screen.getByText("options.webChat.sidepanel.autoReply.draft")).toBeDefined()
   })
 })

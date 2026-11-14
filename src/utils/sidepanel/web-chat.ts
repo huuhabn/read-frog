@@ -419,12 +419,19 @@ export async function getActiveChatMessagesFromTab(tabId: number): Promise<{
   }
 }
 
-export async function insertTextToActiveChatTab(tabId: number, text: string): Promise<boolean> {
+export async function insertTextToActiveChatTab(
+  tabId: number,
+  text: string,
+  options?: { autoSend?: boolean },
+): Promise<boolean> {
+  const shouldSend = options?.autoSend ?? false
+
   // 1. Try communicating with content script runtime first
   try {
     const response: { success?: boolean } | undefined = await browser.tabs.sendMessage(tabId, {
       type: "WEB_CHAT_INSERT_TEXT",
       text,
+      autoSend: shouldSend,
     })
 
     if (response?.success) {
@@ -438,8 +445,8 @@ export async function insertTextToActiveChatTab(tabId: number, text: string): Pr
   try {
     const results = await browser.scripting.executeScript({
       target: { tabId },
-      args: [text],
-      func: (textToInsert: string) => {
+      args: [text, shouldSend],
+      func: (textToInsert: string, autoSend: boolean) => {
         // Zalo specific input
         const zaloInput =
           document.getElementById("richInput") ||
@@ -465,6 +472,51 @@ export async function insertTextToActiveChatTab(tabId: number, text: string): Pr
           // Ignore focus errors
         }
 
+        const triggerSend = () => {
+          if (!autoSend) return
+          setTimeout(() => {
+            // 1. Zalo send button
+            const zaloSend = document.querySelector<HTMLElement>(
+              ".send-msg-btn, [icon='Sent-msg_24_Line'], [data-id='btn_RTF_Send'], [data-translate-title='STR_SEND']",
+            )
+            if (zaloSend) {
+              zaloSend.removeAttribute("data-disabled")
+              zaloSend.removeAttribute("disabled")
+              zaloSend.click()
+              return
+            }
+
+            // 2. Generic platform send button
+            const genericSend = document.querySelector<HTMLElement>(
+              "button[type='submit'], .btn-send, [data-testid='send-button'], button[aria-label*='Send'], button[aria-label*='Gửi']",
+            )
+            if (genericSend) {
+              genericSend.click()
+              return
+            }
+
+            // 3. Dispatch Enter key
+            const enterDown = new KeyboardEvent("keydown", {
+              key: "Enter",
+              code: "Enter",
+              keyCode: 13,
+              which: 13,
+              bubbles: true,
+              cancelable: true,
+            })
+            target.dispatchEvent(enterDown)
+            const enterUp = new KeyboardEvent("keyup", {
+              key: "Enter",
+              code: "Enter",
+              keyCode: 13,
+              which: 13,
+              bubbles: true,
+              cancelable: true,
+            })
+            target.dispatchEvent(enterUp)
+          }, 120)
+        }
+
         if (target instanceof HTMLTextAreaElement || target instanceof HTMLInputElement) {
           const start = target.selectionStart ?? target.value.length
           const end = target.selectionEnd ?? target.value.length
@@ -473,6 +525,7 @@ export async function insertTextToActiveChatTab(tabId: number, text: string): Pr
           target.selectionStart = target.selectionEnd = start + textToInsert.length
           target.dispatchEvent(new Event("input", { bubbles: true }))
           target.dispatchEvent(new Event("change", { bubbles: true }))
+          triggerSend()
           return true
         }
 
@@ -483,6 +536,7 @@ export async function insertTextToActiveChatTab(tabId: number, text: string): Pr
               target.classList.remove("empty")
               target.dispatchEvent(new Event("input", { bubbles: true }))
               target.dispatchEvent(new Event("change", { bubbles: true }))
+              triggerSend()
               return true
             }
           } catch {
@@ -495,6 +549,7 @@ export async function insertTextToActiveChatTab(tabId: number, text: string): Pr
             target.classList.remove("empty")
             target.dispatchEvent(new Event("input", { bubbles: true }))
             target.dispatchEvent(new Event("change", { bubbles: true }))
+            triggerSend()
             return true
           } catch {
             // Fallback

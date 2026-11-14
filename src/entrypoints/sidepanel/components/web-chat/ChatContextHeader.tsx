@@ -1,7 +1,8 @@
-import type { WebChatTone } from "@/types/config/web-chat"
+import type { WebChatAutoReplyMode, WebChatTone } from "@/types/config/web-chat"
 import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import type { ChatRoom } from "@/utils/web-chat/adapter/types"
 import {
+  Bot,
   Check,
   ChevronDown,
   Languages,
@@ -41,11 +42,16 @@ export interface ChatContextHeaderProps {
   selectedTone: WebChatTone
   onSelectTone: (tone: WebChatTone) => void
 
+  autoReplyMode: WebChatAutoReplyMode
+  onSelectAutoReplyMode: (mode: WebChatAutoReplyMode) => void
+  isAutoReplying?: boolean
+
   isOverridden: boolean
   onResetDefaults: () => void
 }
 
 const TONE_VALUES: WebChatTone[] = ["friendly", "professional", "brief", "casual", "humorous"]
+const AUTO_REPLY_MODES: WebChatAutoReplyMode[] = ["none", "draft", "send"]
 
 function getToneLabel(tone: WebChatTone): string {
   switch (tone) {
@@ -61,6 +67,32 @@ function getToneLabel(tone: WebChatTone): string {
       return i18n.t("options.webChat.toneShort.humorous")
     default:
       return i18n.t("options.webChat.toneShort.friendly")
+  }
+}
+
+function getAutoReplyLabel(mode: WebChatAutoReplyMode): string {
+  switch (mode) {
+    case "none":
+      return i18n.t("options.webChat.sidepanel.autoReply.none")
+    case "draft":
+      return i18n.t("options.webChat.sidepanel.autoReply.draft")
+    case "send":
+      return i18n.t("options.webChat.sidepanel.autoReply.send")
+    default:
+      return i18n.t("options.webChat.sidepanel.autoReply.none")
+  }
+}
+
+function getAutoReplyDesc(mode: WebChatAutoReplyMode): string {
+  switch (mode) {
+    case "none":
+      return i18n.t("options.webChat.sidepanel.autoReply.descNone")
+    case "draft":
+      return i18n.t("options.webChat.sidepanel.autoReply.descDraft")
+    case "send":
+      return i18n.t("options.webChat.sidepanel.autoReply.descSend")
+    default:
+      return i18n.t("options.webChat.sidepanel.autoReply.descNone")
   }
 }
 
@@ -98,6 +130,9 @@ export function ChatContextHeader({
   onSelectLang,
   selectedTone,
   onSelectTone,
+  autoReplyMode,
+  onSelectAutoReplyMode,
+  isAutoReplying = false,
   isOverridden,
   onResetDefaults,
 }: ChatContextHeaderProps) {
@@ -267,6 +302,45 @@ export function ChatContextHeader({
               >
                 <span>{getToneLabel(tone)}</span>
                 {selectedTone === tone && <Check className="size-3 text-primary" />}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        {/* Auto Reply Pill Dropdown */}
+        <DropdownMenu>
+          <DropdownMenuTrigger
+            className={cn(
+              "flex h-6.5 shrink-0 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden",
+              autoReplyMode !== "none" &&
+                "border-emerald-500/40 bg-emerald-500/10 font-semibold text-emerald-600 dark:text-emerald-400",
+            )}
+            title={i18n.t("options.webChat.sidepanel.autoReply.title")}
+          >
+            <Bot
+              className={cn(
+                "size-3",
+                autoReplyMode !== "none" ? "text-emerald-500" : "text-muted-foreground",
+                isAutoReplying && "animate-spin text-emerald-500",
+              )}
+            />
+            <span className="max-w-[85px] truncate">{getAutoReplyLabel(autoReplyMode)}</span>
+            <ChevronDown className="size-2.5 opacity-60" />
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start" className="w-56 text-xs">
+            {AUTO_REPLY_MODES.map((mode) => (
+              <DropdownMenuItem
+                key={mode}
+                onClick={() => onSelectAutoReplyMode(mode)}
+                className="flex items-center justify-between py-1.5 text-xs"
+              >
+                <div className="flex flex-col pr-2">
+                  <span className="font-medium">{getAutoReplyLabel(mode)}</span>
+                  <span className="text-[10px] text-muted-foreground">
+                    {getAutoReplyDesc(mode)}
+                  </span>
+                </div>
+                {autoReplyMode === mode && <Check className="size-3 shrink-0 text-primary" />}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>

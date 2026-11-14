@@ -1392,6 +1392,16 @@ options:
       model: Model
       language: Language
       tone: Tone
+      autoReply:
+        title: Auto Reply
+        none: Off
+        draft: Auto Draft
+        send: Auto Send
+        descNone: Auto reply disabled
+        descDraft: Automatically generate and insert reply into chat on new messages
+        descSend: Automatically generate and send reply on new messages
+        statusSent: Reply sent automatically
+        statusDrafted: Reply draft inserted into chat
       sessionCustomized: Session customized
       messagesCount: "$1 messages"
       piiMasked: PII Masked

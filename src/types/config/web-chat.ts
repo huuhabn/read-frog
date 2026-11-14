@@ -1,6 +1,7 @@
 import { z } from "zod"
 
 export type WebChatTone = "friendly" | "professional" | "brief" | "casual" | "humorous"
+export type WebChatAutoReplyMode = "none" | "draft" | "send"
 
 export const DEFAULT_WEB_CHAT_CONFIG = {
   enabled: true,

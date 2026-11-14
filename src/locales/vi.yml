@@ -1245,6 +1245,16 @@ options:
       model: Mô hình
       language: Ngôn ngữ
       tone: Giọng điệu
+      autoReply:
+        title: Tự động phản hồi
+        none: Tắt
+        draft: Chèn nháp
+        send: Gửi tự động
+        descNone: Tắt tự động phản hồi
+        descDraft: Tự động tạo phản hồi và chèn vào khung chat khi có tin mới
+        descSend: Tự động tạo phản hồi và gửi ngay khi có tin mới
+        statusSent: Đã tự động gửi phản hồi
+        statusDrafted: Đã chèn gợi ý phản hồi vào khung chat
       sessionCustomized: Đã tùy chỉnh phiên này
       messagesCount: "$1 tin nhắn"
       piiMasked: PII Masked
