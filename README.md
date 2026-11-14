@@ -1,12 +1,12 @@
 # Workmate AI
 
-An AI language-learning extension for browsers, and an open-source alternative to Immersive Translate.<br/>
-Translate web pages, the sentences you select, and subtitles on YouTube, X, and Netflix. Then save the words you meet and review them as flashcards on an FSRS schedule.<br/>
-Master languages effortlessly and deeply with AI, right in your browser.
+The all-in-one AI Browser Assistant & Language Companion.<br/>
+Chat smarter on Telegram, Zalo, and Slack with AI auto-replies, draft winning Upwork proposals, navigate tabs in a blazing-fast Sider-style sidepanel, translate web pages and video subtitles, and learn vocabulary with FSRS flashcards.<br/>
+Supercharge your productivity and language mastery directly inside your browser.
 
 [![English][english-shield]](./README.md) [![Tiếng Việt][vietnamese-shield]](./readmes/README.vi.md)
 
-[Official Website](https://www.readfrog.app/en?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [All Features](https://www.readfrog.app/en/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Tutorial](https://www.readfrog.app/en/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Changelog][github-release-link] · [Blog](https://www.readfrog.app/en/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [vs Immersive Translate](https://www.readfrog.app/en/compare/immersive-translate?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en)
+[Official Website](https://www.readfrog.app/en?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [All Features](https://www.readfrog.app/en/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Tutorial](https://www.readfrog.app/en/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Changelog][github-release-link] · [Blog](https://www.readfrog.app/en/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en)
 
 </div>
 
@@ -15,30 +15,27 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 #### TOC
 
-- [📺 Demo](#-demo)
-- [👋🏻 Getting Started \& Join Our Community](#-getting-started--join-our-community)
+- [👋🏻 Getting Started](#-getting-started)
   - [Download](#download)
-  - [Community](#community)
-- [✨ Features](#-features)
+  - [Tech Stack](#tech-stack)
+- [✨ Key Features](#-key-features)
+  - [💬 AI Web Chat Assistant (Telegram, Zalo, Slack)](#-ai-web-chat-assistant)
+  - [💼 Upwork Copilot & Proposal Writer](#-upwork-copilot--proposal-writer)
+  - [⚡ Sider-Style Instant Sidepanel](#-sider-style-instant-sidepanel)
   - [🪄 Custom AI Actions](#-custom-ai-actions)
-  - [🧠 Flashcards \& Spaced Repetition](#-flashcards--spaced-repetition)
+  - [🧠 Flashcards \& Spaced Repetition (FSRS)](#-flashcards--spaced-repetition)
   - [🔄 Bilingual / Translation Only](#-bilingual--translation-only)
-  - [✨ Selection Translation](#-selection-translation)
-  - [🧠 Context-Aware Translation](#-context-aware-translation)
-  - [🎬 Subtitle Translation](#-subtitle-translation)
+  - [✨ Selection Translation Toolbar](#-selection-translation)
+  - [🎬 Video Subtitle Translation (YouTube & Netflix)](#-subtitle-translation)
   - [🔊 Text-to-Speech (TTS)](#-text-to-speech-tts)
-  - [📦 Batch Requests](#-batch-requests)
+  - [📦 Batch Requests & Cost Optimization](#-batch-requests)
   - [🤖 20+ AI Providers](#-20-ai-providers)
 - [🧩 Prompt Processing Workflow & Architecture](#-prompt-processing-workflow--architecture)
   - [Architecture Overview](#architecture-overview)
   - [Prompt Pipeline Lifecycle](#prompt-pipeline-lifecycle)
-  - [Supported Tokens & Context Interpolation](#supported-tokens--context-interpolation)
-  - [System Prompt Augmentation & Rule Injection](#system-prompt-augmentation--rule-injection)
-  - [Security, Deterministic Caching & Glossary Protection](#security-deterministic-caching--glossary-protection)
-  - [Real-World Examples](#real-world-examples)
   - [Developer Guide: Adding a New Prompt](#developer-guide-adding-a-new-prompt)
-- [🤝 Contribute](#-contribute)
-  - [Contribute Code](#contribute-code)
+- [💻 Development & Contributing](#-development--contributing)
+- [📜 License](#-license)
 - [📜 Commercial License Grant](#-commercial-license-grant)
 - [❤️ Sponsors](#️-sponsors)
 
@@ -46,11 +43,17 @@ Master languages effortlessly and deeply with AI, right in your browser.
 
 </details>
 
-## 👋🏻 Getting Started & Join Our Community
+## 👋🏻 Getting Started
 
-Workmate AI's vision is to provide an easy-to-use, intelligent, and personalized language learning experience for language learners of all levels. This has become possible in the AI era, but there are few products on the market that meet this demand. Therefore, we decided to take matters into our own hands and ultimately make the world no longer reliant on human language instructors.
+Workmate AI empowers you to read, write, research, and communicate effortlessly on the web. Connect your favorite LLMs (OpenAI, Claude, Gemini, DeepSeek, Groq, Ollama) and enjoy an integrated workspace right in your browser.
 
-Whether you are a user or a developer, Workmate AI will be an important part of your journey toward this vision. Please be aware that Workmate AI is currently under active development, and feedback is welcome for any [issues][issues-link] encountered.
+### Tech Stack
+
+- **Extension Framework**: [WXT](https://wxt.dev/) with Vite
+- **UI & Components**: React 19, Tailwind CSS v4, `@base-ui/react`, Radix UI slots
+- **State & Storage**: Jotai, TanStack React Store, WXT Storage
+- **Code Quality**: Oxlint (`oxlint`), Oxfmt (`oxfmt`), Vitest (`vitest`)
+- **Package Manager**: `pnpm`
 
 ### Download
 
@@ -66,9 +69,52 @@ Whether you are a user or a developer, Workmate AI will be an important part of 
 
 </div>
 
-## ✨ Features
+## ✨ Key Features
 
-Transform your everyday web reading into an immersive language learning journey with Workmate AI's powerful features.
+Transform your browser into a powerhouse for communication, research, and language mastery.
+
+### 💬 AI Web Chat Assistant
+
+Accelerate your conversations on **Telegram Web (A & K)**, **Zalo Web**, **Slack**, and popular web messengers.
+
+- **Smart Auto Reply & Auto Draft**: Instantly generates contextual reply suggestions. Auto-draft places suggestions directly into your input box, while auto-send delivers responses hands-free.
+- **Adaptive Tone & Style**: Switch dynamically between _Professional_, _Casual_, _Concise_, _Friendly_, or _Humorous_ tones.
+- **PII Redaction & Privacy**: Automatically masks emails, phone numbers, and sensitive client information before sending context to AI models.
+- **Sidepanel Auto Reply Toggle**: Easily enable or disable background auto-reply triggers directly from the Sidepanel Header Toolbar.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+### 💼 Upwork Copilot & Proposal Writer
+
+Win more freelance contracts in less time with an integrated assistant designed for Upwork freelancers.
+
+- **Job Post Deep Dive**: Analyzes client requirements, budget constraints, deliverables, and red flags.
+- **Screening Question Generator**: Crafts precise, personalized answers to tricky application questions.
+- **Custom Cover Letter Drafting**: Generates compelling, non-templated proposals highlighting your relevant skills and portfolio matches.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+### ⚡ Sider-Style Instant Sidepanel
+
+A lightweight, multi-tab sidepanel inspired by Sider that loads in milliseconds (<100ms):
+
+- **Tabs**: `Chat` (Conversational AI), `WebChat` (Live messaging copilot), `Read` (Page summarizer & reader), `Write` (Content composer), and `Translate` (Direct bilingual translator).
+- **Code-Split & Optimized**: Built with lazy-loaded views, instant store rehydration, and zero static AI SDK bloat on initial launch.
+- **Theme Aware**: Supports light and dark modes with customizable accent themes.
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
 
 ### 🪄 [Custom AI Actions][docs-custom-actions]
 
@@ -474,6 +520,70 @@ To add a new built-in translation prompt or custom prompt preset:
 
 4. **Add Unit Tests**  
    Verify token interpolation and prompt assembly by adding tests in [`src/utils/constants/__tests__/prompt.test.ts`](./src/utils/constants/__tests__/prompt.test.ts) and [`src/utils/prompts/__tests__/translate.test.ts`](./src/utils/prompts/__tests__/translate.test.ts).
+
+<div align="right">
+
+[![Back to top][back-to-top]](#readme-top)
+
+</div>
+
+## 💻 Development & Contributing
+
+### Prerequisites
+
+- Node.js >= 20
+- [pnpm](https://pnpm.io/) >= 9 (strictly required)
+
+### Local Development Setup
+
+1. **Clone the repository**:
+
+   ```bash
+   git clone https://github.com/mengxi-ream/read-frog.git
+   cd read-frog
+   ```
+
+2. **Install dependencies**:
+
+   ```bash
+   pnpm install
+   ```
+
+3. **Start the development server**:
+   ```bash
+   pnpm dev
+   ```
+   Loads the extension into Chrome via WXT. For other browsers:
+   ```bash
+   pnpm dev:edge
+   pnpm dev:firefox
+   ```
+
+### Code Quality & Testing
+
+- **Linting & Type-checking**:
+  ```bash
+  pnpm lint
+  ```
+- **Formatting**:
+  ```bash
+  pnpm fmt:check
+  pnpm fmt
+  ```
+- **Run Unit Tests**:
+
+  ```bash
+  SKIP_FREE_API=true pnpm test --run
+  ```
+
+  _(Note: `SKIP_FREE_API=true` skips external rate-limited translation API calls during local testing)._
+
+- **Build Production Bundles**:
+  ```bash
+  pnpm build
+  # Or analyze bundle size:
+  pnpm build:analyze
+  ```
 
 <div align="right">
 
