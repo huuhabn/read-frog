@@ -2,7 +2,7 @@ export const ROUTE_DEFS = [
   { path: "/" },
   { path: "/preference" },
   { path: "/shortcuts" },
-  { path: "/api-providers" },
+  { path: "/providers" },
   { path: "/custom-actions" },
   { path: "/page-translation" },
   { path: "/video-subtitles" },

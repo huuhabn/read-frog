@@ -11,8 +11,8 @@ const PreferencePage = lazy(() =>
 const ShortcutsPage = lazy(() =>
   import("./pages/shortcuts").then((module) => ({ default: module.ShortcutsPage })),
 )
-const ApiProvidersPage = lazy(() =>
-  import("./pages/api-providers").then((module) => ({ default: module.ApiProvidersPage })),
+const ProvidersPage = lazy(() =>
+  import("./pages/providers").then((module) => ({ default: module.ProvidersPage })),
 )
 const CustomActionsPage = lazy(() =>
   import("./pages/custom-actions").then((module) => ({ default: module.CustomActionsPage })),
@@ -60,6 +60,7 @@ const AuditLogsPage = lazy(() =>
 function AdvancedRedirect() {
   return <Navigate to="/advanced/glossary" replace />
 }
+
 const HelpAndCommunityPage = lazy(() =>
   import("./pages/help-and-community").then((module) => ({ default: module.HelpAndCommunityPage })),
 )
@@ -135,10 +136,10 @@ const SubtitlesQueuePage = lazy(() =>
 )
 
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
-  "/": ApiProvidersPage,
+  "/": ProvidersPage,
   "/preference": PreferencePage,
   "/shortcuts": ShortcutsPage,
-  "/api-providers": ApiProvidersPage,
+  "/providers": ProvidersPage,
   "/custom-actions": CustomActionsPage,
   "/page-translation": TranslationPage,
   "/video-subtitles": VideoSubtitlesPage,

@@ -331,7 +331,9 @@ export function AuditLogsPage() {
                         </td>
                         <td className="px-3 py-2.5 whitespace-nowrap">
                           <div className="flex flex-col">
-                            <span className="font-medium text-foreground">{log.providerId}</span>
+                            <span className="font-medium text-foreground">
+                              {log.providerName || log.providerId}
+                            </span>
                             {log.model && (
                               <span className="font-mono text-[10px] text-muted-foreground">
                                 {log.model}

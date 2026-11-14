@@ -4,7 +4,7 @@ import type { ReactNode } from "react"
 import { fireEvent, render, screen, within } from "@testing-library/react"
 import { MemoryRouter } from "react-router"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { ProvidersConfig } from "@/entrypoints/options/pages/api-providers/providers-config"
+import { ProvidersConfig } from "@/entrypoints/options/pages/providers/providers-config"
 import {
   BUILT_IN_AI_PROVIDER_ID,
   BUILT_IN_AI_ADVANCE_PROVIDER_ID,
@@ -211,35 +211,34 @@ vi.mock("@/entrypoints/options/components/config-item", () => ({
   ConfigItem: ({ children }: { children: ReactNode }) => <>{children}</>,
 }))
 
-vi.mock("@/entrypoints/options/components/entity-editor-layout", () => ({
-  EntityEditorLayout: ({ list, editor }: { list: ReactNode; editor: ReactNode }) => (
-    <>
-      {list}
-      {editor}
-    </>
-  ),
+vi.mock("@/components/ui/base-ui/sheet", () => ({
+  Sheet: ({ children }: { children: ReactNode }) => <>{children}</>,
+  SheetContent: ({ children }: { children: ReactNode }) => <>{children}</>,
+  SheetHeader: ({ children }: { children: ReactNode }) => <>{children}</>,
+  SheetTitle: ({ children }: { children: ReactNode }) => <>{children}</>,
+  SheetDescription: ({ children }: { children: ReactNode }) => <>{children}</>,
+  SheetClose: () => null,
+  SheetFooter: ({ children }: { children: ReactNode }) => <>{children}</>,
+  SheetTrigger: () => null,
 }))
 
-vi.mock("@/entrypoints/options/components/entity-list-rail", () => ({
-  EntityListRail: ({ children }: { children: ReactNode }) => <>{children}</>,
-}))
-
-vi.mock("@/entrypoints/options/pages/api-providers/providers-config/add-provider-dialog", () => ({
+vi.mock("@/entrypoints/options/pages/providers/providers-config/add-provider-dialog", () => ({
   default: () => null,
 }))
 
-vi.mock("@/entrypoints/options/pages/api-providers/providers-config/atoms", () => ({
+vi.mock("@/entrypoints/options/pages/providers/providers-config/atoms", () => ({
   highlightedProviderFieldAtom,
+  isProviderEditorOpenAtom: {},
   PROVIDER_FIELD_HIGHLIGHT_DURATION_MS: 2700,
   selectedProviderIdAtom,
 }))
 
-vi.mock("@/entrypoints/options/pages/api-providers/providers-config/provider-config-form", () => ({
+vi.mock("@/entrypoints/options/pages/providers/providers-config/provider-config-form", () => ({
   ProviderConfigForm: () => null,
 }))
 
 // `ProvidersConfig` reads the location to honour a `?provider=` deep link.
-function renderProvidersConfig(initialEntry = "/api-providers") {
+function renderProvidersConfig(initialEntry = "/providers") {
   return render(
     <MemoryRouter initialEntries={[initialEntry]}>
       <ProvidersConfig />
@@ -419,7 +418,7 @@ describe("ProvidersConfig", () => {
   it("opens the provider a ?provider= deep link names", () => {
     testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
 
-    renderProvidersConfig(`/api-providers?provider=${providerConfig.id}`)
+    renderProvidersConfig(`/providers?provider=${providerConfig.id}`)
 
     expect(testState.selectedProviderId).toBe(providerConfig.id)
   })
@@ -427,7 +426,7 @@ describe("ProvidersConfig", () => {
   it("keeps the current selection when the deep link names an unknown provider", () => {
     testState.selectedProviderId = BUILT_IN_AI_PROVIDER_ID
 
-    renderProvidersConfig("/api-providers?provider=deleted-provider")
+    renderProvidersConfig("/providers?provider=deleted-provider")
 
     expect(testState.selectedProviderId).toBe(BUILT_IN_AI_PROVIDER_ID)
   })

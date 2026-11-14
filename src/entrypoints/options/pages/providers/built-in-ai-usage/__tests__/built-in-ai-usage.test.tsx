@@ -3,7 +3,7 @@ import type { ReactNode } from "react"
 import type { HostedAiStatusResult } from "@/components/llm-providers/use-hosted-ai-status"
 import { render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { BuiltInAiUsageConfig } from "@/entrypoints/options/pages/api-providers/built-in-ai-usage"
+import { BuiltInAiUsageConfig } from "@/entrypoints/options/pages/providers/built-in-ai-usage"
 import { formatHostedAiResetAtLocal } from "@/utils/hosted-ai/status"
 
 const { hostedAiState } = vi.hoisted(() => {

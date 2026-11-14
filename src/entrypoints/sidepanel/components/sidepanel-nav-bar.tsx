@@ -41,7 +41,7 @@ export function SidePanelNavBar() {
   const [activeTab, setActiveTab] = useAtom(sidepanelNavTabAtom)
 
   const handleOpenSettings = () => {
-    void openOptionsPage({ route: "/api-providers" })
+    void openOptionsPage({ route: "/providers" })
   }
 
   const handleOpenAuditLogs = () => {

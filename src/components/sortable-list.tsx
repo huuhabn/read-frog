@@ -11,6 +11,7 @@ import {
 import { restrictToFirstScrollableAncestor, restrictToVerticalAxis } from "@dnd-kit/modifiers"
 import {
   arrayMove,
+  rectSortingStrategy,
   SortableContext,
   sortableKeyboardCoordinates,
   useSortable,
@@ -25,11 +26,13 @@ export function SortableList<T extends { id: string }>({
   setList,
   renderItem,
   className,
+  layout = "vertical",
 }: {
   list: T[]
   setList: (items: T[]) => void
   renderItem: (item: T) => React.ReactNode
   className?: string
+  layout?: "vertical" | "grid"
 }) {
   const [activeId, setActiveId] = useState<string | null>(null)
 
@@ -76,16 +79,23 @@ export function SortableList<T extends { id: string }>({
     }
   }
 
+  const modifiers =
+    layout === "grid"
+      ? [restrictToFirstScrollableAncestor]
+      : [restrictToVerticalAxis, restrictToFirstScrollableAncestor]
+
+  const strategy = layout === "grid" ? rectSortingStrategy : verticalListSortingStrategy
+
   return (
     <DndContext
       sensors={sensors}
       collisionDetection={closestCenter}
-      modifiers={[restrictToVerticalAxis, restrictToFirstScrollableAncestor]}
+      modifiers={modifiers}
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
       onDragCancel={() => setActiveId(null)}
     >
-      <SortableContext items={list.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+      <SortableContext items={list.map((item) => item.id)} strategy={strategy}>
         <div className={className} style={{ overflowAnchor: "none" }}>
           {list.map((item) => (
             <SortableItemWrapper key={item.id} id={item.id}>

@@ -13,18 +13,18 @@ import { BUILT_IN_DICTIONARY_ACTION_ID } from "@/utils/constants/custom-action"
 import { BUILT_IN_AI_PROVIDER_ID } from "@/utils/constants/provider-ids"
 import { getBuiltInDictionaryAction } from "@/utils/custom-actions"
 import {
-  BuiltInProviderEditor,
-  CustomProviderEditor,
-  ProviderEditor,
-  useProviderForm,
-  useProviderEditor,
-} from "../api-providers/providers-config/provider-editor"
-import {
   ActionEditor,
   BuiltInActionEditor,
   CustomActionEditor,
   useActionEditor,
 } from "../custom-actions/action-config-form/action-editor"
+import {
+  BuiltInProviderEditor,
+  CustomProviderEditor,
+  ProviderEditor,
+  useProviderForm,
+  useProviderEditor,
+} from "../providers/providers-config/provider-editor"
 
 function seedConfig(store: ReturnType<typeof createStore>, config: SeedConfig) {
   void fakeBrowser.storage.local.set({ config })

@@ -6,7 +6,7 @@ import { FeatureProvidersConfig } from "./feature-providers"
 import { LanguageDetectionConfig } from "./language-detection"
 import { ProvidersConfig } from "./providers-config"
 
-export function ApiProvidersPage() {
+export function ProvidersPage() {
   return (
     <PageLayout
       title={i18n.t("options.apiProviders.title")}
@@ -21,3 +21,5 @@ export function ApiProvidersPage() {
     </PageLayout>
   )
 }
+
+export const ApiProvidersPage = ProvidersPage

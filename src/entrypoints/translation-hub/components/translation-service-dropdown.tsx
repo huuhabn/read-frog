@@ -42,7 +42,7 @@ export function TranslationServiceDropdown() {
   const handleConfigureAPI = async () => {
     try {
       await browser.tabs.create({
-        url: browser.runtime.getURL("/options.html#/api-providers"),
+        url: browser.runtime.getURL("/options.html#/providers"),
       })
     } catch (error) {
       log.error("Failed to open the API provider settings", { error })

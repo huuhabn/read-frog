@@ -12,6 +12,7 @@ import { SortableList } from "@/components/sortable-list"
 import { Badge } from "@/components/ui/base-ui/badge"
 import { Button } from "@/components/ui/base-ui/button"
 import { Dialog, DialogTrigger } from "@/components/ui/base-ui/dialog"
+import { Sheet, SheetContent } from "@/components/ui/base-ui/sheet"
 import { anchoredToastManager } from "@/components/ui/base-ui/toast"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { isAPIProvider, isAPIProviderConfig } from "@/types/config/provider"
@@ -43,11 +44,13 @@ import {
 } from "@/utils/providers/provider-registry"
 import { ConfigItem } from "../../../components/config-item"
 import { EntityEditor } from "../../../components/entity-editor"
-import { EntityEditorLayout } from "../../../components/entity-editor-layout"
 import { EntityListItem } from "../../../components/entity-list-item"
-import { EntityListRail } from "../../../components/entity-list-rail"
 import AddProviderDialog from "./add-provider-dialog"
-import { highlightedProviderFieldAtom, selectedProviderIdAtom } from "./atoms"
+import {
+  highlightedProviderFieldAtom,
+  isProviderEditorOpenAtom,
+  selectedProviderIdAtom,
+} from "./atoms"
 import { ProviderConfigForm } from "./provider-config-form"
 import { BuiltInProviderEditor, ProviderEditor } from "./provider-editor"
 import { addProvider } from "./utils"
@@ -64,6 +67,7 @@ function useRequestedProvider() {
   const { search, key: locationKey } = useLocation()
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const setSelectedProviderId = useSetAtom(selectedProviderIdAtom)
+  const setIsEditorOpen = useSetAtom(isProviderEditorOpenAtom)
   const setHighlightedField = useSetAtom(highlightedProviderFieldAtom)
   const handledLocationRef = useRef<string | null>(null)
 
@@ -88,6 +92,7 @@ function useRequestedProvider() {
 
       handledLocationRef.current = marker
       void setSelectedProviderId(providerId)
+      setIsEditorOpen(true)
       highlightRequestedField()
       return
     }
@@ -104,6 +109,7 @@ function useRequestedProvider() {
     )
     if (existingProvider) {
       void setSelectedProviderId(existingProvider.id)
+      setIsEditorOpen(true)
       highlightRequestedField()
       return
     }
@@ -113,19 +119,24 @@ function useRequestedProvider() {
       providersConfig,
       setProvidersConfig,
       setSelectedProviderId,
-    ).then(highlightRequestedField)
+    ).then(() => {
+      setIsEditorOpen(true)
+      highlightRequestedField()
+    })
   }, [
     locationKey,
     search,
     providersConfig,
     setProvidersConfig,
     setSelectedProviderId,
+    setIsEditorOpen,
     setHighlightedField,
   ])
 }
 
 export function ProvidersConfig() {
   const selectedProviderId = useAtomValue(selectedProviderIdAtom)
+  const [isEditorOpen, setIsEditorOpen] = useAtom(isProviderEditorOpenAtom)
   useRequestedProvider()
   const editor = isBuiltInAiProviderId(selectedProviderId) ? (
     <BuiltInProviderPanel key={selectedProviderId} providerId={selectedProviderId} />
@@ -140,7 +151,15 @@ export function ProvidersConfig() {
       title={i18n.t("options.apiProviders.configTitle")}
       description={i18n.t("options.apiProviders.description")}
     >
-      <EntityEditorLayout list={<ProviderCardList />} editor={editor} />
+      <ProviderCardList />
+      <Sheet open={isEditorOpen} onOpenChange={setIsEditorOpen}>
+        <SheetContent
+          side="right"
+          className="flex h-full w-full flex-col gap-0 overflow-hidden p-0 data-[side=right]:w-full data-[side=right]:sm:max-w-2xl data-[side=right]:lg:max-w-3xl data-[side=right]:xl:max-w-[820px]"
+        >
+          <div className="flex-1 overflow-y-auto p-5 sm:p-6">{editor}</div>
+        </SheetContent>
+      </Sheet>
     </ConfigItem>
   )
 }
@@ -148,9 +167,7 @@ export function ProvidersConfig() {
 function ProviderCardList() {
   const [providersConfig, setProvidersConfig] = useAtom(configFieldsAtomMap.providersConfig)
   const apiProvidersConfig = getAPIProvidersConfig(providersConfig)
-  const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false)
-  const didLockInitialSelectionRef = useRef(false)
 
   const handleReorder = (newList: APIProviderConfig[]) => {
     const desiredOrderIds = newList.map((provider) => provider.id)
@@ -179,41 +196,38 @@ function ProviderCardList() {
     void setProvidersConfig([...nonApiProviders, ...reorderedApiProviders])
   }
 
-  useEffect(() => {
-    if (didLockInitialSelectionRef.current) return
-    if (selectedProviderId) {
-      void setSelectedProviderId(selectedProviderId)
-      didLockInitialSelectionRef.current = true
-    }
-  }, [selectedProviderId, setSelectedProviderId])
-
   return (
-    <div className="flex flex-col gap-4">
-      <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
-        <DialogTrigger
-          render={
-            <Button
-              variant="outline"
-              className="h-auto rounded-xl border-dashed border-accent bg-accent/8 p-3 hover:bg-accent/14 dark:border-accent dark:bg-accent/12 dark:hover:bg-accent/20"
-              onClick={() => setIsAddDialogOpen(true)}
-            />
-          }
-        >
-          <div className="flex w-full items-center justify-center gap-2">
-            <Icon icon="tabler:plus" className="size-4" />
-            <span className="text-sm">{i18n.t("options.apiProviders.addProvider")}</span>
-          </div>
-        </DialogTrigger>
-        <AddProviderDialog onClose={() => setIsAddDialogOpen(false)} />
-      </Dialog>
-      <EntityListRail>
-        <SortableList
-          list={apiProvidersConfig}
-          setList={handleReorder}
-          className="flex flex-col gap-4 pt-2"
-          renderItem={(providerConfig) => <ProviderCard providerConfig={providerConfig} />}
-        />
-      </EntityListRail>
+    <div className="flex flex-col gap-6">
+      <div className="flex items-center justify-between gap-4">
+        <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+          <DialogTrigger
+            render={
+              <Button
+                variant="outline"
+                className="h-auto rounded-xl border-dashed border-accent bg-accent/8 p-3 hover:bg-accent/14 dark:border-accent dark:bg-accent/12 dark:hover:bg-accent/20"
+                onClick={() => setIsAddDialogOpen(true)}
+              />
+            }
+          >
+            <div className="flex items-center gap-2">
+              <Icon icon="tabler:plus" className="size-4" />
+              <span className="text-sm font-medium">
+                {i18n.t("options.apiProviders.addProvider")}
+              </span>
+            </div>
+          </DialogTrigger>
+          <AddProviderDialog onClose={() => setIsAddDialogOpen(false)} />
+        </Dialog>
+      </div>
+
+      <SortableList
+        layout="grid"
+        list={apiProvidersConfig}
+        setList={handleReorder}
+        className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4"
+        renderItem={(providerConfig) => <ProviderCard providerConfig={providerConfig} />}
+      />
+
       <BuiltInProviderSection />
     </div>
   )
@@ -223,6 +237,7 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
   const { id, name, provider, enabled } = providerConfig
   const { theme } = useTheme()
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
+  const setIsEditorOpen = useSetAtom(isProviderEditorOpenAtom)
   const patchProviderConfig = useSetAtom(patchProviderConfigAtom)
   const config = useAtomValue(configAtom)
   const sponsor = API_PROVIDER_ITEMS[provider].sponsor
@@ -265,7 +280,10 @@ function ProviderCard({ providerConfig }: { providerConfig: APIProviderConfig })
     <EntityListItem.Root
       data-provider-id={id}
       selected={selectedProviderId === id}
-      onClick={() => setSelectedProviderId(id)}
+      onClick={() => {
+        void setSelectedProviderId(id)
+        setIsEditorOpen(true)
+      }}
     >
       <EntityListItem.Badges>
         <>
@@ -327,11 +345,11 @@ function FeatureCountBadge({ count, children }: { count: number; children: React
 
 function BuiltInProviderSection() {
   return (
-    <section className="flex flex-col gap-2 pt-1">
+    <section className="flex flex-col gap-3 pt-2">
       <h3 className="px-1 text-xs font-medium text-muted-foreground">
         {i18n.t("options.apiProviders.builtInProvider" as never)}
       </h3>
-      <div className="flex flex-col gap-4 pt-2">
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
         {BUILT_IN_AI_PROVIDER_IDS.map((providerId) => (
           <BuiltInProviderCard key={providerId} providerId={providerId} />
         ))}
@@ -342,6 +360,7 @@ function BuiltInProviderSection() {
 
 function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }) {
   const [selectedProviderId, setSelectedProviderId] = useAtom(selectedProviderIdAtom)
+  const setIsEditorOpen = useSetAtom(isProviderEditorOpenAtom)
   const config = useAtomValue(configAtom)
   const providerName = getBuiltInAiProviderName(providerId)
   const assignedFeatures = FEATURE_KEYS.filter(
@@ -359,7 +378,10 @@ function BuiltInProviderCard({ providerId }: { providerId: BuiltInAiProviderId }
     <EntityListItem.Root
       data-provider-id={providerId}
       selected={selectedProviderId === providerId}
-      onClick={() => setSelectedProviderId(providerId)}
+      onClick={() => {
+        void setSelectedProviderId(providerId)
+        setIsEditorOpen(true)
+      }}
     >
       <EntityListItem.Badges>
         <FeatureCountBadge count={totalAssigned}>
@@ -421,7 +443,7 @@ function BuiltInProviderPanel({ providerId }: { providerId: BuiltInAiProviderId 
 
   return (
     <BuiltInProviderEditor.Provider providerId={providerId}>
-      <EntityEditor.Root>
+      <EntityEditor.Root className="border-0 bg-transparent p-0 shadow-none">
         <EntityEditor.Body className="gap-6">
           <div className="flex flex-col gap-4">
             <ProviderEditor.Identity />
