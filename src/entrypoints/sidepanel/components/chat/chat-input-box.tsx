@@ -219,7 +219,7 @@ export function ChatInputBox({
           onKeyDown={handleKeyDown}
           placeholder={i18n.t("sidePanel.chat.inputPlaceholderCompact")}
           rows={1}
-          className="max-h-32 min-h-[36px] w-full resize-none border-0 bg-transparent px-1.5 py-1 text-xs shadow-none focus-visible:ring-0"
+          className="max-h-32 min-h-[36px] w-full resize-none border-0 bg-transparent px-1.5 py-1 shadow-none focus-visible:ring-0"
         />
 
         {/* Bottom Toolbar */}
@@ -245,7 +245,7 @@ export function ChatInputBox({
               disabled={isRestricted || !activeTab}
               title={tabContextTooltip}
               className={cn(
-                "flex h-6.5 cursor-pointer items-center gap-1 rounded-lg px-1.5 text-[11px] font-medium outline-hidden transition-all disabled:cursor-not-allowed disabled:opacity-40",
+                "flex size-6 shrink-0 cursor-pointer items-center justify-center rounded-full text-[11px] font-medium outline-hidden transition-all disabled:cursor-not-allowed disabled:opacity-40",
                 isRestricted
                   ? "border border-dashed border-border/60 text-muted-foreground/60"
                   : usePageContext
@@ -296,7 +296,7 @@ export function ChatInputBox({
                 type="button"
                 size="icon"
                 variant="destructive"
-                className="size-7.5 rounded-full shadow-xs transition-transform hover:scale-105 active:scale-95"
+                className="size-6 rounded-full shadow-xs transition-transform hover:scale-105 active:scale-95"
                 onClick={onStop}
                 title={i18n.t("sidePanel.chat.stop")}
               >
@@ -307,7 +307,7 @@ export function ChatInputBox({
                 type="button"
                 size="icon"
                 disabled={!input.trim()}
-                className="size-7.5 rounded-full shadow-xs transition-transform hover:scale-105 active:scale-95 disabled:pointer-events-none disabled:opacity-30"
+                className="size-6 rounded-full shadow-xs transition-transform hover:scale-105 active:scale-95 disabled:pointer-events-none disabled:opacity-30"
                 onClick={() => void onSend()}
                 title={i18n.t("sidePanel.chat.send")}
               >

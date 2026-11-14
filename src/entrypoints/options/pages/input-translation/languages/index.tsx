@@ -10,11 +10,6 @@ import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
 import { LangSelect } from "./lang-select"
 
-/**
- * Which language the typed text is read as, and which one it comes back in. Both sides sit in
- * the row's control column, one above the other with the arrow between them, so the pair reads
- * as the direction it sets — and swapping shows in the arrow itself.
- */
 export function LanguagesSection() {
   const [inputTranslation, setInputTranslation] = useAtom(configFieldsAtomMap.inputTranslation)
   const language = useAtomValue(configFieldsAtomMap.language)
