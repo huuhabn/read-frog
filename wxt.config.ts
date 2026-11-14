@@ -117,7 +117,7 @@ export default defineConfig({
   }),
   zip: {
     includeSources: ["**/*", ".env.production"],
-    excludeSources: ["docs/**/*", "assets/**/*", "repos/**/*", "readmes/**/*"],
+    excludeSources: ["docs/**/*", "assets/**/*", "repos/**/*"],
   },
   hooks: {
     // With local packages the bundle holds @read-frog/layout-engine's readable

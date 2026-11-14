@@ -41,7 +41,7 @@ export function SlashPromptPopover({
   return (
     <div
       data-testid="slash-prompt-popover"
-      className="absolute right-0 bottom-[calc(100%+8px)] left-0 z-30 flex animate-in flex-col overflow-hidden rounded-xl border border-border/80 bg-popover/95 text-popover-foreground shadow-2xl backdrop-blur-md duration-150 fade-in-0 zoom-in-95"
+      className="absolute right-2.5 bottom-[calc(100%+8px)] left-2.5 z-30 flex animate-in flex-col overflow-hidden rounded-xl border border-border/80 bg-popover/95 text-popover-foreground shadow-2xl backdrop-blur-md duration-150 fade-in-0 zoom-in-95"
     >
       {/* Header */}
       <div className="flex items-center justify-between border-b border-border/60 bg-muted/40 px-3 py-2 text-xs">
@@ -125,7 +125,7 @@ export function SlashPromptPopover({
                       {action.category}
                     </span>
                   </div>
-                  <p className="mt-0.5 line-clamp-1 text-[11px] leading-normal text-muted-foreground">
+                  <p className="mt-0.5 line-clamp-1 text-[11px] leading-normal">
                     {action.description}
                   </p>
                 </div>

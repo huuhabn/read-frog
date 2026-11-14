@@ -196,10 +196,7 @@ export function ChatInputBox({
         : `${i18n.t("sidePanel.chat.tabContextOff")} • ${activeTab.title || activeTab.url}`
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full min-w-0 border-t border-border/50 bg-background p-2.5"
-    >
+    <div ref={containerRef} className="relative w-full min-w-0 bg-background p-2.5">
       {/* Custom AI Actions Floating Popover */}
       {isSlashOpen && (
         <SlashPromptPopover
@@ -241,6 +238,24 @@ export function ChatInputBox({
               <Plus className="size-3.5" />
             </Button>
 
+            {/* Tab Context Icon Button */}
+            <button
+              type="button"
+              onClick={toggleTabContext}
+              disabled={isRestricted || !activeTab}
+              title={tabContextTooltip}
+              className={cn(
+                "flex h-6.5 cursor-pointer items-center gap-1 rounded-lg px-1.5 text-[11px] font-medium outline-hidden transition-all disabled:cursor-not-allowed disabled:opacity-40",
+                isRestricted
+                  ? "border border-dashed border-border/60 text-muted-foreground/60"
+                  : usePageContext
+                    ? "border border-primary/30 bg-primary/15 text-primary hover:bg-primary/25"
+                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
+              )}
+            >
+              <Globe className="size-3.5 shrink-0" />
+            </button>
+
             {/* Model Selector Dropdown */}
             <DropdownMenu>
               <DropdownMenuTrigger className="flex h-6.5 max-w-[150px] cursor-pointer items-center gap-1 rounded-lg px-2 text-xs font-medium text-foreground/85 outline-hidden transition-colors hover:bg-muted hover:text-foreground">
@@ -272,27 +287,6 @@ export function ChatInputBox({
                 )}
               </DropdownMenuContent>
             </DropdownMenu>
-
-            {/* Tab Context Icon Button */}
-            <button
-              type="button"
-              onClick={toggleTabContext}
-              disabled={isRestricted || !activeTab}
-              title={tabContextTooltip}
-              className={cn(
-                "flex h-6.5 cursor-pointer items-center gap-1 rounded-lg px-1.5 text-[11px] font-medium outline-hidden transition-all disabled:cursor-not-allowed disabled:opacity-40",
-                isRestricted
-                  ? "border border-dashed border-border/60 text-muted-foreground/60"
-                  : usePageContext
-                    ? "border border-primary/30 bg-primary/15 text-primary hover:bg-primary/25"
-                    : "text-muted-foreground hover:bg-muted hover:text-foreground",
-              )}
-            >
-              <Globe className="size-3.5 shrink-0" />
-              {usePageContext && !isRestricted && (
-                <span className="size-1.5 shrink-0 rounded-full bg-primary" />
-              )}
-            </button>
           </div>
 
           {/* Right Controls: Submit or Stop Button */}

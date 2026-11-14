@@ -4,7 +4,7 @@ The all-in-one AI Browser Assistant & Language Companion.<br/>
 Chat smarter on Telegram, Zalo, and Slack with AI auto-replies, draft winning Upwork proposals, navigate tabs in a blazing-fast Sider-style sidepanel, translate web pages and video subtitles, and learn vocabulary with FSRS flashcards.<br/>
 Supercharge your productivity and language mastery directly inside your browser.
 
-[![English][english-shield]](./README.md) [![Tiếng Việt][vietnamese-shield]](./readmes/README.vi.md)
+[![English][english-shield]](./README.md) [![Tiếng Việt][vietnamese-shield]](./docs/README.vi.md)
 
 [Official Website](https://www.readfrog.app/en?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [All Features](https://www.readfrog.app/en/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Tutorial](https://www.readfrog.app/en/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Changelog][github-release-link] · [Blog](https://www.readfrog.app/en/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en)
 
