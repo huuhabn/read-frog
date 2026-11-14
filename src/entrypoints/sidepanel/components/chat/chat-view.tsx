@@ -197,7 +197,10 @@ export function ChatView() {
       })
     }
 
-    updateTabContent()
+    // Defer initial page context extraction so the chat UI finishes initial paint smoothly
+    const initialTimer = setTimeout(() => {
+      if (isSubscribed) updateTabContent()
+    }, 250)
 
     const handleActivated = () => {
       updateTabContent()
@@ -214,6 +217,7 @@ export function ChatView() {
 
     return () => {
       isSubscribed = false
+      clearTimeout(initialTimer)
       browser.tabs?.onActivated?.removeListener(handleActivated)
       browser.tabs?.onUpdated?.removeListener(handleUpdated)
     }

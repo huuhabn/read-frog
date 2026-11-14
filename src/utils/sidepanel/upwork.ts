@@ -2,7 +2,6 @@ import type { ProviderConfig } from "@/types/config/provider"
 import type { UpworkConfig } from "@/types/config/upwork"
 import { browser } from "#imports"
 import { MICROSOFT_TRANSLATE_PROVIDER_ID } from "@/utils/constants/providers"
-import { executeTranslate } from "@/utils/host/translate/execute-translate"
 import { createLogger } from "@/utils/logging/logger"
 import { getTranslatePrompt } from "@/utils/prompts/translate"
 import { doesProviderSupportsCapability } from "@/utils/providers/provider-registry"
@@ -89,6 +88,7 @@ export async function translateTextWithProvider(
       targetCode: targetLang as any,
       level: "advanced" as const,
     }
+    const { executeTranslate } = await import("@/utils/host/translate/execute-translate")
     const res = await executeTranslate(text, langConfig, provider, getTranslatePrompt, {
       preserveLineBreaks: true,
     })
