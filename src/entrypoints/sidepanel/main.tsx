@@ -1,4 +1,5 @@
 performance.mark("sidepanel:script-start")
+performance.mark("script-start")
 
 import "@/utils/zod-config"
 import { createStore, Provider as JotaiProvider, useAtomValue } from "jotai"
@@ -28,10 +29,9 @@ initDocumentTheme()
 setupExtensionPageLogging("sidepanel")
 const log = createLogger("sidepanel")
 
-// Lazy-loaded Views to minimize critical bundle size
-const ChatView = lazy(() =>
-  import("./components/chat/chat-view").then((m) => ({ default: m.ChatView })),
-)
+// Eagerly initiate loading the default ChatView chunk in parallel with script startup to eliminate waterfall
+const chatViewPromise = import("./components/chat/chat-view")
+const ChatView = lazy(() => chatViewPromise.then((m) => ({ default: m.ChatView })))
 const WebChatView = lazy(() =>
   import("./components/web-chat/WebChatView").then((m) => ({ default: m.WebChatView })),
 )
@@ -110,12 +110,14 @@ function SidePanelShell() {
 
   useLayoutEffect(() => {
     performance.mark("sidepanel:first-commit")
+    performance.mark("first-commit")
     try {
       performance.measure(
         "sidepanel:time-to-first-commit",
         "sidepanel:script-start",
         "sidepanel:first-commit",
       )
+      performance.measure("time-to-first-commit", "script-start", "first-commit")
       const dataReadyMeasure = performance.getEntriesByName("sidepanel:time-to-data-ready")[0]
       const firstCommitMeasure = performance.getEntriesByName("sidepanel:time-to-first-commit")[0]
       log.info(
@@ -209,12 +211,14 @@ async function initApp() {
     }
 
     performance.mark("sidepanel:data-ready")
+    performance.mark("data-ready")
     try {
       performance.measure(
         "sidepanel:time-to-data-ready",
         "sidepanel:script-start",
         "sidepanel:data-ready",
       )
+      performance.measure("time-to-data-ready", "script-start", "data-ready")
       const m = performance.getEntriesByName("sidepanel:time-to-data-ready")[0]
       log.info(`[SidePanel Perf] data-ready in ${m?.duration.toFixed(1)}ms`)
     } catch {}

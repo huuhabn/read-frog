@@ -2,7 +2,7 @@ import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
 import type { ChatMessageItem as ChatMessageType } from "@/utils/db/dexie/tables/chat-session"
 import { useAtom, useAtomValue } from "jotai"
 import { Languages } from "lucide-react"
-import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { lazy, Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { browser } from "#imports"
 import { isLLMProviderConfig, type LLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
@@ -13,7 +13,6 @@ import {
   sidepanelNavTabAtom,
 } from "@/utils/atoms/sidepanel"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
-import { db } from "@/utils/db/dexie/db"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
@@ -39,9 +38,14 @@ import {
 } from "@/utils/sidepanel/upwork"
 import { ChatEmptyState, QUICK_PROMPT_KEYS } from "./chat-empty-state"
 import { ChatHeader } from "./chat-header"
-import { ChatHistoryDrawer } from "./chat-history-drawer"
 import { ChatInputBox } from "./chat-input-box"
 import { ChatMessageItem } from "./chat-message-item"
+
+const getDb = () => import("@/utils/db/dexie/db").then((m) => m.db)
+
+const ChatHistoryDrawer = lazy(() =>
+  import("./chat-history-drawer").then((m) => ({ default: m.ChatHistoryDrawer })),
+)
 
 const log = createLogger("sidepanel:chat")
 
@@ -145,10 +149,10 @@ export function ChatView() {
       })
     }
 
-    // Defer initial page context extraction so the chat UI finishes initial paint smoothly
+    // Defer initial page context extraction to post-paint frame so initial UI paints instantly
     const initialTimer = setTimeout(() => {
       if (isSubscribed) updateTabContent()
-    }, 250)
+    }, 0)
 
     const handleActivated = () => {
       updateTabContent()
@@ -175,15 +179,17 @@ export function ChatView() {
   useEffect(() => {
     let isSubscribed = true
     if (activeSessionId && loadedSessionIdRef.current !== activeSessionId) {
-      void db.chatSession.get(activeSessionId).then((session) => {
-        if (isSubscribed && session) {
-          loadedSessionIdRef.current = activeSessionId
-          setMessages(session.messages || [])
-          if (session.providerId && session.model) {
-            setSelectedModel({ providerId: session.providerId, model: session.model })
+      void getDb()
+        .then((database) => database.chatSession.get(activeSessionId))
+        .then((session) => {
+          if (isSubscribed && session) {
+            loadedSessionIdRef.current = activeSessionId
+            setMessages(session.messages || [])
+            if (session.providerId && session.model) {
+              setSelectedModel({ providerId: session.providerId, model: session.model })
+            }
           }
-        }
-      })
+        })
     }
     return () => {
       isSubscribed = false
@@ -236,7 +242,8 @@ export function ChatView() {
       setSelectedModel(next)
       await setLocalSelectedChatModel(next)
       if (activeSessionId) {
-        await db.chatSession.update(activeSessionId, {
+        const database = await getDb()
+        await database.chatSession.update(activeSessionId, {
           providerId,
           model,
           updatedAt: getTimestamp(),
@@ -325,12 +332,13 @@ export function ChatView() {
         )
 
         if (activeSessionId) {
-          const session = await db.chatSession.get(activeSessionId)
+          const database = await getDb()
+          const session = await database.chatSession.get(activeSessionId)
           if (session) {
             const updated = session.messages.map((m) =>
               m.id === msg.id ? { ...m, translatedContent: translated } : m,
             )
-            await db.chatSession.update(activeSessionId, { messages: updated })
+            await database.chatSession.update(activeSessionId, { messages: updated })
           }
         }
       }
@@ -390,7 +398,8 @@ export function ChatView() {
       setMessages(finalMsgs)
 
       if (currentId) {
-        await db.chatSession.put({
+        const database = await getDb()
+        await database.chatSession.put({
           id: currentId,
           title: rawText.slice(0, 35),
           providerId: selectedModel.providerId,
@@ -533,11 +542,12 @@ export function ChatView() {
 
     // Prepare session in Dexie
     let currentId = activeSessionId
+    const database = await getDb()
     if (!currentId) {
       currentId = crypto.randomUUID()
       loadedSessionIdRef.current = currentId
       setActiveSessionId(currentId)
-      await db.chatSession.add({
+      await database.chatSession.add({
         id: currentId,
         title: sessionTitle,
         providerId: selectedModel.providerId,
@@ -547,7 +557,7 @@ export function ChatView() {
         updatedAt: getTimestamp(),
       })
     } else {
-      await db.chatSession.update(currentId, {
+      await database.chatSession.update(currentId, {
         providerId: selectedModel.providerId,
         model: selectedModel.model,
         messages: updatedMessages,
@@ -708,7 +718,7 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
       })
 
       if (currentId) {
-        await db.chatSession.update(currentId, {
+        await database.chatSession.update(currentId, {
           messages: finalMessages,
           updatedAt: getTimestamp(),
         })
@@ -797,13 +807,17 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
       />
 
       {/* History Drawer Modal */}
-      <ChatHistoryDrawer
-        isOpen={isHistoryVisible}
-        currentSessionId={activeSessionId}
-        onClose={handleCloseHistory}
-        onSelectSession={(id) => setActiveSessionId(id)}
-        onNewChat={handleNewChat}
-      />
+      {isHistoryVisible && (
+        <Suspense fallback={null}>
+          <ChatHistoryDrawer
+            isOpen={isHistoryVisible}
+            currentSessionId={activeSessionId}
+            onClose={handleCloseHistory}
+            onSelectSession={(id) => setActiveSessionId(id)}
+            onNewChat={handleNewChat}
+          />
+        </Suspense>
+      )}
     </div>
   )
 }

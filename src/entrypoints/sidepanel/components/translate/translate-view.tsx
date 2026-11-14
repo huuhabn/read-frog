@@ -42,6 +42,7 @@ import {
 } from "../common/language-options"
 import { LanguageSelectorDropdown } from "../common/language-selector-dropdown"
 import { ModelSelectorDropdown } from "../common/model-selector-dropdown"
+import { SelectionSnippetCard } from "../common/selection-snippet-card"
 import { TranslationPreferencesPopover } from "./translation-preferences-popover"
 
 export { AUTO_DETECT_OPTION, POPULAR_LANGUAGES, type LanguageOption }
@@ -78,23 +79,38 @@ export function TranslateView() {
   const [isListening, setIsListening] = useState(false)
   const [isSpeaking, setIsSpeaking] = useState(false)
   const [statusNotice, setStatusNotice] = useState<string | null>(null)
+  const [dismissedSnippet, setDismissedSnippet] = useState<string | null>(null)
 
-  const { selectedSnippet } = useActiveTabSelection()
-  const lastInsertedSnippetRef = useRef<string | null>(null)
+  const { selectedSnippet, clearSelection } = useActiveTabSelection()
+
+  const currentSnippet =
+    selectedSnippet && selectedSnippet !== dismissedSnippet ? selectedSnippet : null
 
   const abortControllerRef = useRef<AbortController | null>(null)
   const recognitionRef = useRef<SpeechRecognitionInstance | null>(null)
   const textareaRef = useRef<HTMLTextAreaElement | null>(null)
 
-  // Auto-fill selected text into textarea when selecting text on page
-  useEffect(() => {
+  const handleClearSnippet = useCallback(() => {
     if (selectedSnippet) {
-      if (!sourceText.trim() || sourceText === lastInsertedSnippetRef.current) {
-        setSourceText(selectedSnippet)
-        lastInsertedSnippetRef.current = selectedSnippet
-      }
+      setDismissedSnippet(selectedSnippet)
     }
-  }, [selectedSnippet, sourceText])
+    clearSelection()
+  }, [clearSelection, selectedSnippet])
+
+  const handleInsertSnippet = useCallback(() => {
+    if (currentSnippet) {
+      setDismissedSnippet(currentSnippet)
+      setSourceText(currentSnippet)
+      clearSelection()
+      setTimeout(() => {
+        textareaRef.current?.focus()
+      }, 0)
+    }
+  }, [clearSelection, currentSnippet])
+
+  const handleClearSourceText = useCallback(() => {
+    setSourceText("")
+  }, [])
 
   // Filter available LLM providers
   const llmProviders = useMemo(
@@ -289,7 +305,7 @@ export function TranslateView() {
   }, [])
 
   const handleTranslate = async () => {
-    const textToTranslate = sourceText.trim()
+    const textToTranslate = sourceText.trim() || currentSnippet?.trim() || ""
     if (!textToTranslate || isTranslating) return
 
     setTranslatedText("")
@@ -347,7 +363,7 @@ export function TranslateView() {
   }
 
   const isCustom = !isDefaultPreferences(preferences)
-  const canTranslate = Boolean(sourceText.trim())
+  const canTranslate = Boolean(sourceText.trim() || currentSnippet?.trim())
 
   return (
     <div className="flex h-full flex-col bg-background text-foreground antialiased selection:bg-primary/20">
@@ -401,7 +417,7 @@ export function TranslateView() {
               type="button"
               onClick={handleSwapLanguages}
               aria-label="Swap languages"
-              className="flex size-7 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-hidden transition-colors hover:bg-muted hover:text-foreground"
+              className="flex size-4 cursor-pointer items-center justify-center rounded-full text-muted-foreground outline-hidden transition-colors hover:bg-muted hover:text-foreground"
               title="Swap languages"
             >
               <ArrowLeftRight className="size-3.5" />
@@ -421,6 +437,15 @@ export function TranslateView() {
             </div>
           </div>
 
+          {/* Selection Snippet Card */}
+          {currentSnippet && (
+            <SelectionSnippetCard
+              text={currentSnippet}
+              onClear={handleClearSnippet}
+              onInsert={handleInsertSnippet}
+            />
+          )}
+
           {/* Source Textarea */}
           <div className="relative">
             <Textarea
@@ -436,7 +461,7 @@ export function TranslateView() {
             {sourceText && (
               <button
                 type="button"
-                onClick={() => setSourceText("")}
+                onClick={handleClearSourceText}
                 className="absolute top-1 right-1 flex size-5 cursor-pointer items-center justify-center rounded-full text-muted-foreground/60 transition-colors hover:bg-muted hover:text-foreground"
                 title="Clear text"
               >
@@ -461,9 +486,11 @@ export function TranslateView() {
               >
                 {isListening ? <MicOff className="size-3.5" /> : <Mic className="size-3.5" />}
               </button>
-              {sourceText && (
+              {(sourceText.trim() || currentSnippet?.trim()) && (
                 <span className="text-[10px] text-muted-foreground">
-                  {i18n.t("sidePanel.translate.charsCount", [sourceText.length])}
+                  {i18n.t("sidePanel.translate.charsCount", [
+                    (sourceText.trim() || currentSnippet?.trim() || "").length,
+                  ])}
                 </span>
               )}
             </div>

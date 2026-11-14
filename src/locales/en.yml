@@ -115,7 +115,7 @@ sidePanel:
   translate:
     title: Quick Translate
     pasteSelection: Paste selection
-    autoDetect: Auto-detect language
+    autoDetect: Auto detect
     charsCount: "$1 characters"
     placeholder: "Enter text to translate..."
     translateTo: "Translate to:"

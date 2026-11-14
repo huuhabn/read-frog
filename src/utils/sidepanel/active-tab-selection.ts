@@ -11,6 +11,7 @@ import { getActiveTabSelectedText } from "./page-context"
 export function useActiveTabSelection() {
   const [selectedSnippet, setSelectedSnippet] = useState<string | null>(null)
   const dismissedRef = useRef<string | null>(null)
+  const currentSnippetRef = useRef<string | null>(null)
 
   useEffect(() => {
     let isSubscribed = true
@@ -23,11 +24,9 @@ export function useActiveTabSelection() {
         const trimmed = text.trim()
         if (trimmed) {
           if (trimmed !== dismissedRef.current) {
+            currentSnippetRef.current = trimmed
             setSelectedSnippet(trimmed)
           }
-        } else if (dismissedRef.current) {
-          // Reset dismissed tracking when page selection is cleared
-          dismissedRef.current = null
         }
       })
     }
@@ -43,6 +42,7 @@ export function useActiveTabSelection() {
 
     const handleTabActivated = () => {
       dismissedRef.current = null
+      currentSnippetRef.current = null
       checkSelection()
     }
 
@@ -59,9 +59,11 @@ export function useActiveTabSelection() {
   }, [])
 
   const clearSelection = useCallback(() => {
-    if (selectedSnippet) {
-      dismissedRef.current = selectedSnippet
+    const toDismiss = currentSnippetRef.current || selectedSnippet
+    if (toDismiss) {
+      dismissedRef.current = toDismiss
     }
+    currentSnippetRef.current = null
     setSelectedSnippet(null)
   }, [selectedSnippet])
 

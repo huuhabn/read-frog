@@ -71,7 +71,7 @@ export function ModelSelectorDropdown({
   const triggerVariants = {
     subtle:
       "flex h-6.5 max-w-[180px] cursor-pointer items-center gap-1.5 rounded-lg px-2 text-xs font-medium text-foreground/85 outline-hidden transition-colors hover:bg-muted hover:text-foreground",
-    pill: "flex h-8 items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-3 text-xs font-medium text-foreground outline-hidden transition-colors hover:bg-muted/70",
+    pill: "flex h-8 items-center gap-1.5 rounded-full border border-border/60 bg-muted/30 px-2 text-xs font-medium text-foreground outline-hidden transition-colors hover:bg-muted/70",
     compact: cn(
       "flex h-6.5 shrink-0 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden",
       selectedProviderId && "border-primary/30 text-foreground",

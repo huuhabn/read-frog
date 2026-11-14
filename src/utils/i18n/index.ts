@@ -3,7 +3,13 @@ import type { SupportedUiLocale } from "./resources"
 import type { UiLanguage } from "@/types/config/config"
 import i18next, { changeLanguage, getFixedT, init, t as translate } from "i18next"
 import { resolveUiLocale } from "./locale-map"
-import { DEFAULT_UI_LOCALE, resources, SUPPORTED_UI_LOCALES } from "./resources"
+import {
+  DEFAULT_UI_LOCALE,
+  isLocaleLoaded,
+  loadLocaleResource,
+  resources,
+  SUPPORTED_UI_LOCALES,
+} from "./resources"
 
 /**
  * Runtime-switchable i18n facade.
@@ -78,8 +84,27 @@ const I18NEXT_OPTIONS = {
  * (background, popup, options, each content script) after config is loaded, before render.
  * Idempotent — a second call just switches the language if it differs.
  */
+function checkLocaleLoaded(lng: SupportedUiLocale): boolean {
+  if (typeof isLocaleLoaded === "function") {
+    return isLocaleLoaded(lng)
+  }
+  return Boolean((resources as Record<string, unknown>)?.[lng])
+}
+
 export async function initI18n(uiLanguage: UiLanguage = "auto"): Promise<void> {
   const lng = resolveUiLocale(uiLanguage)
+  if (
+    lng !== DEFAULT_UI_LOCALE &&
+    !checkLocaleLoaded(lng) &&
+    typeof loadLocaleResource === "function"
+  ) {
+    try {
+      const tree = await loadLocaleResource(lng)
+      if (!i18next.hasResourceBundle(lng, "translation")) {
+        i18next.addResourceBundle(lng, "translation", tree, true, true)
+      }
+    } catch {}
+  }
   if (initialized) {
     if (i18next.language !== lng) {
       await changeLanguage(lng)
@@ -90,9 +115,22 @@ export async function initI18n(uiLanguage: UiLanguage = "auto"): Promise<void> {
   await init({ ...I18NEXT_OPTIONS, lng })
 }
 
-/** Switch the active UI language (synchronous with bundled resources). */
+/** Switch the active UI language (synchronous with bundled resources, or after fetching dynamic bundle). */
 export async function setUiLanguage(uiLanguage: UiLanguage): Promise<void> {
-  await changeLanguage(resolveUiLocale(uiLanguage))
+  const lng = resolveUiLocale(uiLanguage)
+  if (
+    lng !== DEFAULT_UI_LOCALE &&
+    !checkLocaleLoaded(lng) &&
+    typeof loadLocaleResource === "function"
+  ) {
+    try {
+      const tree = await loadLocaleResource(lng)
+      if (!i18next.hasResourceBundle(lng, "translation")) {
+        i18next.addResourceBundle(lng, "translation", tree, true, true)
+      }
+    } catch {}
+  }
+  await changeLanguage(lng)
 }
 
 /**
@@ -127,5 +165,13 @@ export function formatUiList(items: readonly string[]): string {
  * model's notes on it. For keys without substitutions.
  */
 export function translateIn(locale: SupportedUiLocale, key: I18nKey): string {
-  return getFixedT(locale)(key)
+  if (isLocaleLoaded(locale) || locale === DEFAULT_UI_LOCALE) {
+    return getFixedT(locale)(key)
+  }
+  void loadLocaleResource(locale).then((tree) => {
+    if (!i18next.hasResourceBundle(locale, "translation")) {
+      i18next.addResourceBundle(locale, "translation", tree, true, true)
+    }
+  })
+  return getFixedT(DEFAULT_UI_LOCALE)(key)
 }

@@ -6,6 +6,8 @@ vi.unmock("@/utils/i18n")
 
 vi.mock("@/utils/i18n/resources", async () => ({
   ...(await vi.importActual<typeof import("@/utils/i18n/locales")>("@/utils/i18n/locales")),
+  isLocaleLoaded: () => true,
+  loadLocaleResource: async () => ({}),
   resources: {
     en: {
       translation: {

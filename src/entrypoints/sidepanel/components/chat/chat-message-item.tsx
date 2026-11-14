@@ -1,10 +1,14 @@
 import type { ChatMessageItem as ChatMessageType } from "@/utils/db/dexie/tables/chat-session"
 import { Icon } from "@iconify/react"
 import { Check, Copy, Languages } from "lucide-react"
-import { MarkdownRenderer } from "@/components/markdown-renderer"
+import { lazy, Suspense } from "react"
 import { Button } from "@/components/ui/base-ui/button"
 import { i18n } from "@/utils/i18n"
 import { cn } from "@/utils/styles/utils"
+
+const MarkdownRenderer = lazy(() =>
+  import("@/components/markdown-renderer").then((m) => ({ default: m.MarkdownRenderer })),
+)
 
 export interface ChatMessageItemProps {
   message: ChatMessageType
@@ -121,10 +125,18 @@ export function ChatMessageItem({
       {/* Assistant Answer Bubble */}
       <div className="max-w-[92%] min-w-0 rounded-2xl rounded-tl-xs border border-border/50 bg-muted/40 px-3.5 py-2 text-xs leading-relaxed [overflow-wrap:anywhere] break-words text-foreground">
         {message.content ? (
-          <MarkdownRenderer
-            content={displayedAssistantContent}
-            className="max-w-full min-w-0 [overflow-wrap:anywhere] break-words"
-          />
+          <Suspense
+            fallback={
+              <div className="max-w-full min-w-0 [overflow-wrap:anywhere] break-words whitespace-pre-wrap">
+                {displayedAssistantContent}
+              </div>
+            }
+          >
+            <MarkdownRenderer
+              content={displayedAssistantContent}
+              className="max-w-full min-w-0 [overflow-wrap:anywhere] break-words"
+            />
+          </Suspense>
         ) : isStreaming && isLast ? (
           <div className="flex items-center gap-1.5 py-1 text-muted-foreground">
             <span className="size-1.5 animate-pulse rounded-full bg-primary" />
