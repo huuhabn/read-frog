@@ -766,6 +766,7 @@ export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG.jalapenocloud,
   DEFAULT_PROVIDER_CONFIG.ifapi,
   DEFAULT_PROVIDER_CONFIG.deepseek,
+  DEFAULT_PROVIDER_CONFIG.google,
 ]
 
 /** Resolve a provider's default description in the active interface language. */

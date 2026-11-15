@@ -76,6 +76,7 @@ describe("dEFAULT_CONFIG", () => {
       "jalapenocloud-default",
       "ifapi-default",
       "deepseek-default",
+      "google-default",
     ])
     expect(DEFAULT_CONFIG.pageTranslation.providerId).toBe("microsoft-translate-default")
     expect(DEFAULT_CONFIG.selectionToolbar.features.translate.providerId).toBe(
@@ -116,6 +117,18 @@ describe("dEFAULT_CONFIG", () => {
           isCustomModel: false,
           customModel: null,
         },
+      }),
+    )
+    expect(
+      DEFAULT_CONFIG.providersConfig.find((provider) => provider.id === "google-default"),
+    ).toEqual(
+      expect.objectContaining({
+        model: {
+          model: "gemini-3.5-flash-lite",
+          isCustomModel: false,
+          customModel: null,
+        },
+        reasoning: "none",
       }),
     )
   })
