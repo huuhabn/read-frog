@@ -432,10 +432,10 @@ describe("feature providers", () => {
       const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
         "deleted-provider",
         config,
-        [getProviderById("jalapenocloud-default")],
+        [getProviderById("google-default")],
       )
 
-      expect(result?.builtInActions.dictionary.providerId).toBe("jalapenocloud-default")
+      expect(result?.builtInActions.dictionary.providerId).toBe("google-default")
       expect(result?.customActions).toEqual([])
     })
 
@@ -454,14 +454,14 @@ describe("feature providers", () => {
       const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
         "deleted-provider",
         config,
-        [getProviderById("jalapenocloud-default")],
+        [getProviderById("google-default")],
       )
 
       expect(result?.builtInActions).toEqual({
         dictionary: DEFAULT_CONFIG.selectionToolbar.builtInActions.dictionary,
         sentenceAnalysis: {
           enabled: false,
-          providerId: "jalapenocloud-default",
+          providerId: "google-default",
           notebaseConnection: undefined,
         },
         improveWriting: DEFAULT_CONFIG.selectionToolbar.builtInActions.improveWriting,
@@ -500,7 +500,7 @@ describe("feature providers", () => {
           ...getProviderById("openai-default"),
           enabled: false,
         },
-        getProviderById("jalapenocloud-default"),
+        getProviderById("google-default"),
       ]
 
       const result = computeSelectionToolbarCustomActionFallbacksAfterDeletion(
@@ -512,7 +512,7 @@ describe("feature providers", () => {
       expect(result?.customActions).toEqual([
         expect.objectContaining({
           id: "action-a",
-          providerId: "jalapenocloud-default",
+          providerId: "google-default",
         }),
       ])
     })
@@ -584,7 +584,7 @@ describe("feature providers", () => {
       const result = resolveLanguageDetectionConfigForModeChange(
         {
           mode: "basic",
-          providerId: "jalapenocloud-default",
+          providerId: "google-default",
         },
         "llm",
         DEFAULT_CONFIG.providersConfig,
@@ -592,7 +592,7 @@ describe("feature providers", () => {
 
       expect(result).toEqual({
         mode: "llm",
-        providerId: "jalapenocloud-default",
+        providerId: "google-default",
       })
     })
 
@@ -606,7 +606,7 @@ describe("feature providers", () => {
             enabled: false,
           },
           {
-            ...getProviderById("jalapenocloud-default"),
+            ...getProviderById("google-default"),
             enabled: false,
           },
         ],
@@ -634,10 +634,10 @@ describe("feature providers", () => {
           ...getProviderById("openai-default"),
           enabled: false,
         },
-        getProviderById("jalapenocloud-default"),
+        getProviderById("google-default"),
       ])
 
-      expect(result).toBe("jalapenocloud-default")
+      expect(result).toBe("google-default")
     })
   })
 })

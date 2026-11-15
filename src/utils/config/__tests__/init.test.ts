@@ -99,12 +99,7 @@ describe("initializeConfig", () => {
     expect(setItemMock).toHaveBeenCalledTimes(1)
     expect(setItemMock).toHaveBeenCalledWith("local:config", expect.any(Object))
     const freshConfig = setItemMock.mock.calls[0]?.[1] as Config
-    for (const providerId of [
-      "openai-default",
-      "jalapenocloud-default",
-      "deepseek-default",
-      "google-default",
-    ]) {
+    for (const providerId of ["openai-default", "google-default"]) {
       expect(freshConfig.providersConfig.find((provider) => provider.id === providerId)).toEqual(
         expect.objectContaining({ description: expect.any(String) }),
       )

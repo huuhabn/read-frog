@@ -763,9 +763,6 @@ export const DEFAULT_PROVIDER_CONFIG_LIST: ProvidersConfig = [
   DEFAULT_PROVIDER_CONFIG["google-translate"],
   DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
   DEFAULT_PROVIDER_CONFIG.openai,
-  DEFAULT_PROVIDER_CONFIG.jalapenocloud,
-  DEFAULT_PROVIDER_CONFIG.ifapi,
-  DEFAULT_PROVIDER_CONFIG.deepseek,
   DEFAULT_PROVIDER_CONFIG.google,
 ]
 
