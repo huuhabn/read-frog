@@ -149,6 +149,42 @@ export function AuditLogDetailModal({ isOpen, onClose, log }: AuditLogDetailModa
             </div>
           )}
 
+          {log.gateway && (
+            <div className="rounded-lg border border-border/80 bg-muted/20 p-3">
+              <div className="flex items-center justify-between border-b border-border/40 pb-2">
+                <span className="flex items-center gap-1.5 font-semibold text-foreground">
+                  <Icon icon="tabler:route" className="size-4 text-primary" />
+                  Gateway route
+                </span>
+                {log.gateway.fallbackUsed && <Badge variant="secondary">Fallback used</Badge>}
+              </div>
+              <div className="mt-2 grid gap-1 text-[11px] text-muted-foreground">
+                <span>
+                  Selected: {log.gateway.selectedProviderId}
+                  {log.gateway.selectedModel ? ` (${log.gateway.selectedModel})` : ""}
+                </span>
+                <span>Operation: {log.gateway.operation}</span>
+              </div>
+              <div className="mt-3 space-y-1.5">
+                {log.gateway.attempts.map((attempt, index) => (
+                  <div
+                    key={`${attempt.providerId}-${attempt.model ?? "default"}-${attempt.status}-${attempt.latencyMs}-${attempt.errorCode ?? "none"}`}
+                    className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-border/50 px-2 py-1.5 font-mono text-[10px]"
+                  >
+                    <span>
+                      {index + 1}. {attempt.providerId}
+                      {attempt.model ? `/${attempt.model}` : ""}
+                    </span>
+                    <span className="text-muted-foreground">
+                      {attempt.status}
+                      {attempt.errorCode ? ` · ${attempt.errorCode}` : ""} · {attempt.latencyMs} ms
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* System Prompt Section */}
           {log.systemPrompt && (
             <div className="rounded-lg border border-border/80 bg-muted/30 p-3">

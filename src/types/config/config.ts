@@ -18,6 +18,7 @@ import {
   getProviderIdsForCapability,
 } from "@/utils/providers/provider-registry"
 import { normalizeSelectionToolbarLists } from "@/utils/selection-toolbar-order"
+import { aiGatewayConfigSchema } from "./ai-gateway"
 import { auditLogConfigSchema } from "./audit-log"
 import { floatingButtonSchema } from "./floating-button"
 import { glossaryConfigSchema } from "./glossary"
@@ -208,6 +209,7 @@ export const configSchema = z
   .object({
     language: languageSchema,
     providersConfig: providersConfigSchema,
+    aiGateway: aiGatewayConfigSchema,
     pageTranslation: translateConfigSchema,
     languageDetection: languageDetectionConfigSchema,
     tts: ttsConfigSchema,

@@ -17,12 +17,16 @@ export async function runGenerateTextInBackground(
     validateProviderHostedFeature(providerRef, payload.hostedFeature)
   }
   let usage: BackgroundGenerateTextResponse["usage"]
+  let gateway: BackgroundGenerateTextResponse["gateway"]
   const text = await generateTextForProviderRef(payload, {
     onUsage: (captured) => {
       usage = captured
     },
+    onGateway: (metadata) => {
+      gateway = metadata
+    },
   })
-  return { text, usage }
+  return { text, usage, gateway }
 }
 
 export function setupLLMGenerateTextMessageHandlers() {

@@ -1,3 +1,4 @@
+import type { GatewayAuditMetadata } from "@/utils/ai-gateway/types"
 import { Entity } from "dexie"
 
 export interface AuditLogMessage {
@@ -30,6 +31,7 @@ export interface AuditLogItem {
   status: "success" | "error" | "aborted"
   errorMessage?: string
   tokenUsage?: AuditLogTokenUsage
+  gateway?: GatewayAuditMetadata
   rawPayload?: Record<string, unknown>
 }
 
@@ -69,6 +71,8 @@ export default class AuditLog extends Entity implements AuditLogItem {
   errorMessage?: string
 
   tokenUsage?: AuditLogTokenUsage
+
+  gateway?: GatewayAuditMetadata
 
   rawPayload?: Record<string, unknown>
 }

@@ -74,6 +74,28 @@ export interface GatewayRouteCandidate {
   cooldownUntil?: number
 }
 
+export interface GatewayAttemptAudit {
+  providerId: string
+  model?: string
+  status: "success" | "error" | "aborted"
+  errorCode?: GatewayErrorCode
+  latencyMs: number
+  estimatedCostUsd?: number
+}
+
+export interface GatewayAuditMetadata {
+  operation: GatewayOperation
+  selectedProviderId: string
+  selectedModel?: string
+  fallbackUsed: boolean
+  estimatedCostUsd?: number
+  attempts: GatewayAttemptAudit[]
+}
+
+export interface GatewayAttemptObserver {
+  onAttemptComplete?(attempt: GatewayAttemptAudit): void
+}
+
 export interface GatewayAttempt<T> {
   candidate: GatewayRouteCandidate
   execute: (signal: AbortSignal) => Promise<T>

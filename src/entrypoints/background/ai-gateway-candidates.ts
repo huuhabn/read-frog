@@ -6,6 +6,13 @@ function providerId(ref: PromptableProviderRef): string {
   return ref.kind === "system" ? ref.providerId : ref.config.id
 }
 
+function modelId(ref: PromptableProviderRef): string | undefined {
+  if (ref.kind === "system") return undefined
+  const model = ref.config.model
+  if (typeof model === "string") return model
+  return model?.customModel || model?.model
+}
+
 export interface BackgroundGenerateTextCandidate {
   candidate: GatewayRouteCandidate
   providerRef: PromptableProviderRef
@@ -32,6 +39,7 @@ export function buildBackgroundGenerateTextCandidates(
         candidate: {
           routeId,
           providerId: id,
+          model: modelId(providerRef),
           operations: ["text.generate"],
           enabled: true,
           configurationOrder,

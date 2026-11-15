@@ -128,6 +128,51 @@ describe("audit-log-service", () => {
     expect(mockState.logs[0]?.status).toBe("success")
   })
 
+  it("stores only allowlisted gateway diagnostics", async () => {
+    await recordAuditLog({
+      sourceFeature: "Web Chat",
+      providerId: "fallback",
+      providerType: "llm",
+      prompt: "Hello",
+      latencyMs: 10,
+      status: "success",
+      gateway: {
+        operation: "text.generate",
+        selectedProviderId: "fallback",
+        fallbackUsed: true,
+        attempts: [
+          {
+            providerId: "primary",
+            status: "error",
+            errorCode: "network",
+            latencyMs: 5,
+            apiKey: "must-not-be-stored",
+          } as never,
+        ],
+        headers: { Authorization: "must-not-be-stored" },
+      } as never,
+    })
+
+    expect(mockState.logs[0]?.gateway).toEqual({
+      operation: "text.generate",
+      selectedProviderId: "fallback",
+      selectedModel: undefined,
+      fallbackUsed: true,
+      estimatedCostUsd: undefined,
+      attempts: [
+        {
+          providerId: "primary",
+          model: undefined,
+          status: "error",
+          errorCode: "network",
+          latencyMs: 5,
+          estimatedCostUsd: undefined,
+        },
+      ],
+    })
+    expect(JSON.stringify(mockState.logs[0]?.gateway)).not.toContain("must-not-be-stored")
+  })
+
   it("filters logs by query, provider, and status", async () => {
     mockState.logs = [
       {

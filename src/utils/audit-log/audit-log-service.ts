@@ -1,3 +1,4 @@
+import type { GatewayAuditMetadata } from "@/utils/ai-gateway/types"
 import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { getLocalConfig } from "@/utils/config/storage"
 import { BUILT_IN_AI_PROVIDER_IDS } from "@/utils/constants/provider-ids"
@@ -6,6 +7,27 @@ import { sendMessage } from "@/utils/message"
 import { getBuiltInAiProviderName } from "@/utils/providers/provider-registry"
 
 export type AuditLogEntryInput = Omit<AuditLogItem, "id" | "createdAt">
+
+function sanitizeGatewayMetadata(
+  gateway: GatewayAuditMetadata | undefined,
+): GatewayAuditMetadata | undefined {
+  if (!gateway) return undefined
+  return {
+    operation: gateway.operation,
+    selectedProviderId: gateway.selectedProviderId,
+    selectedModel: gateway.selectedModel,
+    fallbackUsed: gateway.fallbackUsed,
+    estimatedCostUsd: gateway.estimatedCostUsd,
+    attempts: gateway.attempts.map((attempt) => ({
+      providerId: attempt.providerId,
+      model: attempt.model,
+      status: attempt.status,
+      errorCode: attempt.errorCode,
+      latencyMs: attempt.latencyMs,
+      estimatedCostUsd: attempt.estimatedCostUsd,
+    })),
+  }
+}
 
 export async function recordAuditLog(entry: AuditLogEntryInput): Promise<string | null> {
   try {
@@ -29,7 +51,11 @@ export async function recordAuditLog(entry: AuditLogEntryInput): Promise<string 
       )
         ? getBuiltInAiProviderName(entry.providerId as (typeof BUILT_IN_AI_PROVIDER_IDS)[number])
         : config.providersConfig?.find((provider) => provider.id === entry.providerId)?.name)
-    const normalizedEntry = { ...entry, providerName }
+    const normalizedEntry = {
+      ...entry,
+      providerName,
+      gateway: sanitizeGatewayMetadata(entry.gateway),
+    }
 
     if (!isExtensionContext) {
       try {

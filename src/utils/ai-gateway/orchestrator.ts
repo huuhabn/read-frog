@@ -1,5 +1,21 @@
-import type { GatewayAttempt, GatewayErrorCode, GatewayStreamAttempt } from "./types"
+import type {
+  GatewayAttempt,
+  GatewayAttemptObserver,
+  GatewayErrorCode,
+  GatewayStreamAttempt,
+} from "./types"
 import { GatewayError } from "./types"
+
+function notifyAttempt(
+  observer: GatewayAttemptObserver,
+  attempt: Parameters<NonNullable<GatewayAttemptObserver["onAttemptComplete"]>>[0],
+) {
+  try {
+    observer.onAttemptComplete?.(attempt)
+  } catch {
+    // Diagnostics must never change routing or provider execution semantics.
+  }
+}
 
 function abortError(signal: AbortSignal): GatewayError {
   return new GatewayError("aborted", "AI gateway request was aborted", { cause: signal.reason })
@@ -43,6 +59,7 @@ export function isGatewayErrorRetryable(error: GatewayError): boolean {
 export async function executeGatewayAttempts<T>(
   attempts: readonly GatewayAttempt<T>[],
   signal: AbortSignal,
+  observer: GatewayAttemptObserver = {},
 ): Promise<T> {
   if (signal.aborted) throw abortError(signal)
   if (attempts.length === 0) throw new GatewayError("unsupported", "No compatible AI route")
@@ -50,10 +67,27 @@ export async function executeGatewayAttempts<T>(
   let lastError: GatewayError | undefined
   for (const attempt of attempts.slice(0, 3)) {
     if (signal.aborted) throw abortError(signal)
+    const startedAt = performance.now()
     try {
-      return await attempt.execute(signal)
+      const result = await attempt.execute(signal)
+      notifyAttempt(observer, {
+        providerId: attempt.candidate.providerId,
+        model: attempt.candidate.model,
+        status: "success",
+        latencyMs: Math.round(performance.now() - startedAt),
+        estimatedCostUsd: attempt.candidate.estimatedCostUsd,
+      })
+      return result
     } catch (error) {
       lastError = normalizeGatewayError(error, signal)
+      notifyAttempt(observer, {
+        providerId: attempt.candidate.providerId,
+        model: attempt.candidate.model,
+        status: lastError.code === "aborted" ? "aborted" : "error",
+        errorCode: lastError.code,
+        latencyMs: Math.round(performance.now() - startedAt),
+        estimatedCostUsd: attempt.candidate.estimatedCostUsd,
+      })
       if (!isGatewayErrorRetryable(lastError)) throw lastError
     }
   }

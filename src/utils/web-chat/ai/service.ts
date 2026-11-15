@@ -1,5 +1,6 @@
 import type { ChatMessage } from "../adapter/types"
 import type { LLMProviderConfig } from "@/types/config/provider"
+import type { GatewayAuditMetadata } from "@/utils/ai-gateway/types"
 import type { AuditLogTokenUsage } from "@/utils/db/dexie/tables/audit-log"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { recordAuditLog } from "@/utils/audit-log/audit-log-service"
@@ -117,22 +118,30 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
   let errorMessage: string | undefined
   let outputText = ""
   let tokenUsage: AuditLogTokenUsage | undefined
+  let gateway: GatewayAuditMetadata | undefined
 
   const fullSystemPrompt = rules?.trim()
     ? `${systemPrompt}\n\nStrict Rules you MUST follow:\n${rules.trim()}`
     : systemPrompt
 
   try {
+    const gatewayConfig = config?.aiGateway
+    const excludedProviderIds = new Set(gatewayConfig?.excludedProviderIds ?? [])
+    const automaticRoutingEnabled = gatewayConfig?.enabled ?? true
     const fallbackProviderRefs = (config?.providersConfig ?? [])
       .filter(
         (candidate): candidate is LLMProviderConfig =>
-          candidate.enabled && candidate.id !== targetProviderId && isLLMProviderConfig(candidate),
+          automaticRoutingEnabled &&
+          candidate.enabled &&
+          candidate.id !== targetProviderId &&
+          !excludedProviderIds.has(candidate.id) &&
+          isLLMProviderConfig(candidate),
       )
       .map((candidate) => ({ kind: "local" as const, config: candidate }))
     const response = await sendMessage("backgroundGenerateText", {
       providerRef: { kind: "local", config: providerConfig },
       fallbackProviderRefs,
-      maxGatewayAttempts: 3,
+      maxGatewayAttempts: automaticRoutingEnabled ? (gatewayConfig?.maxAttempts ?? 3) : 1,
       skipAudit: true,
       instructions: fullSystemPrompt,
       prompt: processedPrompt,
@@ -141,6 +150,7 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
     })
 
     outputText = response.text || ""
+    gateway = response.gateway
 
     if (response.usage) {
       const u = response.usage as Record<string, unknown>
@@ -200,10 +210,13 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
     void recordAuditLog({
       sourceFeature,
       url: currentUrl,
-      providerId: targetProviderId,
-      providerName: providerConfig?.name,
+      providerId: gateway?.selectedProviderId ?? targetProviderId,
+      providerName:
+        config?.providersConfig.find(
+          (candidate) => candidate.id === (gateway?.selectedProviderId ?? targetProviderId),
+        )?.name ?? providerConfig?.name,
       providerType: "llm",
-      model: modelName,
+      model: gateway?.selectedModel ?? modelName,
       systemPrompt,
       prompt: userPrompt,
       messages: [
@@ -219,10 +232,11 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
       status,
       errorMessage,
       tokenUsage,
+      gateway,
       rawPayload: {
         sourceFeature,
-        providerId: targetProviderId,
-        model: modelName,
+        providerId: gateway?.selectedProviderId ?? targetProviderId,
+        model: gateway?.selectedModel ?? modelName,
         url: currentUrl,
         latencyMs,
         status,

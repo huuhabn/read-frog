@@ -42,6 +42,8 @@ import {
   executeGatewayAttempts,
   GatewayError,
   planGatewayRoutes,
+  type GatewayAttemptAudit,
+  type GatewayAuditMetadata,
   type GatewayRouteCandidate,
 } from "@/utils/ai-gateway"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
@@ -980,6 +982,7 @@ export async function generateTextForProviderRef(
   options: {
     signal?: AbortSignal
     onUsage?: (usage: AuditLogTokenUsage | undefined) => void
+    onGateway?: (gateway: GatewayAuditMetadata) => void
   } = {},
 ): Promise<string> {
   const { hostedFeature, instructions, prompt, requestId, maxRetries } = payload
@@ -995,6 +998,8 @@ export async function generateTextForProviderRef(
   let outputText = ""
   let capturedUsage: AuditLogTokenUsage | undefined
   let selectedProviderRef = payload.providerRef
+  const gatewayAttempts: GatewayAttemptAudit[] = []
+  let gatewayMetadata: GatewayAuditMetadata | undefined
 
   try {
     const candidates = buildBackgroundGenerateTextCandidates(payload)
@@ -1060,6 +1065,9 @@ export async function generateTextForProviderRef(
         },
       })),
       signal ?? new AbortController().signal,
+      {
+        onAttemptComplete: (attempt) => gatewayAttempts.push(attempt),
+      },
     )
     options.onUsage?.(capturedUsage)
     return outputText
@@ -1088,6 +1096,15 @@ export async function generateTextForProviderRef(
         ? hostedFeature || "Hosted Text Generation"
         : "Local Text Generation"
 
+    gatewayMetadata = {
+      operation: "text.generate",
+      selectedProviderId: providerId,
+      selectedModel: modelName,
+      fallbackUsed: gatewayAttempts.length > 1,
+      attempts: gatewayAttempts,
+    }
+    options.onGateway?.(gatewayMetadata)
+
     if (!payload.skipAudit)
       void recordAuditLog({
         sourceFeature: featureName,
@@ -1098,6 +1115,7 @@ export async function generateTextForProviderRef(
         prompt,
         messages: [{ role: "user", content: prompt }],
         tokenUsage: capturedUsage,
+        gateway: gatewayMetadata,
         responseOutput: outputText,
         latencyMs: Math.round(performance.now() - startTime),
         status,

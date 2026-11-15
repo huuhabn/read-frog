@@ -6,6 +6,7 @@ import type {
 } from "@/types/config/selection-toolbar"
 import type { PageTranslateRange } from "@/types/config/translate"
 import { DEFAULT_LAYOUT } from "@read-frog/layout-engine/presets"
+import { DEFAULT_AI_GATEWAY_CONFIG } from "@/types/config/ai-gateway"
 import { DEFAULT_AUDIT_LOG_CONFIG } from "@/types/config/audit-log"
 import { DEFAULT_SIDE_PANEL_SHORTCUT_KEY } from "@/types/config/side-panel"
 import { DEFAULT_UPWORK_CONFIG } from "@/types/config/upwork"
@@ -83,7 +84,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 export const THEME_STORAGE_KEY = "theme"
 export const SIDEPANEL_CHAT_MODEL_STORAGE_KEY = "sidepanelChatModel"
 export const DEFAULT_DETECTED_CODE = "en" as const
-export const CONFIG_SCHEMA_VERSION = 123
+export const CONFIG_SCHEMA_VERSION = 124
 
 export const DEFAULT_FLOATING_BUTTON_POSITION = 0.66
 export const DEFAULT_FLOATING_BUTTON_SIDE: FloatingButtonSide = "right"
@@ -179,6 +180,7 @@ export const DEFAULT_CONFIG: Config = {
     level: "intermediate",
   },
   providersConfig: DEFAULT_PROVIDER_CONFIG_LIST,
+  aiGateway: { ...DEFAULT_AI_GATEWAY_CONFIG },
   pageTranslation: {
     providerId: MICROSOFT_TRANSLATE_PROVIDER_ID,
     mode: "bilingual",

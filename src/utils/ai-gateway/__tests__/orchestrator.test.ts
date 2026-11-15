@@ -68,6 +68,25 @@ describe("gateway attempt orchestration", () => {
     expect(execute).toHaveBeenCalledTimes(3)
   })
 
+  it("reports only allowlisted attempt diagnostics", async () => {
+    const onAttemptComplete = vi.fn<(attempt: unknown) => void>()
+    await expect(
+      executeGatewayAttempts(
+        [{ candidate, execute: async () => "ok" }],
+        new AbortController().signal,
+        { onAttemptComplete },
+      ),
+    ).resolves.toBe("ok")
+    expect(onAttemptComplete).toHaveBeenCalledWith({
+      providerId: "test",
+      model: undefined,
+      status: "success",
+      latencyMs: expect.any(Number),
+      estimatedCostUsd: undefined,
+    })
+    expect(JSON.stringify(onAttemptComplete.mock.calls)).not.toContain("apiKey")
+  })
+
   it("honors abort before routing", async () => {
     const controller = new AbortController()
     controller.abort()

@@ -1,6 +1,7 @@
 import { i18n } from "@/utils/i18n"
 import { PageLayout } from "../../components/page-layout"
 import { AIContentAwareConfig } from "./ai-content-aware"
+import { AutomaticRoutingConfig } from "./automatic-routing"
 import { BuiltInAiUsageConfig } from "./built-in-ai-usage"
 import { FeatureProvidersConfig } from "./feature-providers"
 import { LanguageDetectionConfig } from "./language-detection"
@@ -15,6 +16,7 @@ export function ProvidersPage() {
     >
       <ProvidersConfig />
       <FeatureProvidersConfig />
+      <AutomaticRoutingConfig />
       <LanguageDetectionConfig />
       <AIContentAwareConfig />
       <BuiltInAiUsageConfig />
