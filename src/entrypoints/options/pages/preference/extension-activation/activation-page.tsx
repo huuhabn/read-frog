@@ -29,8 +29,8 @@ export function ExtensionActivationPage() {
 
   return (
     <PageLayout
-      title={i18n.t("options.preference.title")}
-      description={i18n.t("options.preference.pageDescription")}
+      title={i18n.t("options.general.title")}
+      description={i18n.t("options.general.pageDescription")}
     >
       <ConfigDetailSection
         backTo="/general"

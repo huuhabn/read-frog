@@ -217,7 +217,10 @@ options:
     features: Features
     translation: Translation
     product: Product
+    assistants: Assistants
   tools:
+    title: Tools
+    translate: Translate
     translationHub: Translation Hub
     pdfTranslation: PDF translation
   product:
@@ -272,6 +275,7 @@ options:
       oneTime: Bonus quota
       expiresAt: "Expires at $1"
       features:
+        customPrompts: Custom prompts
         pageTranslation: Page translation
         customAction: Custom AI Actions
         noteSuggestion: Note suggestions
@@ -468,9 +472,10 @@ options:
     duplicate: This pattern is already in the list
     gluedWildcard: A "*" has to stand for a whole part of the address, like *.example.com or example.*
     unsupported: Workmate AI cannot match this address. Ports and schemes other than http and https are not supported.
+  general:
+    title: General
+    pageDescription: General configuration for Workmate AI, including display, language, and advanced features.
   preference:
-    title: Settings
-    pageDescription: Set how Workmate AI looks, where it runs, and how your config is synced and backed up.
     appearanceAndLanguage:
       title: Appearance & language
       theme:
@@ -1574,7 +1579,7 @@ options:
     title: Advanced
     pageDescription: Powerful settings that are not part of the everyday path.
     auditLogs:
-      title: Request Logs
+      title: Audit Logs
       description: Review requests sent to Providers, inspect prompts, evaluate responses, and manage stored logs.
       detailTitle: Request & Response Details
       time: Timestamp

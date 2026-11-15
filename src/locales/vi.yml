@@ -217,7 +217,9 @@ options:
     features: Tính năng
     translation: Dịch
     product: Sản phẩm
+    assistants: Trợ lý
   tools:
+    title: Công cụ
     translationHub: Trung tâm Dịch thuật
     pdfTranslation: Dịch PDF
   product:
@@ -272,6 +274,7 @@ options:
       oneTime: Hạn mức tặng
       expiresAt: "Hết hạn lúc $1"
       features:
+        customPrompts: Custom Prompts
         pageTranslation: Dịch trang
         customAction: Hành động AI tùy chỉnh
         noteSuggestion: Gợi ý ghi chú
@@ -467,9 +470,10 @@ options:
     duplicate: Mẫu này đã có trong danh sách
     gluedWildcard: Dấu "*" phải thay cho trọn một phần của địa chỉ, ví dụ *.example.com hoặc example.*
     unsupported: Workmate AI không khớp được địa chỉ này. Cổng và các giao thức ngoài http, https đều không được hỗ trợ.
+  general:
+    title: Chung
+    pageDescription: Cấu hình chung cho Workmate AI, bao gồm các tùy chọn hiển thị, ngôn ngữ và các tính năng nâng cao.
   preference:
-    title: Cài đặt
-    pageDescription: Cài đặt giao diện của Workmate AI, tiện ích và các cấu hình đồng bộ, sao lưu.
     appearanceAndLanguage:
       title: Giao diện & ngôn ngữ
       theme:
@@ -1427,7 +1431,7 @@ options:
     title: Nâng cao
     pageDescription: Những thiết lập mạnh mẽ nhưng không dùng đến hằng ngày.
     auditLogs:
-      title: Nhật ký Request
+      title: Lịch sử Request
       description: Theo dõi chi tiết các request gửi đến Provider, kiểm tra prompt, đánh giá phản hồi và dọn dẹp dữ liệu.
       detailTitle: Chi tiết Request & Phản hồi
       time: Thời gian

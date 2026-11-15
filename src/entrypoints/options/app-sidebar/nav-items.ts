@@ -62,7 +62,7 @@ export const FEATURE_NAV_ITEMS: readonly FeatureNavItem[] = [
     kind: "link",
     path: "/custom-actions",
     icon: "tabler:sparkles",
-    label: () => i18n.t("options.selectionToolbar.customActions.title"),
+    label: () => i18n.t("options.selectionToolbar.customPrompts.title"),
   },
   {
     kind: "group",
@@ -97,7 +97,7 @@ export const FEATURE_NAV_ITEMS: readonly FeatureNavItem[] = [
   {
     kind: "group",
     icon: "tabler:layers-intersect",
-    label: () => i18n.t("options.overlayTools.title"),
+    label: () => i18n.t("options.tools.title"),
     children: [
       {
         kind: "link",
@@ -118,7 +118,12 @@ export const FEATURE_NAV_ITEMS: readonly FeatureNavItem[] = [
     icon: "tabler:speakerphone",
     label: () => i18n.t("options.tts.title"),
   },
-  { kind: "link", path: "/upwork", icon: "tabler:briefcase", label: () => "Upwork" },
+  {
+    kind: "link",
+    path: "/upwork",
+    icon: "tabler:briefcase",
+    label: () => i18n.t("options.upwork.title"),
+  },
   {
     kind: "link",
     path: "/web-chat",
@@ -129,26 +134,7 @@ export const FEATURE_NAV_ITEMS: readonly FeatureNavItem[] = [
     kind: "external",
     icon: "tabler:language-hiragana",
     href: () => browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH),
-    label: () => i18n.t("options.tools.translationHub"),
-  },
-  {
-    kind: "group",
-    icon: "tabler:flask",
-    label: () => i18n.t("options.advanced.title"),
-    children: [
-      {
-        kind: "link",
-        path: "/advanced/glossary",
-        label: () => i18n.t("options.advanced.glossary.title"),
-        isActive: (p) => p.startsWith("/advanced/glossary"),
-      },
-      {
-        kind: "link",
-        path: "/advanced/audit-logs",
-        label: () => i18n.t("options.advanced.auditLogs.title"),
-        isActive: (p) => p.startsWith("/advanced/audit-logs"),
-      },
-    ],
+    label: () => i18n.t("options.tools.translate"),
   },
 ]
 
@@ -159,22 +145,31 @@ export interface NavItemDef {
   isActive?: (pathname: string) => boolean
 }
 
-export const SETTINGS_NAV_ITEMS: readonly NavItemDef[] = [
-  {
-    path: "/providers",
-    icon: "tabler:api",
-    label: () => i18n.t("options.apiProviders.title"),
-    isActive: (p) => p === "/providers" || p === "/",
-  },
+export const PRIMARY_NAV_ITEMS: readonly NavItemDef[] = [
   {
     path: "/general",
     icon: "tabler:adjustments-horizontal",
-    label: () => i18n.t("options.preference.title"),
+    label: () => i18n.t("options.general.title"),
     isActive: (p) => p.startsWith("/general"),
+  },
+]
+
+export const SETTINGS_NAV_ITEMS: readonly NavItemDef[] = [
+  {
+    path: "/advanced/glossary",
+    icon: "tabler:book",
+    label: () => i18n.t("options.advanced.glossary.title"),
+    isActive: (p) => p.startsWith("/advanced/glossary"),
   },
   {
     path: "/shortcuts",
-    icon: "tabler:command",
+    icon: "tabler:keyboard",
     label: () => i18n.t("options.shortcuts.title"),
+  },
+  {
+    path: "/advanced/audit-logs",
+    icon: "tabler:file-search",
+    label: () => i18n.t("options.advanced.auditLogs.title"),
+    isActive: (p) => p.startsWith("/advanced/audit-logs"),
   },
 ]

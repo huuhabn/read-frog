@@ -10,8 +10,8 @@ import { UserExperienceSection } from "./user-experience"
 export function PreferencePage() {
   return (
     <PageLayout
-      title={i18n.t("options.preference.title")}
-      description={i18n.t("options.preference.pageDescription")}
+      title={i18n.t("options.general.title")}
+      description={i18n.t("options.general.pageDescription")}
       innerClassName="flex flex-col gap-10"
     >
       <AppearanceAndLanguageSection />

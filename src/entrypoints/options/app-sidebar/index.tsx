@@ -9,6 +9,7 @@ import { getCommandPaletteShortcutHint } from "@/utils/os"
 import { commandPaletteOpenAtom } from "../command-palette/atoms"
 import { CollapseToggle } from "./collapse-toggle"
 import { FeaturesNav } from "./features-nav"
+import { PrimaryNav } from "./primary-nav"
 import { SettingsNav } from "./settings-nav"
 
 export function AppSidebar() {
@@ -34,8 +35,9 @@ export function AppSidebar() {
         </InputGroup>
       </SidebarHeader>
       <SidebarContent className="transition-all group-data-[state=expanded]:px-2">
-        <SettingsNav />
+        <PrimaryNav />
         <FeaturesNav />
+        <SettingsNav />
       </SidebarContent>
       <CollapseToggle />
     </Sidebar>
