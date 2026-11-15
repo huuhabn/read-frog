@@ -5,11 +5,11 @@ import {
   Bot,
   Check,
   ChevronDown,
+  Languages,
   RefreshCw,
   RotateCcw,
   ShieldCheck,
   Smile,
-  Sparkles,
 } from "lucide-react"
 import { useMemo } from "react"
 import { IconTooltip } from "@/components/icon-tooltip"
@@ -45,6 +45,9 @@ export interface ChatContextHeaderProps {
   autoReplyMode: WebChatAutoReplyMode
   onSelectAutoReplyMode: (mode: WebChatAutoReplyMode) => void
   isAutoReplying?: boolean
+
+  sublineTranslate?: boolean
+  onToggleSubline?: () => void
 
   isOverridden: boolean
   onResetDefaults: () => void
@@ -125,6 +128,8 @@ export function ChatContextHeader({
   autoReplyMode,
   onSelectAutoReplyMode,
   isAutoReplying = false,
+  sublineTranslate = false,
+  onToggleSubline,
   isOverridden,
   onResetDefaults,
 }: ChatContextHeaderProps) {
@@ -284,6 +289,27 @@ export function ChatContextHeader({
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
+
+        {/* Sub-line Inbound Translation Toggle Button */}
+        {onToggleSubline && (
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onToggleSubline}
+            className={cn(
+              "h-6.5 shrink-0 gap-1 rounded-md border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden",
+              sublineTranslate &&
+                "border-blue-500/40 bg-blue-500/10 font-semibold text-blue-600 dark:text-blue-400",
+            )}
+            title={i18n.t("options.webChat.sidepanel.subline.tooltip")}
+          >
+            <Languages
+              className={cn("size-3", sublineTranslate ? "text-blue-500" : "text-muted-foreground")}
+            />
+            <span className="truncate">{i18n.t("options.webChat.sidepanel.subline.title")}</span>
+          </Button>
+        )}
       </div>
 
       {/* Row 3: Messages Count & PII Status */}
@@ -303,14 +329,8 @@ export function ChatContextHeader({
             >
               {i18n.t("options.webChat.sidepanel.piiMasked")}
             </IconTooltip>
-            {i18n.t("options.webChat.sidepanel.piiMasked")}
           </span>
         </div>
-
-        <span className="flex items-center gap-1 text-[10px] font-medium text-primary">
-          <Sparkles className="size-3" />
-          {i18n.t("options.webChat.sidepanel.cloudLlm")}
-        </span>
       </div>
     </div>
   )

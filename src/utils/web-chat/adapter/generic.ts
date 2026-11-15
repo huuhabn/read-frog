@@ -1,12 +1,15 @@
 import type { ChatMessage, ChatRoom, IChatAdapter } from "./types"
+import { urlMatchesPattern } from "@/utils/url-pattern"
 import { getPlatformSelectorConfig } from "../remote-config/loader"
 import { extractCleanText, insertTextIntoElement, triggerDOMSend } from "./dom-utils"
 
 export class GenericChatAdapter implements IChatAdapter {
   readonly platform = "generic"
   private lastFocusedInput: HTMLElement | null = null
+  private matchPatterns: string[] = []
 
-  constructor() {
+  constructor(matchPatterns: string[] = []) {
+    this.matchPatterns = matchPatterns
     if (typeof document !== "undefined") {
       document.addEventListener("focusin", (e) => {
         const target = e.target as HTMLElement
@@ -22,9 +25,19 @@ export class GenericChatAdapter implements IChatAdapter {
     }
   }
 
-  matches(_url: string): boolean {
-    // Generic matches any page as a universal fallback
-    return true
+  setMatchPatterns(patterns: string[]): void {
+    this.matchPatterns = patterns
+  }
+
+  getMatchPatterns(): readonly string[] {
+    return this.matchPatterns
+  }
+
+  matches(url: string): boolean {
+    if (!this.matchPatterns || this.matchPatterns.length === 0) {
+      return false
+    }
+    return this.matchPatterns.some((pattern) => urlMatchesPattern(url, pattern))
   }
 
   getCurrentRoom(): ChatRoom | null {

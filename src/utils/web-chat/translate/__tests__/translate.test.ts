@@ -1,6 +1,7 @@
 // @vitest-environment jsdom
 import { describe, expect, it } from "vitest"
 import { webChatTranslationCache } from "../cache/translation-cache"
+import { attachTranslationSubline } from "../inbound/sub-line"
 import { ViewportMessageBatcher } from "../inbound/viewport-batcher"
 import { extractPlaceholders, restorePlaceholders } from "../placeholder/extractor"
 
@@ -72,5 +73,56 @@ describe("Web Chat Translation Utilities", () => {
     await batcher.flush()
     expect(callCount).toBe(1)
     batcher.destroy()
+  })
+
+  it("should guard and skip English text if target is English", () => {
+    let called = false
+    const batcher = new ViewportMessageBatcher({
+      targetLang: "en",
+      translateFn: async () => {
+        called = true
+        return []
+      },
+      onTranslated: () => {},
+    })
+
+    const el = document.createElement("div")
+    batcher.observe(
+      el,
+      "msg-en-1",
+      "This is a longer English sentence for offline language detection testing.",
+    )
+    expect(called).toBe(false)
+    batcher.destroy()
+  })
+
+  it("should skip sub-line attachment if translated text is identical to original text", async () => {
+    let onTranslatedCalled = false
+    const batcher = new ViewportMessageBatcher({
+      targetLang: "vi",
+      debounceMs: 5,
+      translateFn: async (texts) => texts, // returns identical text
+      onTranslated: () => {
+        onTranslatedCalled = true
+      },
+    })
+
+    const el = document.createElement("div")
+    batcher.observe(el, "msg-same-1", "Bonjour")
+    await batcher.flush()
+
+    expect(onTranslatedCalled).toBe(false)
+    expect(el.querySelector(".wm-chat-subline-host")).toBeNull()
+    batcher.destroy()
+  })
+
+  it("should configure sub-line host element to float and align to the left", () => {
+    const el = document.createElement("div")
+    const subline = attachTranslationSubline(el, "Đây là bản dịch tiếng Việt")
+    expect(subline).not.toBeNull()
+    expect(subline?.style.textAlign).toBe("left")
+    expect(subline?.style.alignSelf).toBe("flex-start")
+    expect(subline?.style.float).toBe("left")
+    expect(subline?.style.width).toBe("100%")
   })
 })

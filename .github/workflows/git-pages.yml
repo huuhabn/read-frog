@@ -1,0 +1,49 @@
+name: Deploy Git Pages
+on:
+  push:
+    branches: [main]
+    paths:
+      - "gitpages/**"
+      - ".github/workflows/git-pages.yml"
+  workflow_dispatch:
+
+concurrency:
+  group: git-pages
+  cancel-in-progress: true
+
+jobs:
+  build-deploy:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: gitpages
+    steps:
+      - uses: actions/checkout@v5
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: 24
+
+      - name: Install deps
+        run: npm install --no-audit --no-fund
+
+      - name: Build static export
+        run: npm run build
+        env:
+          NODE_ENV: production
+          NEXT_PUBLIC_BASE_PATH: ""
+
+      - name: Add .nojekyll
+        run: touch out/.nojekyll
+
+      - name: Deploy to huuhabn.github.io
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          deploy_key: ${{ secrets.GH_PAGES_DEPLOY_KEY }}
+          external_repository: huuhabn/huuhabn.github.io
+          publish_branch: main
+          publish_dir: gitpages/out
+          force_orphan: true
+          user_name: github-actions[bot]
+          user_email: github-actions[bot]@users.noreply.github.com
+          commit_message: "deploy: ${{ github.sha }}"

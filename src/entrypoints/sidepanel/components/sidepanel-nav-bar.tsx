@@ -11,17 +11,11 @@ import {
   Settings,
 } from "lucide-react"
 import logo from "@/assets/icons/logo.png?url&no-inline"
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/base-ui/tooltip"
+import { TooltipButton } from "@/components/tooltip-button"
+import { TooltipProvider } from "@/components/ui/base-ui/tooltip"
 import { sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
 import { i18n } from "@/utils/i18n"
 import { openOptionsPage } from "@/utils/navigation"
-import { cn } from "@/utils/styles/utils"
-
 interface NavItem {
   id: SidePanelNavTab
   labelKey:
@@ -57,31 +51,28 @@ export function SidePanelNavBar() {
   return (
     <aside className="flex h-screen w-10 flex-col items-center justify-between border-l border-border/60 bg-muted/20 py-2.5 select-none">
       <div className="flex flex-col items-center gap-3">
-        <div className="flex size-7 items-center justify-center rounded-lg bg-primary/10 p-0.5 shadow-xs">
-          <img src={logo} alt="Workmate AI" className="size-5.5 rounded-md object-contain" />
-        </div>
+        <button
+          type="button"
+          onClick={handleOpenSettings}
+          aria-label={i18n.t("sidePanel.nav.settings")}
+          className="flex size-7 cursor-pointer items-center justify-center rounded-lg bg-primary/10 p-0.5 shadow-xs transition-colors hover:bg-primary/20 focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:outline-none"
+        >
+          <img src={logo} alt="" className="size-5.5 rounded-md object-contain" />
+        </button>
 
         <TooltipProvider delay={150}>
           <nav className="flex flex-col items-center gap-1">
             {NAV_ITEMS.map((item) => {
               const Icon = item.icon
-              const isActive = activeTab === item.id
               return (
-                <Tooltip key={item.id}>
-                  <TooltipTrigger
-                    onClick={() => setActiveTab(item.id)}
-                    className={cn(
-                      "flex size-6 items-center justify-center rounded-lg text-muted-foreground transition-all hover:bg-muted hover:text-foreground",
-                      isActive &&
-                        "bg-primary/15 font-medium text-primary shadow-xs ring-1 ring-primary/20",
-                    )}
-                  >
-                    <Icon className="size-4" />
-                  </TooltipTrigger>
-                  <TooltipContent side="left" sideOffset={6} className="text-xs font-medium">
-                    {i18n.t(item.labelKey)}
-                  </TooltipContent>
-                </Tooltip>
+                <TooltipButton
+                  key={item.id}
+                  label={i18n.t(item.labelKey)}
+                  active={activeTab === item.id}
+                  onClick={() => setActiveTab(item.id)}
+                >
+                  <Icon className="size-4" />
+                </TooltipButton>
               )
             })}
           </nav>
@@ -90,29 +81,21 @@ export function SidePanelNavBar() {
 
       <div className="flex flex-col items-center gap-1.5">
         <TooltipProvider delay={150}>
-          <Tooltip>
-            <TooltipTrigger
-              onClick={handleOpenAuditLogs}
-              className="flex size-7.5 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <ScrollText className="size-4" />
-            </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={6} className="text-xs font-medium">
-              {i18n.t("sidePanel.nav.logs")}
-            </TooltipContent>
-          </Tooltip>
+          <TooltipButton
+            label={i18n.t("sidePanel.nav.logs")}
+            size="md"
+            onClick={handleOpenAuditLogs}
+          >
+            <ScrollText className="size-4" />
+          </TooltipButton>
 
-          <Tooltip>
-            <TooltipTrigger
-              onClick={handleOpenSettings}
-              className="flex size-7.5 items-center justify-center rounded-lg text-muted-foreground transition-colors hover:bg-muted hover:text-foreground"
-            >
-              <Settings className="size-4" />
-            </TooltipTrigger>
-            <TooltipContent side="left" sideOffset={6} className="text-xs font-medium">
-              {i18n.t("sidePanel.nav.settings")}
-            </TooltipContent>
-          </Tooltip>
+          <TooltipButton
+            label={i18n.t("sidePanel.nav.settings")}
+            size="md"
+            onClick={handleOpenSettings}
+          >
+            <Settings className="size-4" />
+          </TooltipButton>
         </TooltipProvider>
       </div>
     </aside>

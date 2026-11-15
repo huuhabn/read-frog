@@ -1334,6 +1334,10 @@ options:
       slackDesc: Hỗ trợ các kênh chat và tin nhắn trực tiếp trên Slack.
       genericTitle: Generic Web Chat (Universal)
       genericDesc: Hỗ trợ mọi khung chat trên web bất kỳ có textarea hoặc contenteditable.
+      genericMatchUrlsTitle: Danh sách URL áp dụng Generic Chat
+      genericMatchUrlsDesc: Chỉ kích hoạt trợ lý Generic Web Chat trên các trang khớp với danh sách URL/domain này. Để trống sẽ không áp dụng lên trang nào.
+      genericMatchUrlsPlaceholder: "chat.example.com/*, *.intercom.com/*"
+      genericMatchUrlsTableHead: URL / Tên miền khớp
       remoteConfigTitle: Địa chỉ Remote Config Selectors
       remoteConfigDesc: Tự động cập nhật bộ chọn DOM mà không cần chờ cập nhật extension.
     privacy:
@@ -1365,6 +1369,9 @@ options:
         descSend: Tự động tạo phản hồi và gửi ngay khi có tin mới
         statusSent: Đã tự động gửi phản hồi
         statusDrafted: Đã chèn gợi ý phản hồi vào khung chat
+      subline:
+        title: Sub-line
+        tooltip: Bật/tắt hiển thị dịch phụ đề tin nhắn (Sub-line) cho nhóm chat này
       sessionCustomized: Đã tùy chỉnh phiên này
       messagesCount: "$1 tin nhắn"
       piiMasked: PII Masked

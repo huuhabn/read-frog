@@ -1,5 +1,8 @@
+import { resolveLanguage } from "@read-frog/definitions"
+import { franc } from "franc"
 import { webChatTranslationCache } from "../cache/translation-cache"
 import { extractPlaceholders, restorePlaceholders } from "../placeholder/extractor"
+import { removeTranslationSubline } from "./sub-line"
 
 export interface MessageBatchItem {
   id: string
@@ -9,8 +12,38 @@ export interface MessageBatchItem {
 
 export type BatchTranslateFunction = (texts: string[], targetLang: string) => Promise<string[]>
 
-function isLikelyVietnamese(text: string): boolean {
+export function isLikelyVietnamese(text: string): boolean {
   return /[àáảãạăằắẳẵặâầấẩẫậèéẻẽẹêềếểễệìíỉĩịòóỏõọôồốổỗộơờớởỡợùúủũụưừứửữựỳýỷỹỵđ]/i.test(text)
+}
+
+export function isSameLanguageAsTarget(text: string, targetLang: string): boolean {
+  const normalizedTarget = targetLang.toLowerCase().trim()
+  const baseTarget = normalizedTarget.split("-")[0] ?? normalizedTarget
+
+  // 1. Fast regex check for Vietnamese (covers accented Vietnamese accurately)
+  if (baseTarget === "vi" && isLikelyVietnamese(text)) {
+    return true
+  }
+
+  // 2. Franc offline detection for texts of sufficient length
+  if (text.length >= 10) {
+    const detectedIso = franc(text, { minLength: 3 })
+    if (detectedIso && detectedIso !== "und") {
+      const resolved = resolveLanguage(detectedIso)
+      if (resolved) {
+        const resolvedBase = resolved.toLowerCase().split("-")[0]
+        if (resolvedBase === baseTarget) {
+          return true
+        }
+      }
+    }
+  }
+
+  return false
+}
+
+export function normalizeComparableText(text: string): string {
+  return text.trim().toLowerCase().replace(/\s+/g, " ")
 }
 
 export class ViewportMessageBatcher {
@@ -67,9 +100,10 @@ export class ViewportMessageBatcher {
       return
     }
 
-    // Language guard: if target is Vietnamese and text is already in Vietnamese, skip
-    if (this.targetLang === "vi" && isLikelyVietnamese(trimmed)) {
+    // Language guard (Pre-check): if text is already in the target language, skip completely
+    if (isSameLanguageAsTarget(trimmed, this.targetLang)) {
       this.processedIds.add(id)
+      removeTranslationSubline(element)
       return
     }
 
@@ -91,7 +125,13 @@ export class ViewportMessageBatcher {
     // Check cache first
     const cached = webChatTranslationCache.get(item.text, this.targetLang)
     if (cached) {
-      this.onTranslated(item, cached)
+      const cleanOriginal = normalizeComparableText(item.text)
+      const cleanCached = normalizeComparableText(cached)
+      if (cleanCached && cleanCached !== cleanOriginal) {
+        this.onTranslated(item, cached)
+      } else {
+        removeTranslationSubline(item.element)
+      }
       return
     }
 
@@ -127,8 +167,17 @@ export class ViewportMessageBatcher {
         if (!item) return
         const placeholders = extractedList[index]?.placeholders ?? {}
         const restored = restorePlaceholders(res, placeholders)
-        webChatTranslationCache.set(item.text, this.targetLang, restored)
-        this.onTranslated(item, restored)
+
+        const cleanOriginal = normalizeComparableText(item.text)
+        const cleanTranslated = normalizeComparableText(restored)
+
+        // Post-check: Only attach sub-line if translation differs from original text
+        if (cleanTranslated && cleanTranslated !== cleanOriginal) {
+          webChatTranslationCache.set(item.text, this.targetLang, restored)
+          this.onTranslated(item, restored)
+        } else {
+          removeTranslationSubline(item.element)
+        }
       })
     } catch {
       // Do not delete failed IDs from processedIds to prevent infinite retry storms (e.g. on 429)

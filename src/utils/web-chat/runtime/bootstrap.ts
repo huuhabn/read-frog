@@ -28,11 +28,8 @@ export async function bootstrapWebChat(ctx?: ContentScriptContext): Promise<() =
 
   webChatBootstrapped = true
 
-  // 1. Initialize adapters & remote config
-  initAllChatAdapters()
-  if (webChatConfig.remoteConfigUrl) {
-    void initRemoteConfig(webChatConfig.remoteConfigUrl)
-  }
+  // 1. Initialize adapters with configured match patterns
+  initAllChatAdapters(webChatConfig.genericMatchUrls || [])
 
   const adapter = getAdapterForUrl(window.location.href)
   if (!adapter) {
@@ -44,6 +41,11 @@ export async function bootstrapWebChat(ctx?: ContentScriptContext): Promise<() =
   if (adapter.platform === "telegram" && !webChatConfig.enableTelegram) return () => {}
   if (adapter.platform === "slack" && !webChatConfig.enableSlack) return () => {}
   if (adapter.platform === "generic" && !webChatConfig.enableGeneric) return () => {}
+
+  // 3. Only fetch remote config IF this page is an active matched chat page
+  if (webChatConfig.remoteConfigUrl) {
+    void initRemoteConfig(webChatConfig.remoteConfigUrl)
+  }
 
   const cleanups: (() => void)[] = []
 
@@ -58,32 +60,30 @@ export async function bootstrapWebChat(ctx?: ContentScriptContext): Promise<() =
     cleanups.push(() => palette.destroy())
   }
 
-  // 5. Inbound Real-time Translation
-  if (webChatConfig.translateEnabled) {
-    const controller = createInboundTranslationController({
-      adapter,
-      targetLang: webChatConfig.inboundTargetLang || "vi",
-      translateFn: async (texts, targetLang) => {
-        const results: string[] = []
-        for (const text of texts) {
-          try {
-            const translated = await translateChatText({
-              text,
-              targetLang,
-              sourceFeature: "Web Chat (Inbound Realtime Translate)",
-            })
-            results.push(translated || text)
-          } catch {
-            results.push(text)
-          }
+  // 5. Inbound Real-time Translation (controlled per room via room settings)
+  const controller = createInboundTranslationController({
+    adapter,
+    targetLang: webChatConfig.inboundTargetLang || "vi",
+    translateFn: async (texts, targetLang) => {
+      const results: string[] = []
+      for (const text of texts) {
+        try {
+          const translated = await translateChatText({
+            text,
+            targetLang,
+            sourceFeature: "Web Chat (Inbound Realtime Translate)",
+          })
+          results.push(translated || text)
+        } catch {
+          results.push(text)
         }
-        return results
-      },
-    })
+      }
+      return results
+    },
+  })
 
-    controller.start()
-    cleanups.push(() => controller.stop())
-  }
+  controller.start()
+  cleanups.push(() => controller.stop())
 
   // 6. Sidepanel messaging bridge
   const onRuntimeMessage = (

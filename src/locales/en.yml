@@ -1481,6 +1481,10 @@ options:
       slackDesc: Supports chat channels and direct messages on Slack.
       genericTitle: Generic Web Chat (Universal)
       genericDesc: Supports any web chat interface containing a textarea or contenteditable input.
+      genericMatchUrlsTitle: Generic Chat Match URLs
+      genericMatchUrlsDesc: Only activate Generic Web Chat on pages matching these URL/domain patterns. Leave empty to not match any page.
+      genericMatchUrlsPlaceholder: "chat.example.com/*, *.intercom.com/*"
+      genericMatchUrlsTableHead: Matched URL / Domain
       remoteConfigTitle: Remote Config Selectors URL
       remoteConfigDesc: Automatically updates DOM selectors without waiting for extension updates.
     privacy:
@@ -1512,6 +1516,9 @@ options:
         descSend: Automatically generate and send reply on new messages
         statusSent: Reply sent automatically
         statusDrafted: Reply draft inserted into chat
+      subline:
+        title: Sub-line
+        tooltip: Toggle inbound message sub-line translation for this chat room
       sessionCustomized: Session customized
       messagesCount: "$1 messages"
       piiMasked: PII Masked

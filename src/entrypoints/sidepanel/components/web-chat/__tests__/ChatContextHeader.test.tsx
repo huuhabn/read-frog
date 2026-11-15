@@ -106,4 +106,18 @@ describe("ChatContextHeader", () => {
 
     expect(screen.getByText("options.webChat.sidepanel.autoReply.draft")).toBeDefined()
   })
+
+  it("renders subline toggle button and calls onToggleSubline on click", () => {
+    const onToggle = vi.fn<() => void>()
+    render(
+      <ChatContextHeader {...defaultProps} sublineTranslate={false} onToggleSubline={onToggle} />,
+    )
+
+    const btn = screen.getByTitle("options.webChat.sidepanel.subline.tooltip")
+    expect(btn).toBeDefined()
+    expect(screen.getByText("options.webChat.sidepanel.subline.title")).toBeDefined()
+
+    fireEvent.click(btn)
+    expect(onToggle).toHaveBeenCalledTimes(1)
+  })
 })

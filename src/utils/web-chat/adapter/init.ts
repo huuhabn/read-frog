@@ -7,17 +7,17 @@ import { ZaloChatAdapter } from "./zalo"
 /**
  * Initializes and registers all built-in chat adapters into the registry.
  */
-export function initAllChatAdapters(): void {
+export function initAllChatAdapters(genericMatchUrls: string[] = []): void {
   // Specific platforms registered first
   registerChatAdapter(new ZaloChatAdapter())
   registerChatAdapter(new TelegramChatAdapter())
   registerChatAdapter(new SlackChatAdapter())
 
   // Generic fallback adapter registered last
-  registerChatAdapter(new GenericChatAdapter())
+  registerChatAdapter(new GenericChatAdapter(genericMatchUrls))
 }
 
-export function resetAllChatAdapters(): void {
+export function resetAllChatAdapters(genericMatchUrls: string[] = []): void {
   clearAdapters()
-  initAllChatAdapters()
+  initAllChatAdapters(genericMatchUrls)
 }

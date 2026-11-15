@@ -15,11 +15,13 @@ import {
 } from "@/components/ui/base-ui/select"
 import { Switch } from "@/components/ui/base-ui/switch"
 import { Textarea } from "@/components/ui/base-ui/textarea"
+import { usePatternList } from "@/hooks/use-pattern-list"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../components/config-item"
 import { ConfigSection } from "../../components/config-section"
 import { PageLayout } from "../../components/page-layout"
+import { PatternsTable } from "../../components/patterns-table"
 import { SELECT_CONTENT_PROPS } from "../../components/select-content-props"
 
 export function WebAssistantSettingsPage() {
@@ -32,6 +34,13 @@ export function WebAssistantSettingsPage() {
       ...patch,
     })
   }
+
+  const { addPattern, removePattern } = usePatternList(
+    webChat.genericMatchUrls || [],
+    (nextPatterns) => {
+      handleUpdate({ genericMatchUrls: nextPatterns })
+    },
+  )
 
   return (
     <PageLayout
@@ -238,6 +247,23 @@ export function WebAssistantSettingsPage() {
             onCheckedChange={(checked) => handleUpdate({ enableGeneric: checked })}
           />
         </ConfigItem>
+
+        {webChat.enableGeneric && (
+          <ConfigItem
+            id="webchat-generic-match-urls"
+            title={i18n.t("options.webChat.platforms.genericMatchUrlsTitle")}
+            description={i18n.t("options.webChat.platforms.genericMatchUrlsDesc")}
+          >
+            <PatternsTable
+              patterns={webChat.genericMatchUrls || []}
+              onAddPattern={addPattern}
+              onRemovePattern={removePattern}
+              placeholderText={i18n.t("options.webChat.platforms.genericMatchUrlsPlaceholder")}
+              tableHeaderText={i18n.t("options.webChat.platforms.genericMatchUrlsTableHead")}
+              className="max-w-md"
+            />
+          </ConfigItem>
+        )}
 
         <ConfigItem
           id="webchat-remote-config"

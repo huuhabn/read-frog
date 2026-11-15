@@ -1,5 +1,6 @@
 import type { IChatAdapter } from "../../adapter/types"
-import { attachTranslationSubline } from "./sub-line"
+import { getRoomSettings, webChatRoomSettingsStorage } from "../../storage/room-settings"
+import { attachTranslationSubline, removeTranslationSubline } from "./sub-line"
 import { type BatchTranslateFunction, ViewportMessageBatcher } from "./viewport-batcher"
 
 export interface InboundTranslationController {
@@ -16,10 +17,29 @@ export function createInboundTranslationController(options: {
   const { adapter, targetLang, translateFn } = options
   let batcher: ViewportMessageBatcher | null = null
   let disconnectObserver: (() => void) | null = null
+  let unwatchStorage: (() => void) | null = null
   let running = false
 
-  const processVisibleMessages = () => {
+  const cleanupAllSublines = () => {
+    const messages = adapter.getMessages(50)
+    for (const msg of messages) {
+      if (msg.element) {
+        removeTranslationSubline(msg.element)
+      }
+    }
+  }
+
+  const processVisibleMessages = async () => {
     if (!running || !batcher) return
+    const currentRoom = adapter.getCurrentRoom()
+    if (!currentRoom?.id) return
+
+    const roomSettings = await getRoomSettings(currentRoom.id)
+    if (!roomSettings?.sublineTranslate) {
+      cleanupAllSublines()
+      return
+    }
+
     const messages = adapter.getMessages(50)
     for (const msg of messages) {
       if (msg.element && msg.content) {
@@ -41,13 +61,25 @@ export function createInboundTranslationController(options: {
         },
       })
 
-      processVisibleMessages()
+      void processVisibleMessages()
 
       if (adapter.observeMessages) {
         disconnectObserver = adapter.observeMessages(() => {
-          processVisibleMessages()
+          void processVisibleMessages()
         })
       }
+
+      unwatchStorage = webChatRoomSettingsStorage.watch((allSettings) => {
+        if (!running) return
+        const currentRoom = adapter.getCurrentRoom()
+        if (!currentRoom?.id) return
+        const roomSetting = allSettings?.[currentRoom.id]
+        if (!roomSetting?.sublineTranslate) {
+          cleanupAllSublines()
+        } else {
+          void processVisibleMessages()
+        }
+      })
     },
 
     stop() {
@@ -57,10 +89,15 @@ export function createInboundTranslationController(options: {
         disconnectObserver()
         disconnectObserver = null
       }
+      if (unwatchStorage) {
+        unwatchStorage()
+        unwatchStorage = null
+      }
       if (batcher) {
         batcher.destroy()
         batcher = null
       }
+      cleanupAllSublines()
     },
 
     isStarted() {

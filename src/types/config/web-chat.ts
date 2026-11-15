@@ -3,6 +3,14 @@ import { z } from "zod"
 export type WebChatTone = "friendly" | "professional" | "brief" | "casual" | "humorous"
 export type WebChatAutoReplyMode = "none" | "draft" | "send"
 
+export interface WebChatRoomSettings {
+  autoReplyMode?: WebChatAutoReplyMode
+  model?: string | null
+  lang?: string | null
+  tone?: WebChatTone | null
+  sublineTranslate?: boolean
+}
+
 export const DEFAULT_WEB_CHAT_CONFIG = {
   enabled: true,
   providerId: "",
@@ -23,6 +31,7 @@ export const DEFAULT_WEB_CHAT_CONFIG = {
   enableTelegram: true,
   enableSlack: true,
   enableGeneric: true,
+  genericMatchUrls: [] as string[],
   remoteConfigUrl:
     "https://raw.githubusercontent.com/huuhabn/workmate-artifacts/main/chat-selectors.json",
   // Privacy & PII
@@ -57,6 +66,7 @@ export const webChatConfigSchema = z
     enableTelegram: z.boolean().default(DEFAULT_WEB_CHAT_CONFIG.enableTelegram),
     enableSlack: z.boolean().default(DEFAULT_WEB_CHAT_CONFIG.enableSlack),
     enableGeneric: z.boolean().default(DEFAULT_WEB_CHAT_CONFIG.enableGeneric),
+    genericMatchUrls: z.array(z.string()).default(DEFAULT_WEB_CHAT_CONFIG.genericMatchUrls),
     remoteConfigUrl: z.string().default(DEFAULT_WEB_CHAT_CONFIG.remoteConfigUrl),
     piiMaskingEnabled: z.boolean().default(DEFAULT_WEB_CHAT_CONFIG.piiMaskingEnabled),
     maskPhone: z.boolean().default(DEFAULT_WEB_CHAT_CONFIG.maskPhone),

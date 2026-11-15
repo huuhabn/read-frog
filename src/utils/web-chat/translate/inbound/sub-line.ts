@@ -9,13 +9,19 @@ export function attachTranslationSubline(
     fontSize?: string
     color?: string
   },
-): HTMLElement {
+): HTMLElement | null {
+  const trimmed = translatedText.trim()
+  if (!trimmed) {
+    removeTranslationSubline(messageEl)
+    return null
+  }
+
   // Check if sub-line already exists
   const existing = messageEl.querySelector<HTMLElement>(".wm-chat-subline-host")
   if (existing) {
     const textSpan = existing.shadowRoot?.querySelector(".wm-subline-text")
     if (textSpan) {
-      textSpan.textContent = translatedText
+      textSpan.textContent = trimmed
       return existing
     }
   }
@@ -23,29 +29,45 @@ export function attachTranslationSubline(
   const host = document.createElement("div")
   host.className = "wm-chat-subline-host"
   host.setAttribute("data-wm-subline", "true")
+  host.style.textAlign = "left"
+  host.style.alignSelf = "flex-start"
+  host.style.justifySelf = "flex-start"
+  host.style.width = "100%"
+  host.style.clear = "both"
+  host.style.float = "left"
+  host.style.boxSizing = "border-box"
 
   const shadow = host.attachShadow({ mode: "open" })
 
   const style = document.createElement("style")
   style.textContent = `
     :host {
-      display: block;
+      display: block !important;
       margin-top: 4px;
       margin-bottom: 2px;
       line-height: 1.4;
       font-size: ${options?.fontSize || "0.85em"};
       opacity: 0.85;
       font-family: inherit;
-      clear: both;
+      clear: both !important;
+      float: left !important;
+      text-align: left !important;
+      align-self: flex-start !important;
+      justify-self: flex-start !important;
+      width: 100% !important;
+      box-sizing: border-box !important;
       user-select: text;
     }
     .wm-subline-container {
       display: inline-flex;
       align-items: baseline;
+      text-align: left !important;
       gap: 5px;
       border-left: 2px solid #3b82f6;
       padding-left: 6px;
       color: ${options?.color || "inherit"};
+      max-width: 100%;
+      box-sizing: border-box;
     }
     .wm-subline-badge {
       font-size: 0.75em;
@@ -57,9 +79,11 @@ export function attachTranslationSubline(
       border-radius: 3px;
       padding: 1px 4px;
       user-select: none;
+      flex-shrink: 0;
     }
     .wm-subline-text {
       word-break: break-word;
+      text-align: left !important;
     }
   `
 
@@ -75,7 +99,7 @@ export function attachTranslationSubline(
 
   const textSpan = document.createElement("span")
   textSpan.className = "wm-subline-text"
-  textSpan.textContent = translatedText
+  textSpan.textContent = trimmed
   container.appendChild(textSpan)
 
   shadow.appendChild(style)

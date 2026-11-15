@@ -26,9 +26,24 @@ describe("Chat Adapter Registry", () => {
     expect(adapter?.platform).toBe("slack")
   })
 
-  it("should fallback to GenericChatAdapter for other URLs", () => {
+  it("should not match GenericChatAdapter when genericMatchUrls is empty", () => {
     const adapter = getAdapterForUrl("https://discord.com/channels/123/456")
-    expect(adapter).toBeDefined()
-    expect(adapter?.platform).toBe("generic")
+    expect(adapter).toBeNull()
+  })
+
+  it("should match GenericChatAdapter when URL matches configured genericMatchUrls", () => {
+    clearAdapters()
+    initAllChatAdapters(["discord.com/*", "*.crisp.chat/*"])
+
+    const discord = getAdapterForUrl("https://discord.com/channels/123/456")
+    expect(discord).toBeDefined()
+    expect(discord?.platform).toBe("generic")
+
+    const crisp = getAdapterForUrl("https://app.crisp.chat/inbox/123")
+    expect(crisp).toBeDefined()
+    expect(crisp?.platform).toBe("generic")
+
+    const google = getAdapterForUrl("https://www.google.com/search?q=test")
+    expect(google).toBeNull()
   })
 })
