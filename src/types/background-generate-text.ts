@@ -12,8 +12,20 @@ export type BackgroundGenerateTextPayload = ProviderRequestRouting<PromptablePro
   requestId?: string
   /** Local providers only; hosted retries are the caller's business. */
   maxRetries?: number
+  temperature?: number
+  /** Ordered fallback snapshots. Credentials stay inside each execution closure. */
+  fallbackProviderRefs?: PromptableProviderRef[]
+  /** Defaults to one for compatibility until automatic routing is enabled. */
+  maxGatewayAttempts?: number
+  /** The caller owns the audit record (for example after PII unmasking). */
+  skipAudit?: boolean
 }
 
 export interface BackgroundGenerateTextResponse {
   text: string
+  usage?: {
+    promptTokens?: number
+    completionTokens?: number
+    totalTokens?: number
+  }
 }

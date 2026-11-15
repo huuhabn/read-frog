@@ -39,7 +39,9 @@ import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config/provider"
 import {
   executeGatewayStreamAttempts,
+  executeGatewayAttempts,
   GatewayError,
+  planGatewayRoutes,
   type GatewayRouteCandidate,
 } from "@/utils/ai-gateway"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
@@ -57,6 +59,7 @@ import { buildLocalGenerateTextParams } from "@/utils/providers/generate-params"
 import { getLanguageModelForConfig, getModelById } from "@/utils/providers/model"
 import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
+import { buildBackgroundGenerateTextCandidates } from "./ai-gateway-candidates"
 
 const log = createLogger("background/background-stream")
 
@@ -974,9 +977,12 @@ function createTextPartStreamViaGateway(
  */
 export async function generateTextForProviderRef(
   payload: BackgroundGenerateTextPayload,
-  options: { signal?: AbortSignal } = {},
+  options: {
+    signal?: AbortSignal
+    onUsage?: (usage: AuditLogTokenUsage | undefined) => void
+  } = {},
 ): Promise<string> {
-  const { providerRef, hostedFeature, instructions, prompt, requestId, maxRetries } = payload
+  const { hostedFeature, instructions, prompt, requestId, maxRetries } = payload
   const { signal } = options
 
   if (signal?.aborted) {
@@ -988,68 +994,74 @@ export async function generateTextForProviderRef(
   let errorMessage: string | undefined
   let outputText = ""
   let capturedUsage: AuditLogTokenUsage | undefined
+  let selectedProviderRef = payload.providerRef
 
   try {
-    if (providerRef.kind === "system") {
-      const partStream = await createHostedTextPartStream(
-        {
-          providerKind: "system",
-          providerId: providerRef.providerId,
-          modelTier: providerRef.modelTier,
-          requestId,
-          hostedFeature: requireHostedFeature(hostedFeature),
-          instructions,
-          prompt,
-        },
-        signal,
-      )
-      const snapshot = await consumeTextPartStream(partStream, {
-        signal,
-        onUsage: (u) => {
-          capturedUsage = u
-        },
-      })
-      outputText = snapshot.output.trim()
-      return outputText
-    }
+    const candidates = buildBackgroundGenerateTextCandidates(payload)
+    const planned = planGatewayRoutes(
+      "text.generate",
+      candidates.map(({ candidate }) => candidate),
+      { maxAttempts: payload.maxGatewayAttempts ?? 1 },
+    )
+    const byRouteId = new Map(candidates.map((item) => [item.candidate.routeId, item]))
+    outputText = await executeGatewayAttempts(
+      planned.map((candidate) => ({
+        candidate,
+        execute: async (attemptSignal) => {
+          const item = byRouteId.get(candidate.routeId)
+          if (!item) throw new GatewayError("unsupported", "Missing background AI route")
+          selectedProviderRef = item.providerRef
+          if (item.providerRef.kind === "system") {
+            const partStream = await createHostedTextPartStream(
+              {
+                providerKind: "system",
+                providerId: item.providerRef.providerId,
+                modelTier: item.providerRef.modelTier,
+                requestId,
+                hostedFeature: requireHostedFeature(hostedFeature),
+                instructions,
+                prompt,
+              },
+              attemptSignal,
+            )
+            const snapshot = await consumeTextPartStream(partStream, {
+              signal: attemptSignal,
+              onUsage: (usage) => {
+                capturedUsage = usage
+              },
+            })
+            return snapshot.output.trim()
+          }
 
-    // Local text generation needs a real LLM: pure translate providers (DeepLX,
-    // Google, Microsoft) have no model to prompt. The payload type already says
-    // LLM, but the wire is a trust boundary — a pre-update content script can
-    // still send a translate-only ref — so re-widen and check for real.
-    const localConfig = providerRef.config as TranslateProviderConfig
-    if (!isLLMProviderConfig(localConfig)) {
-      throw new BackgroundStreamError(
-        "invalid_request",
-        `Provider "${localConfig.id}" cannot generate text`,
-      )
-    }
-
-    // Built from the config the ref carries, not looked up by id: every other
-    // parameter below already comes from the ref, so re-reading storage would
-    // pair a model from the current row with reasoning/temperature/providerOptions
-    // computed from the snapshot the caller captured — and would fail outright
-    // for a row deleted from another tab while the config was already in hand.
-    const model = getLanguageModelForConfig(providerRef.config)
-    const result = await generateText({
-      model,
-      instructions,
-      prompt,
-      // maxRetries: 0 — retries belong to the RequestQueue, which meters them
-      // against the token bucket; ai-sdk's hidden default (2) would issue extra
-      // HTTP attempts invisible to the rate limiter.
-      maxRetries: maxRetries ?? 0,
-      abortSignal: signal,
-      ...buildLocalGenerateTextParams(providerRef.config),
-    })
-    outputText = result.text.trim()
-    if (result.usage) {
-      capturedUsage = {
-        promptTokens: result.usage.inputTokens,
-        completionTokens: result.usage.outputTokens,
-        totalTokens: result.usage.totalTokens,
-      }
-    }
+          const localConfig = item.providerRef.config as TranslateProviderConfig
+          if (!isLLMProviderConfig(localConfig)) {
+            throw new BackgroundStreamError(
+              "invalid_request",
+              `Provider "${localConfig.id}" cannot generate text`,
+            )
+          }
+          const result = await generateText({
+            model: getLanguageModelForConfig(item.providerRef.config),
+            instructions,
+            prompt,
+            maxRetries: maxRetries ?? 0,
+            abortSignal: attemptSignal,
+            ...buildLocalGenerateTextParams(item.providerRef.config),
+            ...(payload.temperature !== undefined ? { temperature: payload.temperature } : {}),
+          })
+          capturedUsage = result.usage
+            ? {
+                promptTokens: result.usage.inputTokens,
+                completionTokens: result.usage.outputTokens,
+                totalTokens: result.usage.totalTokens,
+              }
+            : undefined
+          return result.text.trim()
+        },
+      })),
+      signal ?? new AbortController().signal,
+    )
+    options.onUsage?.(capturedUsage)
     return outputText
   } catch (error) {
     if (signal?.aborted || (error as Error)?.name === "AbortError") {
@@ -1061,45 +1073,48 @@ export async function generateTextForProviderRef(
     throw error
   } finally {
     const providerId =
-      providerRef.kind === "system" ? providerRef.providerId : providerRef.config.id
+      selectedProviderRef.kind === "system"
+        ? selectedProviderRef.providerId
+        : selectedProviderRef.config.id
     const modelName =
-      providerRef.kind === "system"
+      selectedProviderRef.kind === "system"
         ? undefined
-        : typeof providerRef.config.model === "object"
-          ? providerRef.config.model?.customModel || providerRef.config.model?.model
-          : providerRef.config?.model
+        : typeof selectedProviderRef.config.model === "object"
+          ? selectedProviderRef.config.model?.customModel || selectedProviderRef.config.model?.model
+          : selectedProviderRef.config?.model
 
     const featureName =
-      providerRef.kind === "system"
+      selectedProviderRef.kind === "system"
         ? hostedFeature || "Hosted Text Generation"
         : "Local Text Generation"
 
-    void recordAuditLog({
-      sourceFeature: featureName,
-      providerId,
-      providerType: "llm",
-      model: modelName,
-      systemPrompt: instructions,
-      prompt,
-      messages: [{ role: "user", content: prompt }],
-      tokenUsage: capturedUsage,
-      responseOutput: outputText,
-      latencyMs: Math.round(performance.now() - startTime),
-      status,
-      errorMessage,
-      rawPayload: {
+    if (!payload.skipAudit)
+      void recordAuditLog({
         sourceFeature: featureName,
         providerId,
+        providerType: "llm",
         model: modelName,
-        instructions,
+        systemPrompt: instructions,
         prompt,
+        messages: [{ role: "user", content: prompt }],
         tokenUsage: capturedUsage,
         responseOutput: outputText,
         latencyMs: Math.round(performance.now() - startTime),
         status,
         errorMessage,
-      },
-    })
+        rawPayload: {
+          sourceFeature: featureName,
+          providerId,
+          model: modelName,
+          instructions,
+          prompt,
+          tokenUsage: capturedUsage,
+          responseOutput: outputText,
+          latencyMs: Math.round(performance.now() - startTime),
+          status,
+          errorMessage,
+        },
+      })
   }
 }
 

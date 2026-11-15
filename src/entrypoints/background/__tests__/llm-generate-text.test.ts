@@ -38,13 +38,22 @@ describe("llm-generate-text", () => {
   })
 
   it("returns the generated text for the given provider ref", async () => {
-    generateTextForProviderRefMock.mockResolvedValue("eng")
+    generateTextForProviderRefMock.mockImplementation(async (_payload, options) => {
+      options.onUsage({ promptTokens: 2, completionTokens: 1, totalTokens: 3 })
+      return "eng"
+    })
 
     const { runGenerateTextInBackground } = await import("../llm-generate-text")
     const result = await runGenerateTextInBackground(localPayload)
 
-    expect(generateTextForProviderRefMock).toHaveBeenCalledWith(localPayload)
-    expect(result).toEqual({ text: "eng" })
+    expect(generateTextForProviderRefMock).toHaveBeenCalledWith(
+      localPayload,
+      expect.objectContaining({ onUsage: expect.any(Function) }),
+    )
+    expect(result).toEqual({
+      text: "eng",
+      usage: { promptTokens: 2, completionTokens: 1, totalTokens: 3 },
+    })
   })
 
   it("passes a system provider ref through untouched", async () => {
@@ -65,7 +74,10 @@ describe("llm-generate-text", () => {
 
     const handler = getRegisteredMessageHandler("backgroundGenerateText")
     await expect(handler({ data: hostedPayload })).resolves.toEqual({ text: "cmn" })
-    expect(generateTextForProviderRefMock).toHaveBeenCalledWith(hostedPayload)
+    expect(generateTextForProviderRefMock).toHaveBeenCalledWith(
+      hostedPayload,
+      expect.objectContaining({ onUsage: expect.any(Function) }),
+    )
   })
 
   it("logs and rethrows handler errors", async () => {

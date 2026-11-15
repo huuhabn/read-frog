@@ -7,6 +7,46 @@ import {
   translateChatText,
 } from "../service"
 
+const { sendMessageMock } = vi.hoisted(() => ({
+  sendMessageMock: vi.fn<(name: string, data: any) => Promise<any>>(),
+}))
+
+sendMessageMock.mockImplementation(async (_name, data) => {
+  if (data.prompt?.includes("FAIL_NOW")) {
+    throw new Error("Simulated LLM network failure")
+  }
+  if (data.instructions?.includes("raw JSON")) {
+    return {
+      text: JSON.stringify({
+        replyText: "Dạ được ạ, để em báo gia đình.",
+        viGloss: "Ý nghĩa phản hồi",
+      }),
+      usage: { promptTokens: 42, completionTokens: 18, totalTokens: 60 },
+    }
+  }
+  if (data.instructions?.includes("conversation summarizer")) {
+    return {
+      text: JSON.stringify({
+        summary: "Cuộc trao đổi về việc đón bố xuất viện.",
+        actionItems: ["Thuê xe taxi về"],
+        extractedEntities: {
+          phones: ["0912345678"],
+          bankAccounts: [],
+          links: [],
+          dates: ["Hôm nay"],
+        },
+      }),
+      usage: { promptTokens: 100, completionTokens: 50, totalTokens: 150 },
+    }
+  }
+  return {
+    text: "Đã dịch: Xin chào bạn",
+    usage: { promptTokens: 20, completionTokens: 10, totalTokens: 30 },
+  }
+})
+
+vi.mock("@/utils/message", () => ({ sendMessage: sendMessageMock }))
+
 vi.mock("@/utils/config/storage", () => ({
   getLocalConfig: vi.fn<() => Promise<any>>().mockResolvedValue({
     providersConfig: [
@@ -25,65 +65,8 @@ vi.mock("@/utils/config/storage", () => ({
   }),
 }))
 
-vi.mock("@/utils/providers/model", () => ({
-  getModelById: vi.fn<() => Promise<any>>().mockResolvedValue({}),
-}))
-
 vi.mock("@/utils/audit-log/audit-log-service", () => ({
   recordAuditLog: vi.fn<() => Promise<string | null>>().mockResolvedValue("log-123"),
-}))
-
-vi.mock("ai", () => ({
-  generateText: vi
-    .fn<(options?: any) => Promise<any>>()
-    .mockImplementation(async (options: any) => {
-      if (options.prompt?.includes("FAIL_NOW")) {
-        throw new Error("Simulated LLM network failure")
-      }
-
-      if (options.system?.includes("raw JSON")) {
-        return {
-          text: JSON.stringify({
-            replyText: "Dạ được ạ, để em báo gia đình.",
-            viGloss: "Ý nghĩa phản hồi",
-          }),
-          usage: {
-            promptTokens: 42,
-            completionTokens: 18,
-            totalTokens: 60,
-          },
-        }
-      }
-
-      if (options.system?.includes("conversation summarizer")) {
-        return {
-          text: JSON.stringify({
-            summary: "Cuộc trao đổi về việc đón bố xuất viện.",
-            actionItems: ["Thuê xe taxi về"],
-            extractedEntities: {
-              phones: ["0912345678"],
-              bankAccounts: [],
-              links: [],
-              dates: ["Hôm nay"],
-            },
-          }),
-          usage: {
-            promptTokens: 100,
-            completionTokens: 50,
-            totalTokens: 150,
-          },
-        }
-      }
-
-      return {
-        text: "Đã dịch: Xin chào bạn",
-        usage: {
-          promptTokens: 20,
-          completionTokens: 10,
-          totalTokens: 30,
-        },
-      }
-    }),
 }))
 
 describe("Web Chat AI Service - Audit Log Integration", () => {
@@ -203,7 +186,6 @@ describe("Web Chat AI Service - Audit Log Integration", () => {
   })
 
   it("injects rules and tone into smart reply prompt", async () => {
-    const { generateText } = await import("ai")
     await generateSmartReply({
       contextMessages: [{ id: "1", author: "A", content: "Hi", timestamp: 1, isOwn: false }],
       targetLang: "vi",
@@ -211,9 +193,12 @@ describe("Web Chat AI Service - Audit Log Integration", () => {
       rules: "Always say hello first and be polite.",
     })
 
-    expect(generateText).toHaveBeenCalledWith(
+    expect(sendMessageMock).toHaveBeenCalledWith(
+      "backgroundGenerateText",
       expect.objectContaining({
-        system: expect.stringMatching(/Strict Rules you MUST follow:[\s\S]*Always say hello first/),
+        instructions: expect.stringMatching(
+          /Strict Rules you MUST follow:[\s\S]*Always say hello first/,
+        ),
       }),
     )
   })

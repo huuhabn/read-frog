@@ -2,6 +2,7 @@ import type { LLMProviderConfig } from "@/types/config/provider"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { TranslatePromptOptions, TranslatePromptResult } from "@/utils/prompts/translate"
 import { generateText } from "ai"
+import { executeGatewayAttempts, GatewayError } from "@/utils/ai-gateway"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { getModelById } from "@/utils/providers/model"
 import { resolveModelId } from "@/utils/providers/model-id"
@@ -52,26 +53,47 @@ export async function aiTranslate<TContext>(
   const { systemPrompt, prompt } = await promptResolver(targetLangName, text, options)
 
   try {
-    const { text: translatedText } = await generateText({
-      model,
-      instructions: systemPrompt,
-      prompt,
-      reasoning,
-      temperature,
-      providerOptions,
-      abortSignal: options?.signal,
-      maxRetries: 0, // Disable SDK built-in retries, let RequestQueue/BatchQueue handle it
-    })
+    const signal = options?.signal ?? new AbortController().signal
+    const translatedText = await executeGatewayAttempts(
+      [
+        {
+          candidate: {
+            routeId: `local:${providerId}`,
+            providerId,
+            model: modelName,
+            operations: ["text.generate"],
+            enabled: true,
+            configurationOrder: 0,
+          },
+          execute: async (attemptSignal) => {
+            const result = await generateText({
+              model,
+              instructions: systemPrompt,
+              prompt,
+              reasoning,
+              temperature,
+              providerOptions,
+              abortSignal: attemptSignal,
+              maxRetries: 0,
+            })
+            return result.text
+          },
+        },
+      ],
+      signal,
+    )
 
     const [, finalTranslation = translatedText] = translatedText.match(THINK_TAG_RE) || []
 
     return finalTranslation
   } catch (error) {
-    const message = extractAISDKErrorMessage(error)
-    const meta = getRequestErrorMeta(error)
-    if (error instanceof Error) {
-      error.message = message
-      throw attachRequestErrorMeta(error, meta)
+    const originalError =
+      error instanceof GatewayError && error.cause !== undefined ? error.cause : error
+    const message = extractAISDKErrorMessage(originalError)
+    const meta = getRequestErrorMeta(originalError)
+    if (originalError instanceof Error) {
+      originalError.message = message
+      throw attachRequestErrorMeta(originalError, meta)
     }
 
     throw attachRequestErrorMeta(new Error(message), meta)

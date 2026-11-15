@@ -1,10 +1,10 @@
 import type { ChatMessage } from "../adapter/types"
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { AuditLogTokenUsage } from "@/utils/db/dexie/tables/audit-log"
-import { generateText } from "ai"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { recordAuditLog } from "@/utils/audit-log/audit-log-service"
 import { getLocalConfig } from "@/utils/config/storage"
-import { getModelById } from "@/utils/providers/model"
+import { sendMessage } from "@/utils/message"
 import { maskPII } from "../pii/mask"
 import { unmaskPII } from "../pii/unmask"
 
@@ -98,14 +98,20 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
     piiMap = piiResult.map
   }
 
-  const providerConfig = await getWebChatProvider()
-  const targetProviderId = providerId || providerConfig?.id
+  const config = await getLocalConfig()
+  const preferredProvider = providerId
+    ? config?.providersConfig.find(
+        (candidate) =>
+          candidate.id === providerId && candidate.enabled && isLLMProviderConfig(candidate),
+      )
+    : await getWebChatProvider()
+  const providerConfig = preferredProvider as LLMProviderConfig | undefined
+  const targetProviderId = providerConfig?.id
 
   if (!targetProviderId) {
     throw new Error("No configured LLM provider found for Web Chat.")
   }
 
-  const model = await getModelById(targetProviderId)
   const startTime = performance.now()
   let status: "success" | "error" = "success"
   let errorMessage: string | undefined
@@ -117,11 +123,21 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
     : systemPrompt
 
   try {
-    const response = await generateText({
-      model,
-      system: fullSystemPrompt,
+    const fallbackProviderRefs = (config?.providersConfig ?? [])
+      .filter(
+        (candidate): candidate is LLMProviderConfig =>
+          candidate.enabled && candidate.id !== targetProviderId && isLLMProviderConfig(candidate),
+      )
+      .map((candidate) => ({ kind: "local" as const, config: candidate }))
+    const response = await sendMessage("backgroundGenerateText", {
+      providerRef: { kind: "local", config: providerConfig },
+      fallbackProviderRefs,
+      maxGatewayAttempts: 3,
+      skipAudit: true,
+      instructions: fullSystemPrompt,
       prompt: processedPrompt,
       temperature: 0.7,
+      maxRetries: 0,
     })
 
     outputText = response.text || ""
