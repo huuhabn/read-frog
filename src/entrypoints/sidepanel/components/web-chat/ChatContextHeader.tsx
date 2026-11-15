@@ -205,8 +205,9 @@ export function ChatContextHeader({
           selectedProviderId={selectedProviderId}
           onSelectModel={(id) => onSelectProvider(id)}
           availableProviders={availableProviders}
-          variant="compact"
+          variant="pill"
           title={i18n.t("options.webChat.sidepanel.model")}
+          triggerClassName="max-w-[120px] px-1"
         />
 
         {/* Target Language Pill Dropdown */}
