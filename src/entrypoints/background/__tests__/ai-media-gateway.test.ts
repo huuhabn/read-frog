@@ -112,6 +112,9 @@ describe("background AI media gateway", () => {
       embeddings: [[0.1, 0.2]],
       usage: { tokens: 2 },
     })
+    await expect(
+      runEmbeddingRequest({ ...routing(), values: ["hello"], dimensions: 0 }),
+    ).rejects.toMatchObject({ code: "invalid_request" })
   })
 
   it("transcribes base64 audio without remote URL fetching", async () => {
@@ -154,6 +157,16 @@ describe("background AI media gateway", () => {
       }),
     ).rejects.toMatchObject({ code: "invalid_request" })
     expect(generateTextMock).not.toHaveBeenCalled()
+  })
+
+  it("rejects invalid media options at the background trust boundary", async () => {
+    const { runImageRequest, runSpeechRequest } = await import("../ai-media-gateway")
+    await expect(
+      runImageRequest({ ...routing(), prompt: "draw", size: "9999x9999" }),
+    ).rejects.toMatchObject({ code: "invalid_request" })
+    await expect(
+      runSpeechRequest({ ...routing(), text: "hello", speed: 10 }),
+    ).rejects.toMatchObject({ code: "invalid_request" })
   })
 
   it("propagates cancellation to the active SDK request", async () => {

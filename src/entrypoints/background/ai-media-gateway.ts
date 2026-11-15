@@ -24,7 +24,9 @@ const MAX_BINARY_BYTES = 8 * 1024 * 1024
 const MAX_GENERATED_BINARY_BYTES = 16 * 1024 * 1024
 const MAX_EMBEDDING_VALUES = 64
 const MAX_EMBEDDING_VALUE_CHARS = 16_000
+const MAX_EMBEDDING_OUTPUT_VALUES = 262_144
 const MAX_SPEECH_TEXT_CHARS = 10_000
+const MAX_PROMPT_CHARS = 20_000
 const MAX_IMAGE_COUNT = 4
 const activeMediaRequests = new Map<string, AbortController>()
 
@@ -40,6 +42,13 @@ type FactoryName =
 
 function assertNonEmpty(value: string, name: string) {
   if (!value.trim()) throw new GatewayError("invalid_request", `${name} is required`)
+}
+
+function assertPrompt(value: string) {
+  assertNonEmpty(value, "prompt")
+  if (value.length > MAX_PROMPT_CHARS) {
+    throw new GatewayError("invalid_request", "prompt is too long")
+  }
 }
 
 function base64ByteLength(value: string): number {
@@ -101,6 +110,7 @@ async function executeMedia<T>(
   ) => Promise<T>,
 ): Promise<T> {
   assertNonEmpty(routing.requestId, "requestId")
+  assertNonEmpty(routing.providerId, "providerId")
   assertNonEmpty(routing.modelId, "modelId")
   if (activeMediaRequests.has(routing.requestId)) {
     throw new GatewayError("invalid_request", "Media requestId is already active")
@@ -111,7 +121,13 @@ async function executeMedia<T>(
     { providerId: routing.providerId, modelId: routing.modelId },
     ...(routing.fallbackRoutes ?? []),
   ]
+  const seenRoutes = new Set<string>()
   const routes = requestedRoutes.flatMap((requested) => {
+    assertNonEmpty(requested.providerId, "fallback providerId")
+    assertNonEmpty(requested.modelId, "fallback modelId")
+    const routeKey = `${requested.providerId}:${requested.modelId}`
+    if (seenRoutes.has(routeKey)) return []
+    seenRoutes.add(routeKey)
     const providerConfig = config.providersConfig.find(
       (candidate) => candidate.id === requested.providerId && candidate.enabled,
     )
@@ -144,7 +160,7 @@ async function executeMedia<T>(
 export async function runVisionRequest(
   request: BackgroundVisionRequest,
 ): Promise<BackgroundVisionResponse> {
-  assertNonEmpty(request.prompt, "prompt")
+  assertPrompt(request.prompt)
   if (!request.mediaType.startsWith("image/"))
     throw new GatewayError("invalid_request", "mediaType must be image/*")
   assertBinaryInput(request.imageBase64)
@@ -181,10 +197,25 @@ export async function runVisionRequest(
 export async function runImageRequest(
   request: BackgroundImageRequest,
 ): Promise<BackgroundImageResponse> {
-  assertNonEmpty(request.prompt, "prompt")
+  assertPrompt(request.prompt)
   const n = request.n ?? 1
   if (!Number.isInteger(n) || n < 1 || n > MAX_IMAGE_COUNT) {
     throw new GatewayError("invalid_request", `n must be between 1 and ${MAX_IMAGE_COUNT}`)
+  }
+  if (request.size) {
+    const match = /^(\d{1,4})x(\d{1,4})$/.exec(request.size)
+    if (!match || Number(match[1]) > 4096 || Number(match[2]) > 4096) {
+      throw new GatewayError("invalid_request", "size must be at most 4096x4096")
+    }
+  }
+  if (request.aspectRatio) {
+    const match = /^(\d{1,3}):(\d{1,3})$/.exec(request.aspectRatio)
+    if (!match || Number(match[1]) === 0 || Number(match[2]) === 0) {
+      throw new GatewayError("invalid_request", "aspectRatio is invalid")
+    }
+  }
+  if (request.seed !== undefined && !Number.isSafeInteger(request.seed)) {
+    throw new GatewayError("invalid_request", "seed must be a safe integer")
   }
   const factoryNames: FactoryName[] = ["imageModel", "image"]
   return executeMedia(
@@ -225,6 +256,12 @@ export async function runEmbeddingRequest(
   if (request.values.some((value) => !value.trim() || value.length > MAX_EMBEDDING_VALUE_CHARS)) {
     throw new GatewayError("invalid_request", "Embedding value is empty or too long")
   }
+  if (
+    request.dimensions !== undefined &&
+    (!Number.isInteger(request.dimensions) || request.dimensions < 1 || request.dimensions > 8192)
+  ) {
+    throw new GatewayError("invalid_request", "dimensions must be between 1 and 8192")
+  }
   const factoryNames: FactoryName[] = ["embeddingModel", "embedding"]
   return executeMedia(
     "embedding.generate",
@@ -239,6 +276,13 @@ export async function runEmbeddingRequest(
         abortSignal: signal,
         maxRetries: 0,
       })
+      const outputValues = result.embeddings.reduce(
+        (total, embedding) => total + embedding.length,
+        0,
+      )
+      if (outputValues > MAX_EMBEDDING_OUTPUT_VALUES) {
+        throw new GatewayError("provider", "Embedding output exceeds extension limit")
+      }
       return {
         embeddings: result.embeddings,
         usage: result.usage,
@@ -288,6 +332,9 @@ export async function runSpeechRequest(
   assertNonEmpty(request.text, "text")
   if (request.text.length > MAX_SPEECH_TEXT_CHARS)
     throw new GatewayError("invalid_request", "Speech text is too long")
+  if (request.speed !== undefined && (request.speed < 0.25 || request.speed > 4)) {
+    throw new GatewayError("invalid_request", "Speech speed must be between 0.25 and 4")
+  }
   const factoryNames: FactoryName[] = ["speechModel", "speech"]
   return executeMedia(
     "speech.synthesize",
