@@ -16,8 +16,19 @@ function toRetryDelay(attempt: number): number {
   return base + jitter
 }
 
-async function wait(ms: number): Promise<void> {
-  await new Promise((resolve) => setTimeout(resolve, ms))
+async function wait(ms: number, signal?: AbortSignal): Promise<void> {
+  if (signal?.aborted) throw signal.reason ?? new DOMException("Aborted", "AbortError")
+  await new Promise<void>((resolve, reject) => {
+    const onAbort = () => {
+      clearTimeout(timer)
+      reject(signal?.reason ?? new DOMException("Aborted", "AbortError"))
+    }
+    const timer = setTimeout(() => {
+      signal?.removeEventListener("abort", onAbort)
+      resolve()
+    }, ms)
+    signal?.addEventListener("abort", onAbort, { once: true })
+  })
 }
 
 function concatArrayBuffers(chunks: ArrayBuffer[]): ArrayBuffer {
@@ -85,7 +96,10 @@ function assertChunkConcatSupported(chunkRequests: EdgeTTSSynthesizeRequest[]): 
   }
 }
 
-async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeTTSResponse> {
+async function synthesizeChunk(
+  request: EdgeTTSSynthesizeRequest,
+  signal?: AbortSignal,
+): Promise<EdgeTTSResponse> {
   const endpointInfo = await getEdgeTTSEndpointToken()
   const url = `https://${endpointInfo.endpoint.r}.tts.speech.microsoft.com/cognitiveservices/v1`
 
@@ -98,6 +112,7 @@ async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeT
       "X-Microsoft-OutputFormat": resolveOutputFormat(request.outputFormat),
     },
     body: buildSSMLRequest(request),
+    signal,
   })
 
   if (!response.ok) {
@@ -150,17 +165,18 @@ async function synthesizeChunk(request: EdgeTTSSynthesizeRequest): Promise<EdgeT
 
 export async function synthesizeEdgeTTSChunkWithRetry(
   request: EdgeTTSSynthesizeRequest,
+  signal?: AbortSignal,
 ): Promise<EdgeTTSResponse> {
   let lastError: unknown
   for (let attempt = 0; attempt <= EDGE_TTS_MAX_RETRIES; attempt++) {
     try {
-      return await synthesizeChunk(request)
+      return await synthesizeChunk(request, signal)
     } catch (error) {
       lastError = error
       if (attempt >= EDGE_TTS_MAX_RETRIES || !isRetryableError(error)) {
         break
       }
-      await wait(toRetryDelay(attempt))
+      await wait(toRetryDelay(attempt), signal)
     }
   }
 
@@ -190,6 +206,7 @@ export async function synthesizeEdgeTTSChunkWithRetry(
 
 export async function combineEdgeTTSAudioChunks(
   chunkRequests: EdgeTTSSynthesizeRequest[],
+  signal?: AbortSignal,
 ): Promise<EdgeTTSResponse> {
   assertChunkConcatSupported(chunkRequests)
 
@@ -197,7 +214,7 @@ export async function combineEdgeTTSAudioChunks(
   let contentType = "audio/mpeg"
 
   for (const chunkRequest of chunkRequests) {
-    const response = await synthesizeEdgeTTSChunkWithRetry(chunkRequest)
+    const response = await synthesizeEdgeTTSChunkWithRetry(chunkRequest, signal)
     contentType = response.contentType
     chunkAudioBuffers.push(response.audio)
   }

@@ -212,6 +212,7 @@ interface ProtocolMap {
   invalidateAuthCache: () => Promise<void>
   // edge tts
   edgeTtsSynthesize: (data: EdgeTTSSynthesizeRequest) => Promise<EdgeTTSSynthesizeWireResponse>
+  edgeTtsCancel: (data: { requestId: string }) => Promise<{ ok: true }>
   edgeTtsListVoices: () => Promise<EdgeTTSVoice[]>
   edgeTtsHealthCheck: () => Promise<EdgeTTSHealthStatus>
   // tts playback

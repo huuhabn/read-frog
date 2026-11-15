@@ -37,6 +37,7 @@ function toChunkRequests(params: EdgeTTSRequestParams): EdgeTTSSynthesizeRequest
 
 export async function synthesizeEdgeTTS(
   params: EdgeTTSRequestParams,
+  signal?: AbortSignal,
 ): Promise<EdgeTTSSynthesizeResponse> {
   try {
     assertEdgeTTSAvailable()
@@ -49,7 +50,7 @@ export async function synthesizeEdgeTTS(
     }
 
     const requests = toChunkRequests(params)
-    const response = await combineEdgeTTSAudioChunks(requests)
+    const response = await combineEdgeTTSAudioChunks(requests, signal)
     recordEdgeTTSSuccess()
 
     return {

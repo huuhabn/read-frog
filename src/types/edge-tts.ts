@@ -28,6 +28,12 @@ export interface EdgeTTSErrorPayload {
 
 export interface EdgeTTSSynthesizeRequest extends EdgeTTSRequestParams {
   outputFormat?: string
+  /** Groups concurrent chunk requests so background cancellation can abort all of them. */
+  requestId?: string
+}
+
+export interface EdgeTTSCancelRequest {
+  requestId: string
 }
 
 export interface EdgeTTSSynthesizeSuccess {

@@ -116,6 +116,7 @@ async function synthesizeEdgeTTSAudioChunk(
   chunk: string,
   voice: string,
   ttsConfig: TTSConfig,
+  requestId: string,
 ): Promise<SynthesizedAudioChunk> {
   const response = await sendMessage("edgeTtsSynthesize", {
     text: chunk,
@@ -123,6 +124,7 @@ async function synthesizeEdgeTTSAudioChunk(
     rate: toSignedValue(ttsConfig.rate, "%"),
     pitch: toSignedValue(ttsConfig.pitch, "Hz"),
     volume: toSignedValue(ttsConfig.volume, "%"),
+    requestId,
   })
 
   if (!response.ok) {
@@ -156,6 +158,7 @@ export function useTextToSpeech(
     const activeRequestId = activeRequestIdRef.current
     activeRequestIdRef.current = null
     if (activeRequestId) {
+      void sendMessage("edgeTtsCancel", { requestId: activeRequestId }).catch(() => {})
       void sendMessage("ttsPlaybackStop", { requestId: activeRequestId }).catch(() => {})
     }
 
@@ -247,6 +250,7 @@ export function useTextToSpeech(
         queryKey: [
           "tts-audio",
           {
+            requestId,
             text: chunk,
             voice: selectedVoice,
             rate: ttsConfig.rate,
@@ -254,7 +258,7 @@ export function useTextToSpeech(
             volume: ttsConfig.volume,
           },
         ],
-        queryFn: () => synthesizeEdgeTTSAudioChunk(chunk, selectedVoice, ttsConfig),
+        queryFn: () => synthesizeEdgeTTSAudioChunk(chunk, selectedVoice, ttsConfig, requestId),
         staleTime: Number.POSITIVE_INFINITY,
         gcTime: 1000 * 60 * 10,
         meta: {
