@@ -18,23 +18,47 @@ else
   echo "✅ No local link overrides found in pnpm-lock.yaml."
 fi
 
-# Base branch for `nx affected`. Override with: NX_BASE=origin/develop git push
+# Base branch for finding changes. Override with: NX_BASE=origin/develop git push
 BASE="${NX_BASE:-origin/sider}"
 if ! git rev-parse --verify --quiet "$BASE" > /dev/null; then
   echo "⚠️  Base '$BASE' not found, falling back to origin/master."
   BASE="origin/master"
 fi
+if ! git rev-parse --verify --quiet "$BASE" > /dev/null; then
+  echo "⚠️  Base '$BASE' not found, falling back to HEAD~1."
+  BASE="HEAD~1"
+fi
 
-# Format check stays workspace-wide (kept as in the original script).
+# Format check stays workspace-wide (fast cached check).
 pnpm exec nx fmt:check
 
-# Only lint/test projects affected by the changes since $BASE.
+# Only lint projects affected by the changes since $BASE.
 pnpm exec nx affected -t lint --base="$BASE" --head=HEAD
 # pnpm exec nx affected -t build --base="$BASE" --head=HEAD
 
-# Skip the free-api test when SKIP_FREE_API is set
-if [ "$SKIP_FREE_API" = "true" ]; then
-  pnpm exec nx affected -t test --base="$BASE" --head=HEAD -- --exclude="**/free-api.test.ts"
+# Run tests ONLY for newly changed features and their dependencies
+if [ "$TEST_ALL" = "true" ]; then
+  echo "🧪 Running full test suite (TEST_ALL=true)..."
+  if [ "$SKIP_FREE_API" = "true" ]; then
+    pnpm exec vitest run --exclude="**/free-api.test.ts"
+  else
+    pnpm exec vitest run
+  fi
 else
-  pnpm exec nx affected -t test --base="$BASE" --head=HEAD
+  # Find changed TypeScript/JavaScript files in src/ (ignoring deleted files and .d.ts)
+  CHANGED_FILES=$(git diff --name-only --diff-filter=d "$BASE"...HEAD -- 'src/' | grep -E '\.(ts|tsx|js|jsx)$' | grep -v '\.d\.ts$' || true)
+
+  if [ -z "$CHANGED_FILES" ]; then
+    echo "✅ No source or test files changed in 'src/' since $BASE. Skipping tests."
+  else
+    FILE_COUNT=$(echo "$CHANGED_FILES" | wc -l | tr -d ' ')
+    echo "🧪 Running tests for $FILE_COUNT changed file(s) and their dependents..."
+
+    EXTRA_FLAGS=""
+    if [ "$SKIP_FREE_API" = "true" ]; then
+      EXTRA_FLAGS="--exclude=**/free-api.test.ts"
+    fi
+
+    echo "$CHANGED_FILES" | xargs pnpm exec vitest related --run --passWithNoTests $EXTRA_FLAGS
+  fi
 fi
