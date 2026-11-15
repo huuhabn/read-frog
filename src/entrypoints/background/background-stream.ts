@@ -37,6 +37,11 @@ import { generateText, Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config/provider"
+import {
+  executeGatewayStreamAttempts,
+  GatewayError,
+  type GatewayRouteCandidate,
+} from "@/utils/ai-gateway"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { recordAuditLog } from "@/utils/audit-log/audit-log-service"
@@ -894,6 +899,64 @@ async function createHostedTextPartStream(
   }
 }
 
+function isVisibleTextStreamPart(part: unknown): boolean {
+  if (!part || typeof part !== "object" || !("type" in part)) return false
+  return [
+    "text-delta",
+    "reasoning-delta",
+    "tool-call",
+    "tool-input-start",
+    "tool-input-delta",
+  ].includes(String(part.type))
+}
+
+/**
+ * Compatibility bridge between the existing AI SDK part stream and the gateway
+ * attempt lifecycle. The public Port protocol stays unchanged while routing,
+ * abort and pre-output failover semantics gain one owner.
+ */
+function createTextPartStreamViaGateway(
+  serializablePayload: BackgroundStreamTextSerializablePayload,
+  options: StreamRuntimeOptions<BackgroundTextStreamSnapshot>,
+): AsyncIterable<unknown> {
+  const signal = options.signal ?? new AbortController().signal
+  const candidate: GatewayRouteCandidate = {
+    routeId: `${serializablePayload.providerKind}:${serializablePayload.providerId}`,
+    providerId: serializablePayload.providerId,
+    operations: ["text.stream"],
+    enabled: true,
+    configurationOrder: 0,
+  }
+  const stream = executeGatewayStreamAttempts(
+    [
+      {
+        candidate,
+        execute: () =>
+          serializablePayload.providerKind === "system"
+            ? createHostedTextPartStream(serializablePayload, options.signal)
+            : createLocalTextPartStream(serializablePayload, options),
+      },
+    ],
+    signal,
+    isVisibleTextStreamPart,
+  )
+
+  return {
+    async *[Symbol.asyncIterator]() {
+      try {
+        yield* stream
+      } catch (error) {
+        // Keep existing error identity/message for Port normalization and audit
+        // until all consumers speak the canonical gateway error contract.
+        if (error instanceof GatewayError && error.cause !== undefined) {
+          throw error.cause
+        }
+        throw error
+      }
+    },
+  }
+}
+
 /**
  * One text generation against either provider kind, collected into a string.
  *
@@ -1057,10 +1120,7 @@ export async function runStreamTextInBackground(
   let capturedUsage: AuditLogTokenUsage | undefined
 
   try {
-    const partStream =
-      serializablePayload.providerKind === "system"
-        ? await createHostedTextPartStream(serializablePayload, signal)
-        : await createLocalTextPartStream(serializablePayload, options)
+    const partStream = createTextPartStreamViaGateway(serializablePayload, options)
 
     finalSnapshot = await consumeTextPartStream(partStream, {
       onChunk,
