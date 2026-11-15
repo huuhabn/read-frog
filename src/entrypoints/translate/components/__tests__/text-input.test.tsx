@@ -3,8 +3,8 @@
 import { fireEvent, render, screen } from "@testing-library/react"
 import { createStore, Provider } from "jotai"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { inputTextAtom, translateRequestAtom } from "@/entrypoints/translation-hub/atoms"
-import { TextInput } from "@/entrypoints/translation-hub/components/text-input"
+import { inputTextAtom, translateRequestAtom } from "@/entrypoints/translate/atoms"
+import { TextInput } from "@/entrypoints/translate/components/text-input"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
 const { playMock, stopMock, speechState } = vi.hoisted(() => ({

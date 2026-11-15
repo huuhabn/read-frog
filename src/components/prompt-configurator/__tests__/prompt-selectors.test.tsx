@@ -5,7 +5,7 @@ import type { Config } from "@/types/config/config"
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
 import TranslatePromptSelector from "@/entrypoints/popup/components/translate-prompt-selector"
-import { PromptSelector as TranslationHubPromptSelector } from "@/entrypoints/translation-hub/components/prompt-selector"
+import { PromptSelector as TranslatePromptSelectorComponent } from "@/entrypoints/translate/components/prompt-selector"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
 
 const {
@@ -55,7 +55,7 @@ vi.mock("@/utils/atoms/provider", () => ({
   featureProviderRefAtom: () => providerRefAtom,
 }))
 
-vi.mock("@/entrypoints/translation-hub/atoms", () => ({
+vi.mock("@/entrypoints/translate/atoms", () => ({
   selectedProvidersAtom,
 }))
 
@@ -198,7 +198,7 @@ describe("translation prompt selectors", () => {
       name: "Built-in AI",
       modelTier: "normal",
     }
-    render(<TranslationHubPromptSelector />)
+    render(<TranslatePromptSelectorComponent />)
 
     expect(screen.getByRole("combobox")).toHaveTextContent("Deep polish")
     expect(screen.getAllByRole("option").map((option) => option.textContent)).toEqual([
@@ -213,14 +213,14 @@ describe("translation prompt selectors", () => {
 
   it("falls back to the default Hub prompt when a custom prompt was deleted", () => {
     testState.translationHub!.promptId = "missing"
-    render(<TranslationHubPromptSelector />)
+    render(<TranslatePromptSelectorComponent />)
     expect(screen.getByRole("combobox")).toHaveTextContent("Default")
   })
 
   it("uses the page prompt until an older config finishes migration", () => {
     testState.translationHub!.promptId = null
     testState.pageTranslation!.customPromptsConfig.promptId = "precision-rewrite"
-    render(<TranslationHubPromptSelector />)
+    render(<TranslatePromptSelectorComponent />)
     expect(screen.getByRole("combobox")).toHaveTextContent("Deep polish")
   })
 })

@@ -2,7 +2,7 @@
 
 import { fireEvent, render, screen } from "@testing-library/react"
 import { beforeEach, describe, expect, it, vi } from "vitest"
-import { TranslationCard } from "@/entrypoints/translation-hub/components/translation-card"
+import { TranslationCard } from "@/entrypoints/translate/components/translation-card"
 
 const {
   anchoredToastAddMock,
@@ -239,7 +239,7 @@ vi.mock("@/utils/i18n", () => ({
   i18n: { t: (key: string) => key },
 }))
 
-vi.mock("@/entrypoints/translation-hub/atoms", () => ({
+vi.mock("@/entrypoints/translate/atoms", () => ({
   selectedProviderIdsAtom,
   translateRequestAtom: requestAtom,
   translationCardExpandedStateAtom: {},

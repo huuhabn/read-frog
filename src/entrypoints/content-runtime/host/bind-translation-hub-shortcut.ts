@@ -2,7 +2,7 @@ import type { HotkeyChord } from "@tanstack/hotkeys"
 import { HotkeyManager } from "@tanstack/hotkeys"
 import { browser } from "#imports"
 import { getLocalConfig } from "@/utils/config/storage"
-import { TRANSLATION_HUB_PAGE_PATH } from "@/utils/constants/translation-hub"
+import { TRANSLATE_PAGE_PATH } from "@/utils/constants/translation-hub"
 import { sendMessage } from "@/utils/message"
 import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
 
@@ -11,7 +11,7 @@ import { isShortcutEmpty, isValidShortcut } from "@/utils/shortcut"
  * tab itself, so the background does it — the same `openPage` route the popup
  * button and the options sidebar link already use.
  */
-export async function bindTranslationHubShortcutKey() {
+export async function bindTranslateShortcutKey() {
   const config = await getLocalConfig()
   if (!config || isShortcutEmpty(config.translationHub.shortcut)) {
     return () => {}
@@ -26,7 +26,7 @@ export async function bindTranslationHubShortcutKey() {
     shortcut as HotkeyChord,
     () => {
       void sendMessage("openPage", {
-        url: browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH),
+        url: browser.runtime.getURL(TRANSLATE_PAGE_PATH),
         active: true,
       })
     },
@@ -41,3 +41,5 @@ export async function bindTranslationHubShortcutKey() {
     registration.unregister()
   }
 }
+
+export const bindTranslationHubShortcutKey = bindTranslateShortcutKey

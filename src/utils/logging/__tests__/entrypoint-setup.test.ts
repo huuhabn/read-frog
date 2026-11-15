@@ -8,7 +8,7 @@ import { describe, expect, it } from "vitest"
 
 const ENTRYPOINTS_DIR = path.resolve("src/entrypoints")
 
-const EXTENSION_PAGES = ["offscreen", "options", "popup", "sidepanel", "translation-hub"]
+const EXTENSION_PAGES = ["offscreen", "options", "popup", "sidepanel", "translate"]
 
 // Bootstraps injected into a great many frames, kept as small as they can be.
 // They log nothing themselves; what they load sets up its own logging.

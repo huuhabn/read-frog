@@ -30,7 +30,7 @@ import { getProviderLogo, isSystemProviderSelectorItem } from "@/utils/providers
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { selectedProviderIdsAtom } from "../atoms"
 
-const log = createLogger("translation-hub/translation-service-dropdown")
+const log = createLogger("translate/translation-service-dropdown")
 
 export function TranslationServiceDropdown() {
   const { theme } = useTheme()

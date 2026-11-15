@@ -202,7 +202,7 @@ describe("background analytics", () => {
     const { captureFeatureUsedEventInBackground } = createAnalytics()
     await captureFeatureUsedEventInBackground(
       { ...TTS_EVENT, surface: "translation_hub" },
-      { id: 42, url: "chrome-extension://abc/translation-hub.html" },
+      { id: 42, url: "chrome-extension://abc/translate.html" },
     )
 
     expect(posthogCaptureMock).toHaveBeenCalledWith("feature_used", {
@@ -246,7 +246,7 @@ describe("background analytics", () => {
     const { captureFeatureUsedEventInBackground } = createAnalytics()
     await captureFeatureUsedEventInBackground(
       { ...TTS_EVENT },
-      { id: 42, url: "chrome-extension://abc/translation-hub.html" },
+      { id: 42, url: "chrome-extension://abc/translate.html" },
     )
 
     expect(posthogCaptureMock).toHaveBeenCalledWith(

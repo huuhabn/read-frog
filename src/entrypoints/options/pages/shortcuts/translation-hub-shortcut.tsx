@@ -3,7 +3,7 @@ import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { ShortcutConfigItem } from "./shortcut-config-item"
 
-export function TranslationHubShortcut() {
+export function TranslateShortcut() {
   const [translationHub, setTranslationHub] = useAtom(configFieldsAtomMap.translationHub)
 
   return (
@@ -18,3 +18,5 @@ export function TranslationHubShortcut() {
     />
   )
 }
+
+export const TranslationHubShortcut = TranslateShortcut

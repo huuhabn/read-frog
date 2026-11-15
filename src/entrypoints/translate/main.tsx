@@ -22,7 +22,7 @@ import App from "./app"
 import "@fontsource-variable/inter/index.css"
 import "@/assets/styles/theme.css"
 
-setupExtensionPageLogging("translation-hub")
+setupExtensionPageLogging("translate")
 
 interface HydrateAtomsProps {
   initialValues: [[typeof configAtom, Config], [typeof baseThemeModeAtom, ThemeMode]]

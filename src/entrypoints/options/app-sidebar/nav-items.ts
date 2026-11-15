@@ -1,6 +1,6 @@
 import { browser } from "#imports"
 import { env } from "@/env"
-import { TRANSLATION_HUB_PAGE_PATH } from "@/utils/constants/translation-hub"
+import { TRANSLATE_PAGE_PATH } from "@/utils/constants/translation-hub"
 import { i18n } from "@/utils/i18n"
 
 export const ROUTE_DEFS = [
@@ -120,30 +120,32 @@ export const FEATURE_NAV_ITEMS: readonly FeatureNavItem[] = [
   },
   {
     kind: "link",
-    path: "/upwork",
-    icon: "tabler:briefcase",
-    label: () => i18n.t("options.upwork.title"),
-  },
-  {
-    kind: "link",
     path: "/web-chat",
     icon: "tabler:messages",
     label: () => i18n.t("options.webChat.title"),
   },
   {
-    kind: "external",
-    icon: "tabler:language-hiragana",
-    href: () => browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH),
-    label: () => i18n.t("options.tools.translate"),
+    kind: "link",
+    path: "/upwork",
+    icon: "tabler:briefcase",
+    label: () => i18n.t("options.upwork.title"),
   },
 ]
 
-export interface NavItemDef {
-  path: RoutePath
-  icon: string
-  label: Label
-  isActive?: (pathname: string) => boolean
-}
+export type NavItemDef =
+  | {
+      kind?: "link"
+      path: RoutePath
+      icon: string
+      label: Label
+      isActive?: (pathname: string) => boolean
+    }
+  | {
+      kind: "external"
+      href: () => string
+      icon: string
+      label: Label
+    }
 
 export const PRIMARY_NAV_ITEMS: readonly NavItemDef[] = [
   {
@@ -151,6 +153,12 @@ export const PRIMARY_NAV_ITEMS: readonly NavItemDef[] = [
     icon: "tabler:adjustments-horizontal",
     label: () => i18n.t("options.general.title"),
     isActive: (p) => p.startsWith("/general"),
+  },
+  {
+    kind: "external",
+    icon: "tabler:language-hiragana",
+    href: () => browser.runtime.getURL(TRANSLATE_PAGE_PATH),
+    label: () => i18n.t("options.tools.translate"),
   },
 ]
 

@@ -5,17 +5,17 @@ import { Button } from "@/components/ui/base-ui/button"
 import { Kbd, KbdGroup } from "@/components/ui/base-ui/kbd"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/base-ui/tooltip"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { TRANSLATION_HUB_PAGE_PATH } from "@/utils/constants/translation-hub"
+import { TRANSLATE_PAGE_PATH } from "@/utils/constants/translation-hub"
 import { i18n } from "@/utils/i18n"
 import { formatHotkeyParts } from "@/utils/os"
 import { isShortcutEmpty } from "@/utils/shortcut"
 
-export function TranslationHubButton() {
+export function TranslatePageButton() {
   const translationHub = useAtomValue(configFieldsAtomMap.translationHub)
 
   const handleClick = async () => {
     await browser.tabs.create({
-      url: browser.runtime.getURL(TRANSLATION_HUB_PAGE_PATH),
+      url: browser.runtime.getURL(TRANSLATE_PAGE_PATH),
     })
   }
 
@@ -43,3 +43,5 @@ export function TranslationHubButton() {
     </Tooltip>
   )
 }
+
+export const TranslationHubButton = TranslatePageButton

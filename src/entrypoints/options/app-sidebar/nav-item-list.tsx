@@ -8,8 +8,23 @@ export function NavItems({ items }: { items: readonly NavItemDef[] }) {
 
   return (
     <SidebarMenu>
-      {items.map(({ path, icon, label: getLabel, isActive }) => {
-        const label = getLabel()
+      {items.map((item) => {
+        const label = item.label()
+        if (item.kind === "external") {
+          return (
+            <SidebarMenuItem key={item.href()}>
+              <SidebarMenuButton
+                render={<a href={item.href()} target="_blank" rel="noopener noreferrer" />}
+                tooltip={label}
+              >
+                <Icon icon={item.icon} />
+                <span>{label}</span>
+              </SidebarMenuButton>
+            </SidebarMenuItem>
+          )
+        }
+
+        const { path, icon, isActive } = item
         return (
           <SidebarMenuItem key={path}>
             <SidebarMenuButton

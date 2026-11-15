@@ -38,6 +38,7 @@ describe("getWebPageNoteOrigin", () => {
   })
 
   it.each([
+    "chrome-extension://abcdefghijklmnop/translate.html",
     "chrome-extension://abcdefghijklmnop/translation-hub.html",
     "moz-extension://1234/options.html",
     "file:///Users/reader/book.html",

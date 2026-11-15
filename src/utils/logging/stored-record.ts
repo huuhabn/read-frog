@@ -11,6 +11,7 @@ export const FORWARDING_LOG_CONTEXTS = [
   "options",
   "popup",
   "sidepanel",
+  "translate",
   "translation-hub",
 ] as const
 export type ForwardingLogContext = (typeof FORWARDING_LOG_CONTEXTS)[number]
