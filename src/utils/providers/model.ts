@@ -115,14 +115,49 @@ export function getLanguageModelForConfig(providerConfig: LLMProviderConfig) {
   const headers = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers)
   const providerSpecificSettings = getProviderSpecificSettings(providerConfig)
 
-  const provider = match(providerConfig)
+  const modelId = resolveModelId(providerConfig.model)
+
+  if (!modelId) {
+    throw new ProviderSetupError("Model is undefined")
+  }
+
+  return getLanguageModelForConfigAndId(providerConfig, modelId, headers, providerSpecificSettings)
+}
+
+export function getLanguageModelForConfigAndId(
+  providerConfig: LLMProviderConfig,
+  modelId: string,
+  resolvedHeaders = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers),
+  resolvedProviderSettings = getProviderSpecificSettings(providerConfig),
+) {
+  const provider = createAIProviderForConfig(
+    providerConfig,
+    resolvedHeaders,
+    resolvedProviderSettings,
+  )
+  if (providerConfig.provider === "azure" && getAzureApiMode(providerConfig) === "chat") {
+    return (provider as ReturnType<typeof createAzure>).chat(modelId)
+  }
+  if (providerConfig.provider === "ollama") {
+    return (provider as ReturnType<typeof createOllama>).languageModel(modelId, { think: false })
+  }
+  return provider.languageModel(modelId)
+}
+
+/** Build the configured AI SDK provider without selecting an operation-specific model. */
+export function createAIProviderForConfig(
+  providerConfig: LLMProviderConfig,
+  resolvedHeaders = getProviderHeadersWithOverride(providerConfig.provider, providerConfig.headers),
+  resolvedProviderSettings = getProviderSpecificSettings(providerConfig),
+) {
+  return match(providerConfig)
     .when(isOpenAICompatibleLLMProviderConfig, (matchedConfig) =>
       createOpenAICompatible({
         name: matchedConfig.provider,
         baseURL: matchedConfig.baseURL,
         supportsStructuredOutputs: true,
         ...(matchedConfig.apiKey && { apiKey: matchedConfig.apiKey }),
-        ...(headers && { headers }),
+        ...(resolvedHeaders && { headers: resolvedHeaders }),
       }),
     )
     .when(isOpenResponsesLLMProviderConfig, (matchedConfig) =>
@@ -130,34 +165,18 @@ export function getLanguageModelForConfig(providerConfig: LLMProviderConfig) {
         name: matchedConfig.provider,
         url: matchedConfig.url,
         ...(matchedConfig.apiKey && { apiKey: matchedConfig.apiKey }),
-        ...(headers && { headers }),
+        ...(resolvedHeaders && { headers: resolvedHeaders }),
       }),
     )
     .when(isDedicatedLLMProviderConfig, (matchedConfig) =>
       DEDICATED_PROVIDER_FACTORY_BY_TYPE[matchedConfig.provider]({
-        ...providerSpecificSettings,
+        ...resolvedProviderSettings,
         ...(matchedConfig.baseURL && { baseURL: matchedConfig.baseURL }),
         ...(matchedConfig.apiKey && { apiKey: matchedConfig.apiKey }),
-        ...(headers && { headers }),
+        ...(resolvedHeaders && { headers: resolvedHeaders }),
       }),
     )
     .exhaustive()
-
-  const modelId = resolveModelId(providerConfig.model)
-
-  if (!modelId) {
-    throw new ProviderSetupError("Model is undefined")
-  }
-
-  if (providerConfig.provider === "azure" && getAzureApiMode(providerConfig) === "chat") {
-    return (provider as ReturnType<typeof createAzure>).chat(modelId)
-  }
-
-  if (providerConfig.provider === "ollama") {
-    return (provider as ReturnType<typeof createOllama>).languageModel(modelId, { think: false })
-  }
-
-  return provider.languageModel(modelId)
 }
 
 export async function getModelById(providerId: string) {

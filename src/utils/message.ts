@@ -5,6 +5,18 @@ import type {
   BackgroundGenerateTextPayload,
   BackgroundGenerateTextResponse,
 } from "@/types/background-generate-text"
+import type {
+  BackgroundEmbeddingRequest,
+  BackgroundEmbeddingResponse,
+  BackgroundImageRequest,
+  BackgroundImageResponse,
+  BackgroundSpeechRequest,
+  BackgroundSpeechResponse,
+  BackgroundTranscriptionRequest,
+  BackgroundTranscriptionResponse,
+  BackgroundVisionRequest,
+  BackgroundVisionResponse,
+} from "@/types/background-media"
 import type { Config } from "@/types/config/config"
 import type { TranslationTextFormat } from "@/types/config/translate"
 import type {
@@ -47,6 +59,16 @@ interface ProtocolMap {
   >
   // config
   getInitialConfig: () => Config | null
+  backgroundGenerateVision: (data: BackgroundVisionRequest) => Promise<BackgroundVisionResponse>
+  backgroundGenerateImage: (data: BackgroundImageRequest) => Promise<BackgroundImageResponse>
+  backgroundGenerateEmbeddings: (
+    data: BackgroundEmbeddingRequest,
+  ) => Promise<BackgroundEmbeddingResponse>
+  backgroundTranscribeAudio: (
+    data: BackgroundTranscriptionRequest,
+  ) => Promise<BackgroundTranscriptionResponse>
+  backgroundGenerateSpeech: (data: BackgroundSpeechRequest) => Promise<BackgroundSpeechResponse>
+  backgroundCancelMedia: (data: { requestId: string }) => Promise<{ ok: true }>
   // glossary — the terms live in IndexedDB, which a content script cannot open,
   // so it asks the background once per page and compiles a matcher locally.
   // `url` says which page is asking; glossaries scoped to other sites are left
