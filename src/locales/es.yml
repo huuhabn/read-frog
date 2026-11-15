@@ -311,6 +311,15 @@ options:
       success: Correcto
       failed: Falló
       slow: Lento (se recomienda ajustar el modo de razonamiento)
+    automaticRouting:
+      title: Enrutamiento automático de IA
+      enabled: Usar proveedores de respaldo
+      enabledDescription: Cuando el proveedor seleccionado no esté disponible temporalmente, Workmate puede enviar la misma solicitud a otro proveedor habilitado. Esto puede cambiar la residencia de los datos và los cargos del proveedor.
+      maxAttempts: Intentos máximos
+      maxAttemptsDescription: Incluye el proveedor seleccionado. Las solicitudes en streaming nunca cambian después de que comienza la salida visible.
+      fallbackProviders: Proveedores de respaldo
+      fallbackProvidersDescription: El proveedor seleccionado para una función siempre se prueba primero. Desactive los proveedores que el enrutamiento automático nunca debe usar como respaldo.
+      allowProvider: Permitir a $1 como respaldo automático
     featureProviders:
       title: Proveedores de funciones
       description: Elige qué proveedor usar para cada función

@@ -40,12 +40,15 @@ describe("AutomaticRoutingConfig", () => {
       </Provider>,
     )
 
-    expect(screen.getByText(/send the same request to another enabled provider/i)).toBeVisible()
-    const fallback = screen.getByRole("switch", {
-      name: "Allow Fallback as an automatic fallback",
-    })
+    expect(
+      screen.getByText("options.apiProviders.automaticRouting.enabledDescription"),
+    ).toBeVisible()
+    const fallback = screen.getAllByRole("switch", {
+      name: "options.apiProviders.automaticRouting.allowProvider",
+    })[1]
+    expect(fallback).toBeDefined()
     expect(fallback).toBeChecked()
-    fireEvent.click(fallback)
+    fireEvent.click(fallback as HTMLElement)
     expect(store.get(configFieldsAtomMap.aiGateway).excludedProviderIds).toEqual(["fallback"])
   })
 })

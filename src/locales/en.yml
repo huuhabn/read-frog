@@ -414,6 +414,15 @@ options:
       success: Success
       failed: Failed
       slow: Slow (try adjusting thinking mode)
+    automaticRouting:
+      title: Automatic AI routing
+      enabled: Use fallback providers
+      enabledDescription: When the selected provider is temporarily unavailable, Workmate may send the same request to another enabled provider. This can change data residency and provider charges.
+      maxAttempts: Maximum attempts
+      maxAttemptsDescription: Includes the selected provider. Streaming requests never switch after visible output starts.
+      fallbackProviders: Fallback providers
+      fallbackProvidersDescription: The provider selected for a feature is always tried first. Turn off providers that automatic routing must never use as fallbacks.
+      allowProvider: Allow $1 as an automatic fallback
     featureProviders:
       title: Feature providers
       description: Choose which provider to use for each feature

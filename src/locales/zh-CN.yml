@@ -311,6 +311,15 @@ options:
       success: 成功
       failed: 失败
       slow: 缓慢（建议调节思考模式）
+    automaticRouting:
+      title: 自动 AI 路由
+      enabled: 使用备用提供商
+      enabledDescription: 当所选提供商暂时不可用时，Workmate 可以将同一请求发送给另一个已启用的提供商。这可能会改变数据驻留地和提供商费用。
+      maxAttempts: 最大尝试次数
+      maxAttemptsDescription: 包括所选提供商。流式请求在可见输出开始后绝不切换。
+      fallbackProviders: 备用提供商
+      fallbackProvidersDescription: 始终首先尝试为功能选择的提供商。关闭自动路由绝不能用作备用的提供商。
+      allowProvider: 允许 $1 作为自动备用
     featureProviders:
       title: 功能提供商
       description: 为每个功能选择使用的提供商

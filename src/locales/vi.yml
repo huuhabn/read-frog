@@ -413,6 +413,15 @@ options:
       success: Thành công
       failed: Thất bại
       slow: Chậm (nên điều chỉnh chế độ suy nghĩ)
+    automaticRouting:
+      title: Định tuyến AI tự động
+      enabled: Sử dụng nhà cung cấp dự phòng
+      enabledDescription: Khi nhà cung cấp đã chọn tạm thời không khả dụng, Workmate có thể gửi yêu cầu tương tự đến một nhà cung cấp đã bật khác. Điều này có thể thay đổi vị trí lưu trữ dữ liệu và chi phí API.
+      maxAttempts: Số lần thử tối đa
+      maxAttemptsDescription: Bao gồm cả nhà cung cấp được chọn. Yêu cầu truyền phát sẽ không bao giờ chuyển đổi sau khi bắt đầu có dữ liệu xuất hiện.
+      fallbackProviders: Nhà cung cấp dự phòng
+      fallbackProvidersDescription: Nhà cung cấp được chọn cho một tính năng luôn được thử đầu tiên. Tắt các nhà cung cấp mà định tuyến tự động không bao giờ được dùng làm dự phòng.
+      allowProvider: Cho phép $1 làm dự phòng tự động
     featureProviders:
       title: Nhà cung cấp tính năng
       description: Chọn nhà cung cấp sử dụng cho mỗi tính năng

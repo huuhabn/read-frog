@@ -9,6 +9,7 @@ import {
 import { Switch } from "@/components/ui/base-ui/switch"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
+import { i18n } from "@/utils/i18n"
 import { ConfigItem } from "../../../components/config-item"
 import { ConfigSection } from "../../../components/config-section"
 
@@ -22,10 +23,13 @@ export function AutomaticRoutingConfig() {
   const excluded = new Set(gateway.excludedProviderIds)
 
   return (
-    <ConfigSection id="automatic-ai-routing" title="Automatic AI routing">
+    <ConfigSection
+      id="automatic-ai-routing"
+      title={i18n.t("options.apiProviders.automaticRouting.title")}
+    >
       <ConfigItem
-        title="Use fallback providers"
-        description="When the selected provider is temporarily unavailable, Workmate may send the same request to another enabled provider. This can change data residency and provider charges."
+        title={i18n.t("options.apiProviders.automaticRouting.enabled")}
+        description={i18n.t("options.apiProviders.automaticRouting.enabledDescription")}
       >
         <Switch
           checked={gateway.enabled}
@@ -34,8 +38,8 @@ export function AutomaticRoutingConfig() {
       </ConfigItem>
 
       <ConfigItem
-        title="Maximum attempts"
-        description="Includes the selected provider. Streaming requests never switch after visible output starts."
+        title={i18n.t("options.apiProviders.automaticRouting.maxAttempts")}
+        description={i18n.t("options.apiProviders.automaticRouting.maxAttemptsDescription")}
       >
         <Select
           value={gateway.maxAttempts}
@@ -44,7 +48,7 @@ export function AutomaticRoutingConfig() {
             if (value !== null) void setGateway({ maxAttempts: value })
           }}
         >
-          <SelectTrigger aria-label="Maximum AI routing attempts">
+          <SelectTrigger aria-label={i18n.t("options.apiProviders.automaticRouting.maxAttempts")}>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -59,8 +63,8 @@ export function AutomaticRoutingConfig() {
 
       {providers.length > 1 && (
         <ConfigItem
-          title="Fallback providers"
-          description="The provider selected for a feature is always tried first. Turn off providers that automatic routing must never use as fallbacks."
+          title={i18n.t("options.apiProviders.automaticRouting.fallbackProviders")}
+          description={i18n.t("options.apiProviders.automaticRouting.fallbackProvidersDescription")}
           orientation="vertical"
         >
           <div className="grid gap-2 sm:grid-cols-2">
@@ -73,7 +77,9 @@ export function AutomaticRoutingConfig() {
                 >
                   <span className="min-w-0 truncate text-sm">{provider.name}</span>
                   <Switch
-                    aria-label={`Allow ${provider.name} as an automatic fallback`}
+                    aria-label={i18n.t("options.apiProviders.automaticRouting.allowProvider", [
+                      provider.name,
+                    ])}
                     checked={allowed}
                     disabled={!gateway.enabled}
                     onCheckedChange={(checked) => {

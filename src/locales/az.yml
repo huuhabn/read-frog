@@ -311,6 +311,15 @@ options:
       success: Uğurludur
       failed: Alınmadı
       slow: Yavaşdır (düşünmə rejimini tənzimləməyə çalışın)
+    automaticRouting:
+      title: Avtomatik AI marşrutlaşdırma
+      enabled: Ehtiyat təminatçılardan istifadə et
+      enabledDescription: Seçilmiş təminatçı müvəqqəti olaraq əlçatmaz olduqda, Workmate eyni sorğunu aktivləşdirilmiş başqa bir təminatçıya göndərə bilər.
+      maxAttempts: Maksimum cəhd
+      maxAttemptsDescription: Seçilmiş təminatçı daxildir. Yayım sorğuları görünən çıxış başladıqdan sonra heç vaxt dəyişdirilmir.
+      fallbackProviders: Ehtiyat təminatçılar
+      fallbackProvidersDescription: Bir funksiya üçün seçilmiş təminatçı həmişə ilk olaraq yoxlanılır.
+      allowProvider: $1 üçün avtomatik ehtiyat kimi icazə ver
     featureProviders:
       title: Funksiya provayderləri
       description: Hər funksiya üçün istifadə ediləcək provayderi seçin

@@ -310,6 +310,15 @@ options:
       success: Başarılı
       failed: Başarısız
       slow: Yavaş (düşünme modunu ayarlamanız önerilir)
+    automaticRouting:
+      title: Otomatik AI yönlendirme
+      enabled: Yedek sağlayıcıları kullan
+      enabledDescription: Seçilen sağlayıcı geçici olarak kullanılamadığında, Workmate aynı isteği etkinleştirilmiş başka bir sağlayıcıya gönderebilir. Bu durum veri yerleşimini ve sağlayıcı ücretlerini değiştirebilir.
+      maxAttempts: Maksimum deneme
+      maxAttemptsDescription: Seçilen sağlayıcıyı içerir. Akış istekleri görünür çıktı başladıktan sonra asla değiştirilmez.
+      fallbackProviders: Yedek sağlayıcılar
+      fallbackProvidersDescription: Bir özellik için seçilen sağlayıcı her zaman önce denenir. Otomatik yönlendirmenin asla yedek olarak kullanmaması gereken sağlayıcıları kapatın.
+      allowProvider: $1 sağlayıcısına otomatik yedek olarak izin ver
     featureProviders:
       title: Özellik sağlayıcıları
       description: Her özellik için kullanılacak sağlayıcıyı seçin

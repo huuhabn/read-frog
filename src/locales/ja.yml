@@ -310,6 +310,15 @@ options:
       success: 成功
       failed: 失敗
       slow: 低速（思考モードの調整を推奨）
+    automaticRouting:
+      title: 自動 AI ルーティング
+      enabled: フォールバックプロバイダーを使用
+      enabledDescription: 選択したプロバイダーが一時的に利用できない場合、Workmate は同じリクエストを有効な別のプロバイダーに送信することがあります。これによりデータの保存場所やプロバイダー料金が変更される可能性があります。
+      maxAttempts: 最大試行回数
+      maxAttemptsDescription: 選択したプロバイダーを含みます。ストリーミングリクエストは可視出力が開始された後は切り替えられません。
+      fallbackProviders: フォールバックプロバイダー
+      fallbackProvidersDescription: 機能に選択されたプロバイダーが常に最初に試行されます。自動ルーティングでフォールバックとして使用してはならないプロバイダーを無効にしてください。
+      allowProvider: $1 を自動フォールバックとして許可
     featureProviders:
       title: 機能プロバイダー
       description: 各機能に使用するプロバイダーを選択
