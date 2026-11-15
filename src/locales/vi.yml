@@ -215,6 +215,7 @@ options:
     toggle: Bật/tắt thanh bên
     settings: Cài đặt
     features: Tính năng
+    customPrompts: Prompts
     translation: Dịch
     product: Sản phẩm
     assistants: Trợ lý

@@ -215,6 +215,7 @@ options:
     toggle: Toggle sidebar
     settings: Settings
     features: Features
+    customPrompts: Prompts
     translation: Translation
     product: Product
     assistants: Assistants

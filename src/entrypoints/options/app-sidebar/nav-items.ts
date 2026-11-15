@@ -62,7 +62,7 @@ export const FEATURE_NAV_ITEMS: readonly FeatureNavItem[] = [
     kind: "link",
     path: "/custom-actions",
     icon: "tabler:sparkles",
-    label: () => i18n.t("options.selectionToolbar.customPrompts.title"),
+    label: () => i18n.t("options.sidebar.customPrompts"),
   },
   {
     kind: "group",
