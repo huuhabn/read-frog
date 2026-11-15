@@ -8,7 +8,7 @@ describe("resolveScrollTarget", () => {
       resolveScrollTarget({
         navigationType: NavigationType.Pop,
         savedOffset: 420,
-        pathname: "/preference",
+        pathname: "/general",
         previousPathname: null,
       }),
     ).toBeNull()
@@ -19,8 +19,8 @@ describe("resolveScrollTarget", () => {
       resolveScrollTarget({
         navigationType: NavigationType.Push,
         savedOffset: undefined,
-        pathname: "/preference/config-backup",
-        previousPathname: "/preference",
+        pathname: "/general/config-backup",
+        previousPathname: "/general",
       }),
     ).toBe(0)
   })
@@ -30,8 +30,8 @@ describe("resolveScrollTarget", () => {
       resolveScrollTarget({
         navigationType: NavigationType.Pop,
         savedOffset: 420,
-        pathname: "/preference",
-        previousPathname: "/preference/config-backup",
+        pathname: "/general",
+        previousPathname: "/general/config-backup",
       }),
     ).toBe(420)
   })
@@ -41,8 +41,8 @@ describe("resolveScrollTarget", () => {
       resolveScrollTarget({
         navigationType: NavigationType.Pop,
         savedOffset: undefined,
-        pathname: "/preference",
-        previousPathname: "/preference/config-backup",
+        pathname: "/general",
+        previousPathname: "/general/config-backup",
       }),
     ).toBe(0)
   })

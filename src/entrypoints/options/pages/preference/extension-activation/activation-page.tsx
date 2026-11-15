@@ -33,7 +33,7 @@ export function ExtensionActivationPage() {
       description={i18n.t("options.preference.pageDescription")}
     >
       <ConfigDetailSection
-        backTo="/preference"
+        backTo="/general"
         title={
           <span id="extension-activation">
             {i18n.t("options.preference.extensionActivation.title")}

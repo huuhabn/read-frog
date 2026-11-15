@@ -10,7 +10,7 @@ export function ExtensionActivationSection() {
   return (
     <ConfigSection title={i18n.t("options.preference.extensionActivation.title")}>
       <ConfigNavItem
-        to="/preference/extension-activation"
+        to="/general/extension-activation"
         title={i18n.t("options.preference.extensionActivation.manageSites")}
         description={i18n.t("options.preference.extensionActivation.description")}
       />

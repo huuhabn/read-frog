@@ -140,7 +140,7 @@ export function AuditLogsPage() {
             <Button
               size="sm"
               variant="outline"
-              render={<Link to="/preference" />}
+              render={<Link to="/general" />}
               className="h-7 border-amber-500/40 text-xs hover:bg-amber-500/20"
             >
               {i18n.t("options.advanced.auditLogs.goToPreference")}

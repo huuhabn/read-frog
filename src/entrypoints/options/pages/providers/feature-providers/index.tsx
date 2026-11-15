@@ -242,7 +242,7 @@ export function FeatureProvidersConfig() {
       id="feature-providers"
       title={i18n.t("options.apiProviders.featureProviders.title")}
       action={<AllFeatureProvidersSelector />}
-      contentClassName="grid grid-cols-1 md:grid-cols-2 gap-4 items-stretch"
+      contentClassName="grid grid-cols-1 gap-4 items-stretch"
     >
       {FEATURE_KEYS.map((featureKey) => (
         <FeatureProviderItem key={featureKey} featureKey={featureKey} />

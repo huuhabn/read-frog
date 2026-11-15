@@ -136,7 +136,7 @@ const SubtitlesQueuePage = lazy(() =>
 
 const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/": ProvidersPage,
-  "/preference": PreferencePage,
+  "/general": PreferencePage,
   "/shortcuts": ShortcutsPage,
   "/providers": ProvidersPage,
   "/custom-actions": CustomActionsPage,
@@ -154,8 +154,8 @@ const ROUTE_COMPONENTS: Record<RoutePath, ComponentType> = {
   "/advanced/glossary": GlossaryPage,
   "/advanced/glossary/:glossaryId": GlossaryEditorPage,
   "/advanced/audit-logs": AuditLogsPage,
-  "/preference/config-backup": ConfigBackupPage,
-  "/preference/extension-activation": ExtensionActivationPage,
+  "/general/config-backup": ConfigBackupPage,
+  "/general/extension-activation": ExtensionActivationPage,
   "/page-translation/custom-css": CustomCssPage,
   "/page-translation/prompts": PersonalizedPromptsPage,
   "/page-translation/translation-control": TranslationControlPage,

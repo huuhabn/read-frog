@@ -29,7 +29,7 @@ import { createLogger } from "@/utils/logging/logger"
 import { JsonTreeView } from "./json-tree-view"
 
 const log = createLogger(
-  "options/pages/preference/config/google-drive-sync/components/unresolved-dialog",
+  "options/pages/general/config/google-drive-sync/components/unresolved-dialog",
 )
 
 interface UnresolvedDialogProps {

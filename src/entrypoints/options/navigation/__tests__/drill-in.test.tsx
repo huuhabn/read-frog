@@ -7,7 +7,7 @@ import { DRILL_IN_LOCATION_STATE, useDrillInBack } from "../drill-in"
 function DetailPage() {
   const goBack = useDrillInBack()
   return (
-    <Link to="/preference" onClick={goBack}>
+    <Link to="/general" onClick={goBack}>
       back
     </Link>
   )
@@ -19,19 +19,19 @@ function ParentPage() {
 }
 
 function renderDetailPage({ drilledIn }: { drilledIn: boolean }) {
-  const detailEntry = { pathname: "/preference/config-backup" }
+  const detailEntry = { pathname: "/general/config-backup" }
   return render(
     <MemoryRouter
       initialEntries={
         drilledIn
-          ? [{ pathname: "/preference" }, { ...detailEntry, state: DRILL_IN_LOCATION_STATE }]
+          ? [{ pathname: "/general" }, { ...detailEntry, state: DRILL_IN_LOCATION_STATE }]
           : [detailEntry]
       }
       initialIndex={drilledIn ? 1 : 0}
     >
       <Routes>
-        <Route path="/preference" element={<ParentPage />} />
-        <Route path="/preference/config-backup" element={<DetailPage />} />
+        <Route path="/general" element={<ParentPage />} />
+        <Route path="/general/config-backup" element={<DetailPage />} />
       </Routes>
     </MemoryRouter>,
   )

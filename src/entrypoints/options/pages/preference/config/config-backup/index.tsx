@@ -32,7 +32,7 @@ export function ConfigBackupPage() {
       description={i18n.t("options.preference.pageDescription")}
     >
       <ConfigDetailSection
-        backTo="/preference"
+        backTo="/general"
         title={<span id="config-backup">{i18n.t("options.preference.config.backup.title")}</span>}
       >
         <div className="space-y-4">

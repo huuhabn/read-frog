@@ -7,7 +7,7 @@ import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { useGlossaryInvalidation } from "../../../advanced/glossary/use-glossary"
 
-const log = createLogger("options/pages/preference/config/google-drive-sync/use-glossary-sync")
+const log = createLogger("options/pages/general/config/google-drive-sync/use-glossary-sync")
 
 /**
  * One cast, in one place, instead of one at each of the fifteen call sites.

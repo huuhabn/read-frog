@@ -15,7 +15,7 @@ import { GlossarySyncReviewDialog } from "./components/glossary-review-dialog"
 import { UnresolvedDialog } from "./components/unresolved-dialog"
 import { useGlossarySync } from "./use-glossary-sync"
 
-const log = createLogger("options/pages/preference/config/google-drive-sync")
+const log = createLogger("options/pages/general/config/google-drive-sync")
 
 export function GoogleDriveSyncConfigItem() {
   const [isSyncing, setIsSyncing] = useState(false)

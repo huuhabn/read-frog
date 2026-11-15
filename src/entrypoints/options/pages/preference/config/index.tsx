@@ -12,7 +12,7 @@ export function ConfigManagementSection() {
       <GoogleDriveSyncConfigItem />
       <ManualConfigSyncConfigItems />
       <ConfigNavItem
-        to="/preference/config-backup"
+        to="/general/config-backup"
         title={i18n.t("options.preference.config.backup.title")}
         description={i18n.t("options.preference.config.backup.description", [MAX_BACKUPS_COUNT])}
       />
