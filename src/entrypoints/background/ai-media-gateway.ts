@@ -15,7 +15,12 @@ import type { LLMProviderConfig } from "@/types/config/provider"
 import type { GatewayOperation, GatewayRouteCandidate } from "@/utils/ai-gateway"
 import { embedMany, generateImage, generateSpeech, generateText, transcribe } from "ai"
 import { isLLMProviderConfig } from "@/types/config/provider"
-import { executeGatewayAttempts, GatewayError, planGatewayRoutes } from "@/utils/ai-gateway"
+import {
+  executeGatewayAttempts,
+  GatewayError,
+  GatewayHealthRegistry,
+  planGatewayRoutes,
+} from "@/utils/ai-gateway"
 import { getLocalConfig } from "@/utils/config/storage"
 import { onMessage } from "@/utils/message"
 import { createAIProviderForConfig, getLanguageModelForConfigAndId } from "@/utils/providers/model"
@@ -29,6 +34,7 @@ const MAX_SPEECH_TEXT_CHARS = 10_000
 const MAX_PROMPT_CHARS = 20_000
 const MAX_IMAGE_COUNT = 4
 const activeMediaRequests = new Map<string, AbortController>()
+const mediaHealth = new GatewayHealthRegistry()
 
 type FactoryName =
   | "imageModel"
@@ -79,6 +85,7 @@ function candidateFor(
     model: modelId,
     operations: [operation],
     enabled: config.enabled,
+    pinned: configurationOrder === 0,
     configurationOrder,
   }
 }
@@ -140,6 +147,7 @@ async function executeMedia<T>(
   )
   const planned = planGatewayRoutes(operation, candidates, {
     maxAttempts: Math.min(3, Math.max(1, routing.maxGatewayAttempts ?? 1)),
+    health: mediaHealth,
   })
   const byRoute = new Map(candidates.map((candidate, index) => [candidate.routeId, routes[index]!]))
   const controller = new AbortController()
@@ -151,6 +159,8 @@ async function executeMedia<T>(
         execute: (signal) => execute(byRoute.get(candidate.routeId)!, signal),
       })),
       controller.signal,
+      {},
+      mediaHealth,
     )
   } finally {
     activeMediaRequests.delete(routing.requestId)

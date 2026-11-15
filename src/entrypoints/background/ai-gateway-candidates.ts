@@ -42,6 +42,7 @@ export function buildBackgroundGenerateTextCandidates(
           model: modelId(providerRef),
           operations: ["text.generate"],
           enabled: true,
+          pinned: configurationOrder === 0,
           configurationOrder,
         },
       },

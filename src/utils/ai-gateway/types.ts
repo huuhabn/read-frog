@@ -67,6 +67,8 @@ export interface GatewayRouteCandidate {
   model?: string
   operations: readonly GatewayOperation[]
   enabled: boolean
+  /** The feature-selected route remains first; cost sorting applies to fallback routes. */
+  pinned?: boolean
   /** Estimated request cost in USD. Unknown estimates remain undefined and sort last. */
   estimatedCostUsd?: number
   /** Stable order from user configuration, used only as a tie-breaker. */

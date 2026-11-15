@@ -41,6 +41,7 @@ import {
   executeGatewayStreamAttempts,
   executeGatewayAttempts,
   GatewayError,
+  GatewayHealthRegistry,
   planGatewayRoutes,
   type GatewayAttemptAudit,
   type GatewayAuditMetadata,
@@ -64,6 +65,7 @@ import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
 import { buildBackgroundGenerateTextCandidates } from "./ai-gateway-candidates"
 
 const log = createLogger("background/background-stream")
+const textGatewayHealth = new GatewayHealthRegistry()
 
 const invalidStreamStartPayloadMessage = "Invalid stream start payload"
 const aiStreamProtocolErrorMessage = "Invalid AI stream response."
@@ -944,6 +946,7 @@ function createTextPartStreamViaGateway(
     ],
     signal,
     isVisibleTextStreamPart,
+    textGatewayHealth,
   )
 
   return {
@@ -1006,7 +1009,7 @@ export async function generateTextForProviderRef(
     const planned = planGatewayRoutes(
       "text.generate",
       candidates.map(({ candidate }) => candidate),
-      { maxAttempts: payload.maxGatewayAttempts ?? 1 },
+      { maxAttempts: payload.maxGatewayAttempts ?? 1, health: textGatewayHealth },
     )
     const byRouteId = new Map(candidates.map((item) => [item.candidate.routeId, item]))
     outputText = await executeGatewayAttempts(
@@ -1068,6 +1071,7 @@ export async function generateTextForProviderRef(
       {
         onAttemptComplete: (attempt) => gatewayAttempts.push(attempt),
       },
+      textGatewayHealth,
     )
     options.onUsage?.(capturedUsage)
     return outputText

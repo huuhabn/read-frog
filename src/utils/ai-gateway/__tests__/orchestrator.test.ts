@@ -1,6 +1,11 @@
 import type { GatewayRouteCandidate } from "../types"
 import { describe, expect, it, vi } from "vitest"
-import { executeGatewayAttempts, executeGatewayStreamAttempts, GatewayError } from "../index"
+import {
+  executeGatewayAttempts,
+  executeGatewayStreamAttempts,
+  GatewayError,
+  GatewayHealthRegistry,
+} from "../index"
 
 const candidate: GatewayRouteCandidate = {
   routeId: "test",
@@ -66,6 +71,26 @@ describe("gateway attempt orchestration", () => {
       ),
     ).rejects.toMatchObject({ code: "network" })
     expect(execute).toHaveBeenCalledTimes(3)
+  })
+
+  it("records route health for later planning", async () => {
+    const health = new GatewayHealthRegistry({ failureThreshold: 1, cooldownMs: 100 })
+    await expect(
+      executeGatewayAttempts(
+        [
+          {
+            candidate,
+            execute: async () => {
+              throw new GatewayError("network", "offline")
+            },
+          },
+        ],
+        new AbortController().signal,
+        {},
+        health,
+      ),
+    ).rejects.toMatchObject({ code: "network" })
+    expect(health.withHealth(candidate).cooldownUntil).toBeTypeOf("number")
   })
 
   it("reports only allowlisted attempt diagnostics", async () => {

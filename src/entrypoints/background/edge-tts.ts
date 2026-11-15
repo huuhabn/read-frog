@@ -1,3 +1,5 @@
+import type { EdgeTTSSynthesizeFailure } from "@/types/edge-tts"
+import { executeGatewayAttempts, GatewayError, GatewayHealthRegistry } from "@/utils/ai-gateway"
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import {
@@ -8,6 +10,7 @@ import {
 
 const log = createLogger("background/edge-tts")
 const activeSynthesisControllers = new Map<string, Set<AbortController>>()
+const edgeTtsHealth = new GatewayHealthRegistry()
 
 function addController(requestId: string | undefined, controller: AbortController) {
   if (!requestId) return
@@ -73,6 +76,8 @@ export function setupEdgeTTSMessageHandlers() {
           },
         ],
         controller.signal,
+        {},
+        edgeTtsHealth,
       )
       return {
         ok: true as const,
@@ -115,5 +120,3 @@ export function setupEdgeTTSMessageHandlers() {
     return getEdgeTTSHealthStatus()
   })
 }
-import type { EdgeTTSSynthesizeFailure } from "@/types/edge-tts"
-import { executeGatewayAttempts, GatewayError } from "@/utils/ai-gateway"

@@ -1,3 +1,4 @@
+import type { GatewayHealthRegistry } from "./health"
 import type {
   GatewayAttempt,
   GatewayAttemptObserver,
@@ -60,6 +61,7 @@ export async function executeGatewayAttempts<T>(
   attempts: readonly GatewayAttempt<T>[],
   signal: AbortSignal,
   observer: GatewayAttemptObserver = {},
+  health?: GatewayHealthRegistry,
 ): Promise<T> {
   if (signal.aborted) throw abortError(signal)
   if (attempts.length === 0) throw new GatewayError("unsupported", "No compatible AI route")
@@ -70,6 +72,7 @@ export async function executeGatewayAttempts<T>(
     const startedAt = performance.now()
     try {
       const result = await attempt.execute(signal)
+      health?.recordSuccess(attempt.candidate.routeId)
       notifyAttempt(observer, {
         providerId: attempt.candidate.providerId,
         model: attempt.candidate.model,
@@ -80,6 +83,7 @@ export async function executeGatewayAttempts<T>(
       return result
     } catch (error) {
       lastError = normalizeGatewayError(error, signal)
+      health?.recordFailure(attempt.candidate.routeId, lastError)
       notifyAttempt(observer, {
         providerId: attempt.candidate.providerId,
         model: attempt.candidate.model,
@@ -98,6 +102,7 @@ export function executeGatewayStreamAttempts<T>(
   attempts: readonly GatewayStreamAttempt<T>[],
   signal: AbortSignal,
   isVisibleOutput: (event: T) => boolean,
+  health?: GatewayHealthRegistry,
 ): AsyncIterable<T> {
   return {
     async *[Symbol.asyncIterator]() {
@@ -115,9 +120,11 @@ export function executeGatewayStreamAttempts<T>(
             hasVisibleOutput ||= isVisibleOutput(event)
             yield event
           }
+          health?.recordSuccess(attempt.candidate.routeId)
           return
         } catch (error) {
           lastError = normalizeGatewayError(error, signal)
+          health?.recordFailure(attempt.candidate.routeId, lastError)
           if (hasVisibleOutput || !isGatewayErrorRetryable(lastError)) throw lastError
         }
       }

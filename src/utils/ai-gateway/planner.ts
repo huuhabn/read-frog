@@ -1,8 +1,10 @@
+import type { GatewayHealthRegistry } from "./health"
 import type { GatewayOperation, GatewayRouteCandidate } from "./types"
 
 export interface GatewayRoutePlanOptions {
   now?: number
   maxAttempts?: number
+  health?: GatewayHealthRegistry
 }
 
 export function planGatewayRoutes(
@@ -14,6 +16,7 @@ export function planGatewayRoutes(
   const maxAttempts = Math.max(0, options.maxAttempts ?? 3)
 
   return candidates
+    .map((candidate) => options.health?.withHealth(candidate) ?? candidate)
     .filter(
       (candidate) =>
         candidate.enabled &&
@@ -21,6 +24,7 @@ export function planGatewayRoutes(
         (candidate.cooldownUntil === undefined || candidate.cooldownUntil <= now),
     )
     .toSorted((left, right) => {
+      if (left.pinned !== right.pinned) return left.pinned ? -1 : 1
       const leftCost = left.estimatedCostUsd ?? Number.POSITIVE_INFINITY
       const rightCost = right.estimatedCostUsd ?? Number.POSITIVE_INFINITY
       return leftCost - rightCost || left.configurationOrder - right.configurationOrder

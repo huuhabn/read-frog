@@ -29,6 +29,14 @@ describe("planGatewayRoutes", () => {
     expect(result.map(({ routeId }) => routeId)).toEqual(["cheap", "first", "second", "unknown"])
   })
 
+  it("keeps the feature-pinned route first before cost-sorted fallbacks", () => {
+    const result = planGatewayRoutes("text.stream", [
+      route({ routeId: "pinned", pinned: true, configurationOrder: 0 }),
+      route({ routeId: "cheap", estimatedCostUsd: 0.001, configurationOrder: 1 }),
+    ])
+    expect(result.map(({ routeId }) => routeId)).toEqual(["pinned", "cheap"])
+  })
+
   it("filters disabled, incompatible and cooling-down routes and caps attempts", () => {
     const result = planGatewayRoutes(
       "text.stream",
