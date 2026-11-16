@@ -47,3 +47,8 @@ scripts/output/
 
 reference/
 .gstack/
+
+# AI Gateway local SQLite
+packages/ai-gateway/data/
+data/ai-gateway.sqlite
+data/ai-gateway.sqlite-*

@@ -56,6 +56,11 @@ export type BackgroundStreamTextSerializablePayload = BaseBackgroundStreamSerial
         providerKind: "local"
         /** Model and generation settings captured with the caller's cache identity. */
         providerConfig?: LLMProviderConfig
+        /**
+         * Lets the background retry on other providers from the user's
+         * automatic routing settings when this one fails before any output.
+         */
+        automaticRouting?: boolean
         hostedFeature?: never
       }
     | {

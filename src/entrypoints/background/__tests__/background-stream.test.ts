@@ -52,6 +52,11 @@ vi.mock("@/utils/providers/model", () => ({
   getLanguageModelForConfig: getLanguageModelForConfigMock,
 }))
 
+const getLocalConfigMock = vi.fn<(...args: any[]) => any>()
+vi.mock("@/utils/config/storage", () => ({
+  getLocalConfig: getLocalConfigMock,
+}))
+
 vi.mock("@/utils/orpc/background-client", () => ({
   backgroundOrpcClient: {
     hostedAi: {
@@ -779,6 +784,95 @@ describe("background-stream", () => {
       },
     })
     expect(mockPort.disconnect).toHaveBeenCalledTimes(1)
+  })
+
+  describe("automatic routing", () => {
+    const primary = { ...DEFAULT_PROVIDER_CONFIG.openai, id: "primary-llm", name: "Primary" }
+    const fallback = { ...DEFAULT_PROVIDER_CONFIG.openai, id: "fallback-llm", name: "Fallback" }
+
+    function mockRateLimitedPrimary() {
+      getLanguageModelForConfigMock.mockImplementation((config: { id: string }) => config.id)
+      streamTextMock.mockImplementation(
+        (options: { model: string; onError?: (event: { error: unknown }) => void }) => {
+          if (options.model === primary.id) {
+            const error = Object.assign(new Error("Rate limited"), { statusCode: 429 })
+            return {
+              stream: (async function* () {
+                options.onError?.({ error })
+                yield { type: "error", error }
+              })(),
+            }
+          }
+          return {
+            stream: (async function* () {
+              yield { type: "text-delta", text: "From fallback" }
+              yield { type: "finish", finishReason: "stop" }
+            })(),
+          }
+        },
+      )
+    }
+
+    async function startStream(payload: Record<string, unknown>) {
+      const { handleStreamTextPort } = await import("../background-stream")
+      const mockPort = createMockPort("stream-text")
+      handleStreamTextPort(mockPort.port as never)
+      await mockPort.emitMessage({
+        type: "start",
+        streamRequestId: "routing",
+        payload: {
+          providerKind: "local",
+          providerId: primary.id,
+          providerConfig: primary,
+          prompt: "Hello",
+          ...payload,
+        },
+      })
+      return mockPort
+    }
+
+    it("falls back to another provider when the selected one fails before output", async () => {
+      getLocalConfigMock.mockResolvedValue({
+        providersConfig: [primary, fallback],
+        aiGateway: { enabled: true, maxAttempts: 3, excludedProviderIds: [] },
+      })
+      mockRateLimitedPrimary()
+
+      const mockPort = await startStream({ automaticRouting: true })
+
+      expect(streamTextMock.mock.calls.map(([options]) => options.model)).toEqual([
+        primary.id,
+        fallback.id,
+      ])
+      expect(mockPort.postMessage).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          type: "done",
+          data: expect.objectContaining({ output: "From fallback" }),
+        }),
+      )
+      expect(mockPort.postMessage).not.toHaveBeenCalledWith(
+        expect.objectContaining({ type: "error" }),
+      )
+    })
+
+    it("does not fall back unless the caller opts in", async () => {
+      mockRateLimitedPrimary()
+
+      getLocalConfigMock.mockResolvedValue({
+        providersConfig: [primary, fallback],
+        aiGateway: { enabled: true, maxAttempts: 3, excludedProviderIds: [] },
+      })
+
+      const mockPort = await startStream({})
+
+      expect(streamTextMock).toHaveBeenCalledTimes(1)
+      expect(mockPort.postMessage).toHaveBeenLastCalledWith(
+        expect.objectContaining({
+          type: "error",
+          error: expect.objectContaining({ message: "Rate limited" }),
+        }),
+      )
+    })
   })
 
   it("normalizes system role messages into instructions and sets allowSystemInMessages", async () => {

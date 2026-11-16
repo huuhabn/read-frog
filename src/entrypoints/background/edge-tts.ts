@@ -1,5 +1,9 @@
 import type { EdgeTTSSynthesizeFailure } from "@/types/edge-tts"
-import { executeGatewayAttempts, GatewayError, GatewayHealthRegistry } from "@/utils/ai-gateway"
+import {
+  executeGatewayAttempts,
+  RouteError,
+  GatewayHealthRegistry,
+} from "@workmate-ai/ai-gateway/routing"
 import { createLogger } from "@/utils/logging/logger"
 import { onMessage } from "@/utils/message"
 import {
@@ -26,7 +30,7 @@ function removeController(requestId: string | undefined, controller: AbortContro
   if (controllers?.size === 0) activeSynthesisControllers.delete(requestId)
 }
 
-function gatewayErrorForFailure(failure: EdgeTTSSynthesizeFailure): GatewayError {
+function gatewayErrorForFailure(failure: EdgeTTSSynthesizeFailure): RouteError {
   const { error } = failure
   const code =
     error.code === "SYNTH_RATE_LIMITED"
@@ -36,7 +40,7 @@ function gatewayErrorForFailure(failure: EdgeTTSSynthesizeFailure): GatewayError
         : error.retryable
           ? "provider"
           : "invalid_request"
-  return new GatewayError(code, error.message, { cause: failure, status: error.status })
+  return new RouteError(code, error.message, { cause: failure, status: error.status })
 }
 
 function arrayBufferToBase64(buffer: ArrayBuffer): string {
@@ -66,7 +70,7 @@ export function setupEdgeTTSMessageHandlers() {
             execute: async (signal) => {
               const result = await synthesizeEdgeTTS(message.data, signal)
               if (signal.aborted) {
-                throw new GatewayError("aborted", "Edge TTS synthesis was aborted", {
+                throw new RouteError("aborted", "Edge TTS synthesis was aborted", {
                   cause: signal.reason,
                 })
               }
@@ -85,7 +89,7 @@ export function setupEdgeTTSMessageHandlers() {
         contentType: response.contentType,
       }
     } catch (error) {
-      const failure = error instanceof GatewayError ? error.cause : undefined
+      const failure = error instanceof RouteError ? error.cause : undefined
       if (failure && typeof failure === "object" && "ok" in failure) {
         log.warn("[EdgeTTS] synthesize failed", {
           error: (failure as EdgeTTSSynthesizeFailure).error,

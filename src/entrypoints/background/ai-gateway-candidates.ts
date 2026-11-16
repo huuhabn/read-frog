@@ -1,5 +1,5 @@
+import type { GatewayRouteCandidate } from "@workmate-ai/ai-gateway/routing"
 import type { BackgroundGenerateTextPayload } from "@/types/background-generate-text"
-import type { GatewayRouteCandidate } from "@/utils/ai-gateway"
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 
 function providerId(ref: PromptableProviderRef): string {

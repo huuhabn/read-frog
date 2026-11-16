@@ -642,6 +642,7 @@ Hãy thực hiện yêu cầu của người dùng dựa trên nội dung và UR
           providerKind: "local",
           providerId: targetProviderId,
           providerConfig: effectiveProviderConfig,
+          automaticRouting: true,
           instructions,
           messages: formattedMessages,
           temperature: 0.7,

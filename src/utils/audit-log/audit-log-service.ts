@@ -1,4 +1,4 @@
-import type { GatewayAuditMetadata } from "@/utils/ai-gateway/types"
+import type { GatewayAuditMetadata } from "@workmate-ai/ai-gateway/routing"
 import type { AuditLogItem } from "@/utils/db/dexie/tables/audit-log"
 import { getLocalConfig } from "@/utils/config/storage"
 import { BUILT_IN_AI_PROVIDER_IDS } from "@/utils/constants/provider-ids"

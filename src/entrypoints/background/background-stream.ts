@@ -20,7 +20,7 @@ import type {
   StreamRuntimeOptions,
   ThinkingSnapshot,
 } from "@/types/background-stream"
-import type { TranslateProviderConfig } from "@/types/config/provider"
+import type { LLMProviderConfig, TranslateProviderConfig } from "@/types/config/provider"
 import type { AuditLogMessage, AuditLogTokenUsage } from "@/utils/db/dexie/tables/audit-log"
 import type { ErrorAction } from "@/utils/error-action"
 import {
@@ -33,23 +33,26 @@ import {
   HostedAiStreamTextInputSchema,
   HostedAiTierRestrictedDataSchema,
 } from "@read-frog/api-contract"
+import {
+  executeGatewayStreamAttempts,
+  executeGatewayAttempts,
+  RouteError,
+  GatewayHealthRegistry,
+  planGatewayRoutes,
+  type GatewayAttemptAudit,
+  type GatewayAttemptObserver,
+  type GatewayAuditMetadata,
+  type GatewayRouteCandidate,
+  type GatewayStreamAttempt,
+} from "@workmate-ai/ai-gateway/routing"
 import { generateText, Output, parsePartialJson, streamText } from "ai"
 import { z } from "zod"
 import { BACKGROUND_STREAM_PORTS } from "@/types/background-stream"
 import { isLLMProviderConfig, llmProviderConfigItemSchema } from "@/types/config/provider"
-import {
-  executeGatewayStreamAttempts,
-  executeGatewayAttempts,
-  GatewayError,
-  GatewayHealthRegistry,
-  planGatewayRoutes,
-  type GatewayAttemptAudit,
-  type GatewayAuditMetadata,
-  type GatewayRouteCandidate,
-} from "@/utils/ai-gateway"
 import { createStructuredObjectSchema } from "@/utils/ai/structured-object-schema"
 import { classifyFailureReason } from "@/utils/analytics-failure-reason"
 import { recordAuditLog } from "@/utils/audit-log/audit-log-service"
+import { getLocalConfig } from "@/utils/config/storage"
 import { BUILT_IN_AI_PROVIDER_IDS } from "@/utils/constants/provider-ids"
 import { upgradeAction } from "@/utils/error-action"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
@@ -58,8 +61,10 @@ import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { noteSuggestionEnvelopeSchema } from "@/utils/note-suggestion/types"
 import { backgroundOrpcClient } from "@/utils/orpc/background-client"
+import { selectFallbackProviders } from "@/utils/providers/fallback-providers"
 import { buildLocalGenerateTextParams } from "@/utils/providers/generate-params"
 import { getLanguageModelForConfig, getModelById } from "@/utils/providers/model"
+import { resolveModelId } from "@/utils/providers/model-id"
 import { isBuiltInAiProviderId } from "@/utils/providers/provider-registry"
 import { attachRequestErrorMeta } from "@/utils/request/retry-policy"
 import { buildBackgroundGenerateTextCandidates } from "./ai-gateway-candidates"
@@ -109,6 +114,7 @@ const streamTextPayloadSchema = z.discriminatedUnion("providerKind", [
         .min(1)
         .refine((id) => !isBuiltInAiProviderId(id)),
       providerConfig: llmProviderConfigItemSchema.optional(),
+      automaticRouting: z.boolean().optional(),
       hostedFeature: z.never().optional(),
     })
     .refine(
@@ -829,6 +835,7 @@ async function createLocalTextPartStream(
     providerKind: _providerKind,
     providerId,
     providerConfig,
+    automaticRouting: _automaticRouting,
     ...streamTextParams
   } = serializablePayload
   const { signal, onError } = options
@@ -925,44 +932,136 @@ function isVisibleTextStreamPart(part: unknown): boolean {
 function createTextPartStreamViaGateway(
   serializablePayload: BackgroundStreamTextSerializablePayload,
   options: StreamRuntimeOptions<BackgroundTextStreamSnapshot>,
+  observer: GatewayAttemptObserver = {},
 ): AsyncIterable<unknown> {
   const signal = options.signal ?? new AbortController().signal
-  const candidate: GatewayRouteCandidate = {
-    routeId: `${serializablePayload.providerKind}:${serializablePayload.providerId}`,
-    providerId: serializablePayload.providerId,
-    operations: ["text.stream"],
-    enabled: true,
-    configurationOrder: 0,
+  // Only the attempt whose outcome is reported may surface its onError,
+  // otherwise a failed attempt would poison a successful fallback.
+  let attemptError: unknown
+  const attemptOptions: StreamRuntimeOptions<BackgroundTextStreamSnapshot> = {
+    ...options,
+    onError: (error) => {
+      attemptError ??= error
+    },
   }
-  const stream = executeGatewayStreamAttempts(
-    [
-      {
-        candidate,
-        execute: () =>
-          serializablePayload.providerKind === "system"
-            ? createHostedTextPartStream(serializablePayload, options.signal)
-            : createLocalTextPartStream(serializablePayload, options),
-      },
-    ],
-    signal,
-    isVisibleTextStreamPart,
-    textGatewayHealth,
-  )
+  const startAttempt = <T>(execute: () => Promise<T>) => {
+    attemptError = undefined
+    return execute()
+  }
 
   return {
     async *[Symbol.asyncIterator]() {
+      const attempts = await buildTextStreamAttempts(
+        serializablePayload,
+        attemptOptions,
+        startAttempt,
+      )
       try {
-        yield* stream
+        yield* executeGatewayStreamAttempts(
+          attempts,
+          signal,
+          isVisibleTextStreamPart,
+          textGatewayHealth,
+          observer,
+        )
       } catch (error) {
         // Keep existing error identity/message for Port normalization and audit
         // until all consumers speak the canonical gateway error contract.
-        if (error instanceof GatewayError && error.cause !== undefined) {
+        if (error instanceof RouteError && error.cause !== undefined) {
           throw error.cause
         }
         throw error
+      } finally {
+        if (attemptError !== undefined) options.onError?.(attemptError)
       }
     },
   }
+}
+
+function textStreamCandidate(
+  routeId: string,
+  providerId: string,
+  providerConfig: LLMProviderConfig | undefined,
+  configurationOrder: number,
+): GatewayRouteCandidate {
+  return {
+    routeId,
+    providerId,
+    model: providerConfig ? resolveModelId(providerConfig.model) : undefined,
+    operations: ["text.stream"],
+    enabled: true,
+    pinned: configurationOrder === 0,
+    configurationOrder,
+  }
+}
+
+async function* throwOnErrorPart(stream: AsyncIterable<unknown>): AsyncIterable<unknown> {
+  for await (const part of stream) {
+    if (isRecord(part) && part.type === "error") throw getStreamPartError(part)
+    yield part
+  }
+}
+
+async function buildTextStreamAttempts(
+  serializablePayload: BackgroundStreamTextSerializablePayload,
+  options: StreamRuntimeOptions<BackgroundTextStreamSnapshot>,
+  startAttempt: <T>(execute: () => Promise<T>) => Promise<T>,
+): Promise<GatewayStreamAttempt<unknown>[]> {
+  if (serializablePayload.providerKind === "system") {
+    return [
+      {
+        candidate: textStreamCandidate(
+          `system:${serializablePayload.providerId}`,
+          serializablePayload.providerId,
+          undefined,
+          0,
+        ),
+        execute: () =>
+          startAttempt(() => createHostedTextPartStream(serializablePayload, options.signal)),
+      },
+    ]
+  }
+
+  const localAttempt = (
+    payload: Extract<BackgroundStreamTextSerializablePayload, { providerKind: "local" }>,
+    configurationOrder: number,
+  ): GatewayStreamAttempt<unknown> => ({
+    candidate: textStreamCandidate(
+      `local:${payload.providerId}`,
+      payload.providerId,
+      payload.providerConfig,
+      configurationOrder,
+    ),
+    execute: () =>
+      startAttempt(async () => throwOnErrorPart(await createLocalTextPartStream(payload, options))),
+  })
+
+  const primary = localAttempt(serializablePayload, 0)
+  if (!serializablePayload.automaticRouting) return [primary]
+
+  const { fallbackProviders, maxAttempts } = selectFallbackProviders(
+    await getLocalConfig(),
+    serializablePayload.providerId,
+  )
+  // Reasoning and provider options are tuned for the selected provider.
+  const {
+    reasoning: _reasoning,
+    providerOptions: _providerOptions,
+    ...portable
+  } = serializablePayload
+  const attempts = [
+    primary,
+    ...fallbackProviders.map((providerConfig, index) =>
+      localAttempt({ ...portable, providerId: providerConfig.id, providerConfig }, index + 1),
+    ),
+  ]
+  const byRouteId = new Map(attempts.map((attempt) => [attempt.candidate.routeId, attempt]))
+  const planned = planGatewayRoutes(
+    "text.stream",
+    attempts.map((attempt) => attempt.candidate),
+    { maxAttempts, health: textGatewayHealth },
+  ).flatMap((candidate) => byRouteId.get(candidate.routeId) ?? [])
+  return planned.length > 0 ? planned : [primary]
 }
 
 /**
@@ -1017,7 +1116,7 @@ export async function generateTextForProviderRef(
         candidate,
         execute: async (attemptSignal) => {
           const item = byRouteId.get(candidate.routeId)
-          if (!item) throw new GatewayError("unsupported", "Missing background AI route")
+          if (!item) throw new RouteError("unsupported", "Missing background AI route")
           selectedProviderRef = item.providerRef
           if (item.providerRef.kind === "system") {
             const partStream = await createHostedTextPartStream(
@@ -1104,7 +1203,7 @@ export async function generateTextForProviderRef(
       operation: "text.generate",
       selectedProviderId: providerId,
       selectedModel: modelName,
-      fallbackUsed: gatewayAttempts.length > 1,
+      fallbackUsed: status === "success" && gatewayAttempts.length > 1,
       attempts: gatewayAttempts,
     }
     options.onGateway?.(gatewayMetadata)
@@ -1155,9 +1254,12 @@ export async function runStreamTextInBackground(
   let errorMessage: string | undefined
   let finalSnapshot: BackgroundTextStreamSnapshot | undefined
   let capturedUsage: AuditLogTokenUsage | undefined
+  const gatewayAttempts: GatewayAttemptAudit[] = []
 
   try {
-    const partStream = createTextPartStreamViaGateway(serializablePayload, options)
+    const partStream = createTextPartStreamViaGateway(serializablePayload, options, {
+      onAttemptComplete: (attempt) => gatewayAttempts.push(attempt),
+    })
 
     finalSnapshot = await consumeTextPartStream(partStream, {
       onChunk,
@@ -1186,10 +1288,21 @@ export async function runStreamTextInBackground(
             | undefined)
         : undefined
 
+    const lastAttempt = gatewayAttempts.at(-1)
+    const providerId = lastAttempt?.providerId ?? serializablePayload.providerId
     const modelName =
-      typeof providerConfigObj?.model === "object"
-        ? providerConfigObj.model?.customModel || providerConfigObj.model?.model
-        : providerConfigObj?.model
+      providerId !== serializablePayload.providerId
+        ? lastAttempt?.model
+        : typeof providerConfigObj?.model === "object"
+          ? providerConfigObj.model?.customModel || providerConfigObj.model?.model
+          : providerConfigObj?.model
+    const gateway: GatewayAuditMetadata = {
+      operation: "text.stream",
+      selectedProviderId: providerId,
+      selectedModel: modelName,
+      fallbackUsed: status === "success" && gatewayAttempts.length > 1,
+      attempts: gatewayAttempts,
+    }
 
     const featureName =
       serializablePayload.sourceFeature ||
@@ -1200,7 +1313,7 @@ export async function runStreamTextInBackground(
     const rawPayload: Record<string, unknown> = {
       sourceFeature: featureName,
       url: serializablePayload.url,
-      providerId: serializablePayload.providerId,
+      providerId,
       model: modelName,
       instructions: serializablePayload.instructions,
       prompt: serializablePayload.prompt,
@@ -1227,12 +1340,13 @@ export async function runStreamTextInBackground(
     void recordAuditLog({
       sourceFeature: featureName,
       url: serializablePayload.url,
-      providerId: serializablePayload.providerId,
+      providerId,
       providerType: "llm",
       model: modelName,
       systemPrompt: serializablePayload.instructions,
       prompt: promptStr,
       messages: structuredMessages,
+      gateway,
       parameters: {
         temperature: serializablePayload.temperature,
         topP: serializablePayload.topP,

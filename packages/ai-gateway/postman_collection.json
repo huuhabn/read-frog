@@ -1,0 +1,638 @@
+{
+  "info": {
+    "_postman_id": "a1b2c3d4-e5f6-7890-abcd-ef1234567890",
+    "name": "AI Gateway Standalone Service",
+    "description": "Postman Collection for AI Gateway Standalone Service covering Multi-Format Inference (OpenAI, Claude, Gemini, Responses, Ollama), Embeddings, Model Registry, and Management/Audit APIs.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3001",
+      "type": "string"
+    },
+    {
+      "key": "apiKey",
+      "value": "sk-test-key",
+      "type": "string"
+    },
+    {
+      "key": "tenantId",
+      "value": "vxt-saas-prod",
+      "type": "string"
+    }
+  ],
+  "item": [
+    {
+      "name": "System & Health",
+      "item": [
+        {
+          "name": "Health Check",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/health",
+              "host": ["{{baseUrl}}"],
+              "path": ["health"]
+            },
+            "description": "Check if the AI Gateway service is running and healthy."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Inference APIs",
+      "item": [
+        {
+          "name": "OpenAI - Chat Completions (Streaming SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"system\",\n      \"content\": \"You are a helpful and concise assistant.\"\n    },\n    {\n      \"role\": \"user\",\n      \"content\": \"Explain Clean Architecture in 2 bullet points.\"\n    }\n  ],\n  \"stream\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/chat/completions",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chat", "completions"]
+            },
+            "description": "Standard OpenAI chat completion endpoint streaming response chunks via SSE."
+          }
+        },
+        {
+          "name": "OpenAI - Chat Completions (Non-Streaming)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Hello AI Gateway! Give me a one-sentence greeting.\"\n    }\n  ],\n  \"stream\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/chat/completions",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chat", "completions"]
+            },
+            "description": "Standard OpenAI non-streaming chat completion returning single JSON response."
+          }
+        },
+        {
+          "name": "OpenAI - With Tool Calling",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is the weather in Tokyo?\"\n    }\n  ],\n  \"tools\": [\n    {\n      \"type\": \"function\",\n      \"function\": {\n        \"name\": \"get_current_weather\",\n        \"description\": \"Get the current weather in a given location\",\n        \"parameters\": {\n          \"type\": \"object\",\n          \"properties\": {\n            \"location\": {\n              \"type\": \"string\",\n              \"description\": \"The city and state, e.g. San Francisco, CA\"\n            },\n            \"unit\": {\n              \"type\": \"string\",\n              \"enum\": [\"celsius\", \"fahrenheit\"]\n            }\n          },\n          \"required\": [\"location\"]\n        }\n      }\n    }\n  ],\n  \"stream\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/chat/completions",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chat", "completions"]
+            },
+            "description": "Function / Tool calling with OpenAI chat completions schema."
+          }
+        },
+        {
+          "name": "OpenAI - With RTK Token Compression",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              },
+              {
+                "key": "x-rtk-enabled",
+                "value": "true",
+                "description": "Enable in-place compression of large tool results"
+              },
+              {
+                "key": "x-concise-prompt",
+                "value": "true",
+                "description": "Inject token-saving concise guidance"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4o\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Summarize system diagnostic logs\"\n    }\n  ],\n  \"stream\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/chat/completions",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chat", "completions"]
+            },
+            "description": "Request with Request Token-Killer (RTK) compression headers enabled."
+          }
+        },
+        {
+          "name": "Anthropic - Claude Messages (Streaming SSE)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "anthropic-version",
+                "value": "2023-06-01"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"claude-3-5-sonnet-20241022\",\n  \"system\": \"You are an expert TypeScript engineer.\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Write a generic debounce function in TypeScript.\"\n    }\n  ],\n  \"max_tokens\": 1024,\n  \"stream\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "messages"]
+            },
+            "description": "Anthropic Claude Messages API format. AI Gateway automatically handles bi-directional translation."
+          }
+        },
+        {
+          "name": "Anthropic - Claude Messages (Non-Streaming)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "x-api-key",
+                "value": "{{apiKey}}"
+              },
+              {
+                "key": "anthropic-version",
+                "value": "2023-06-01"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"claude-3-5-haiku-20241022\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Hello Claude! Give me 3 tips for writing clean code.\"\n    }\n  ],\n  \"max_tokens\": 500,\n  \"stream\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/messages",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "messages"]
+            },
+            "description": "Anthropic Claude non-streaming request returning message response."
+          }
+        },
+        {
+          "name": "Codex Responses API",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"gpt-4o\",\n  \"instructions\": \"You are a programming mentor.\",\n  \"input\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"What is the difference between interface and type in TypeScript?\"\n    }\n  ],\n  \"stream\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/responses",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "responses"]
+            },
+            "description": "OpenAI Codex Responses API format."
+          }
+        },
+        {
+          "name": "Google Gemini - StreamGenerateContent",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"contents\": [\n    {\n      \"role\": \"user\",\n      \"parts\": [\n        {\n          \"text\": \"List the 3 key benefits of Event-Driven Architecture.\"\n        }\n      ]\n    }\n  ],\n  \"generationConfig\": {\n    \"temperature\": 0.7,\n    \"maxOutputTokens\": 500\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1beta/models/gemini-1.5-flash:streamGenerateContent",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1beta", "models", "gemini-1.5-flash:streamGenerateContent"]
+            },
+            "description": "Google Gemini wire format via :streamGenerateContent."
+          }
+        },
+        {
+          "name": "Ollama - Chat API",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"llama3\",\n  \"messages\": [\n    {\n      \"role\": \"user\",\n      \"content\": \"Why is the sky blue?\"\n    }\n  ],\n  \"stream\": true\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/chat",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "chat"]
+            },
+            "description": "Ollama /api/chat compatibility endpoint."
+          }
+        },
+        {
+          "name": "Text Embeddings",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"model\": \"text-embedding-3-small\",\n  \"input\": [\n    \"AI Gateway Standalone Service Architecture\",\n    \"Clean Architecture with Ports and Adapters in TypeScript\"\n  ],\n  \"encoding_format\": \"float\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/embeddings",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "embeddings"]
+            },
+            "description": "Generate vector embeddings for input text strings."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Model Registry",
+      "item": [
+        {
+          "name": "List Available Models",
+          "request": {
+            "method": "GET",
+            "header": [
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "url": {
+              "raw": "{{baseUrl}}/v1/models",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "models"]
+            },
+            "description": "Retrieve the list of enabled models formatted in OpenAI standard list format."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Management & BYOK",
+      "item": [
+        {
+          "name": "Admin - Create Tenant",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": \"{{tenantId}}\",\n  \"name\": \"VXT Production SaaS\",\n  \"slug\": \"vxt-prod\",\n  \"credentialMode\": \"hybrid\",\n  \"allowedProviders\": [\"openai\", \"anthropic\", \"gemini\", \"deepseek\"]\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/tenants",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "admin", "tenants"]
+            },
+            "description": "Platform Admin: Register a new SaaS customer tenant."
+          }
+        },
+        {
+          "name": "Tenant - Add BYOK Credential (Encrypted)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"provider\": \"anthropic\",\n  \"apiKey\": \"sk-ant-api03-sample-key-1234567890\",\n  \"label\": \"Production Anthropic Key\",\n  \"priority\": 10\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/tenant/credentials",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tenant", "credentials"]
+            },
+            "description": "Tenant: Save an encrypted BYOK API key. Secret is AES-256-GCM encrypted at rest and write-only."
+          }
+        },
+        {
+          "name": "Tenant - Add Web Session Credential",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"provider\": \"chatgpt-web\",\n  \"apiKey\": \"eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.dummy_access_token\",\n  \"label\": \"My ChatGPT Web Account\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/tenant/credentials",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tenant", "credentials"]
+            },
+            "description": "Tenant: Save a ChatGPT Web session token/cookie credential."
+          }
+        },
+        {
+          "name": "Tenant - Add Gemini Web Credential",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"provider\": \"gemini-web\",\n  \"apiKey\": \"{\\\"__Secure-1PSID\\\": \\\"psid_sample_value\\\", \\\"__Secure-1PSIDTS\\\": \\\"psidts_sample_value\\\"}\",\n  \"label\": \"My Gemini Web Account\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/tenant/credentials",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tenant", "credentials"]
+            },
+            "description": "Tenant: Save a Gemini Web cookie session credential (__Secure-1PSID and __Secure-1PSIDTS)."
+          }
+        },
+        {
+          "name": "Tenant - Add Muse Web Credential",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"tenantId\": \"{{tenantId}}\",\n  \"provider\": \"muse-web\",\n  \"apiKey\": \"hatch_sess=sample_sess_123; hatch_gw=sample_gw_456\",\n  \"label\": \"My Muse Web Account\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/tenant/credentials",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tenant", "credentials"]
+            },
+            "description": "Tenant: Save a Muse Web session cookie credential (hatch_sess, hatch_gw)."
+          }
+        },
+        {
+          "name": "Tenant - List Credentials (Masked)",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/tenant/credentials?tenantId={{tenantId}}&provider=anthropic",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tenant", "credentials"],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}"
+                },
+                {
+                  "key": "provider",
+                  "value": "anthropic"
+                }
+              ]
+            },
+            "description": "Tenant: List configured credentials. Always returns masked secret (e.g. sk-a...7890)."
+          }
+        },
+        {
+          "name": "Tenant - Usage Summary",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/tenant/usage?tenantId={{tenantId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tenant", "usage"],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}"
+                }
+              ]
+            },
+            "description": "Tenant: Get aggregated token and cost metrics."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Audit Logs",
+      "item": [
+        {
+          "name": "Admin - List All Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/admin/audit-logs?limit=50&offset=0",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "admin", "audit-logs"],
+              "query": [
+                {
+                  "key": "limit",
+                  "value": "50"
+                },
+                {
+                  "key": "offset",
+                  "value": "0"
+                }
+              ]
+            },
+            "description": "Admin: Query all administrative, credential, and security audit logs across the platform."
+          }
+        },
+        {
+          "name": "Tenant - List Own Audit Logs",
+          "request": {
+            "method": "GET",
+            "header": [],
+            "url": {
+              "raw": "{{baseUrl}}/v1/tenant/audit-logs?tenantId={{tenantId}}&limit=20",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "tenant", "audit-logs"],
+              "query": [
+                {
+                  "key": "tenantId",
+                  "value": "{{tenantId}}"
+                },
+                {
+                  "key": "limit",
+                  "value": "20"
+                }
+              ]
+            },
+            "description": "Tenant: Query audit events scoped to the authenticated tenant."
+          }
+        }
+      ]
+    },
+    {
+      "name": "Prompt Pipeline & Orchestrator",
+      "item": [
+        {
+          "name": "Pipeline - Chat & Translation (Cache Miss & Normalization)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Please translate this sentence: AI Gateway is powerful with <b>HTML markers</b> and $E=mc^2$.\",\n  \"target\": \"openai/gpt-4o\",\n  \"styleProfile\": {\n    \"targetLanguage\": \"Vietnamese\",\n    \"tone\": \"professional and concise\",\n    \"glossary\": {\n      \"AI Gateway\": \"Cổng kết nối AI\"\n    }\n  },\n  \"params\": {\n    \"temperature\": 0.3\n  },\n  \"bypassCache\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/chat/pipeline",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chat", "pipeline"]
+            },
+            "description": "Executes the 10-step Prompt Pipeline lifecycle: Resolves base rules & styleProfile, extracts matched glossary, activates conditional layers (HTML & Math), safe-interpolates template variables, executes inference via fallback router, normalizes output (stripping <think> and validating markers), saves to Cache and records audit logs."
+          }
+        },
+        {
+          "name": "Pipeline - Cache Hit Verification (Zero-Latency)",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Please translate this sentence: AI Gateway is powerful with <b>HTML markers</b> and $E=mc^2$.\",\n  \"target\": \"openai/gpt-4o\",\n  \"styleProfile\": {\n    \"targetLanguage\": \"Vietnamese\",\n    \"tone\": \"professional and concise\",\n    \"glossary\": {\n      \"AI Gateway\": \"Cổng kết nối AI\"\n    }\n  },\n  \"params\": {\n    \"temperature\": 0.3\n  },\n  \"bypassCache\": false\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/chat/pipeline",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chat", "pipeline"]
+            },
+            "description": "Repeats identical prompt pipeline call. Verifies that result is served instantly from L3 deterministic SHA-256 Cache with cached: true and zero upstream cost."
+          }
+        },
+        {
+          "name": "Pipeline - Streaming SSE with On-the-Fly Normalization",
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              },
+              {
+                "key": "Authorization",
+                "value": "Bearer {{apiKey}}"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"text\": \"Explain why Clean Architecture matters in AI applications in 2 sentences.\",\n  \"target\": \"openai/gpt-4o\",\n  \"stream\": true,\n  \"styleProfile\": {\n    \"tone\": \"concise\"\n  }\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/v1/chat/pipeline",
+              "host": ["{{baseUrl}}"],
+              "path": ["v1", "chat", "pipeline"]
+            },
+            "description": "Streams output chunks in real-time via Server-Sent Events (SSE). Chunks pass through the TransformStream normalizer to suppress reasoning <think> blocks on the fly."
+          }
+        }
+      ]
+    }
+  ]
+}

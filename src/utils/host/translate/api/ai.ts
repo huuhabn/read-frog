@@ -1,8 +1,8 @@
 import type { LLMProviderConfig } from "@/types/config/provider"
 import type { MatchedTerm } from "@/utils/glossary/types"
 import type { TranslatePromptOptions, TranslatePromptResult } from "@/utils/prompts/translate"
+import { executeGatewayAttempts, RouteError } from "@workmate-ai/ai-gateway/routing"
 import { generateText } from "ai"
-import { executeGatewayAttempts, GatewayError } from "@/utils/ai-gateway"
 import { extractAISDKErrorMessage } from "@/utils/error/extract-message"
 import { getModelById } from "@/utils/providers/model"
 import { resolveModelId } from "@/utils/providers/model-id"
@@ -88,7 +88,7 @@ export async function aiTranslate<TContext>(
     return finalTranslation
   } catch (error) {
     const originalError =
-      error instanceof GatewayError && error.cause !== undefined ? error.cause : error
+      error instanceof RouteError && error.cause !== undefined ? error.cause : error
     const message = extractAISDKErrorMessage(originalError)
     const meta = getRequestErrorMeta(originalError)
     if (originalError instanceof Error) {

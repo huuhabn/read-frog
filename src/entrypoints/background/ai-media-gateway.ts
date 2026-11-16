@@ -1,3 +1,4 @@
+import type { GatewayOperation, GatewayRouteCandidate } from "@workmate-ai/ai-gateway/routing"
 import type {
   BackgroundEmbeddingRequest,
   BackgroundEmbeddingResponse,
@@ -12,15 +13,15 @@ import type {
   BackgroundVisionResponse,
 } from "@/types/background-media"
 import type { LLMProviderConfig } from "@/types/config/provider"
-import type { GatewayOperation, GatewayRouteCandidate } from "@/utils/ai-gateway"
-import { embedMany, generateImage, generateSpeech, generateText, transcribe } from "ai"
-import { isLLMProviderConfig } from "@/types/config/provider"
 import {
   executeGatewayAttempts,
-  GatewayError,
+  RouteError,
   GatewayHealthRegistry,
+  MAX_GATEWAY_ATTEMPTS,
   planGatewayRoutes,
-} from "@/utils/ai-gateway"
+} from "@workmate-ai/ai-gateway/routing"
+import { embedMany, generateImage, generateSpeech, generateText, transcribe } from "ai"
+import { isLLMProviderConfig } from "@/types/config/provider"
 import { getLocalConfig } from "@/utils/config/storage"
 import { onMessage } from "@/utils/message"
 import { createAIProviderForConfig, getLanguageModelForConfigAndId } from "@/utils/providers/model"
@@ -47,20 +48,20 @@ type FactoryName =
   | "speech"
 
 function assertNonEmpty(value: string, name: string) {
-  if (!value.trim()) throw new GatewayError("invalid_request", `${name} is required`)
+  if (!value.trim()) throw new RouteError("invalid_request", `${name} is required`)
 }
 
 function assertPrompt(value: string) {
   assertNonEmpty(value, "prompt")
   if (value.length > MAX_PROMPT_CHARS) {
-    throw new GatewayError("invalid_request", "prompt is too long")
+    throw new RouteError("invalid_request", "prompt is too long")
   }
 }
 
 function base64ByteLength(value: string): number {
   const normalized = value.replace(/\s/g, "")
   if (!/^[A-Za-z0-9+/]*={0,2}$/.test(normalized) || normalized.length % 4 !== 0) {
-    throw new GatewayError("invalid_request", "Invalid base64 payload")
+    throw new RouteError("invalid_request", "Invalid base64 payload")
   }
   return (
     (normalized.length * 3) / 4 - (normalized.endsWith("==") ? 2 : normalized.endsWith("=") ? 1 : 0)
@@ -69,7 +70,7 @@ function base64ByteLength(value: string): number {
 
 function assertBinaryInput(value: string) {
   if (base64ByteLength(value) > MAX_BINARY_BYTES) {
-    throw new GatewayError("invalid_request", `Binary input exceeds ${MAX_BINARY_BYTES} bytes`)
+    throw new RouteError("invalid_request", `Binary input exceeds ${MAX_BINARY_BYTES} bytes`)
   }
 }
 
@@ -96,7 +97,7 @@ function resolveOperationModel(config: LLMProviderConfig, modelId: string, names
     const factory = provider[name]
     if (typeof factory === "function") return factory.call(provider, modelId)
   }
-  throw new GatewayError(
+  throw new RouteError(
     "unsupported",
     `Provider "${config.provider}" does not support this media operation`,
   )
@@ -120,10 +121,10 @@ async function executeMedia<T>(
   assertNonEmpty(routing.providerId, "providerId")
   assertNonEmpty(routing.modelId, "modelId")
   if (activeMediaRequests.has(routing.requestId)) {
-    throw new GatewayError("invalid_request", "Media requestId is already active")
+    throw new RouteError("invalid_request", "Media requestId is already active")
   }
   const config = await getLocalConfig()
-  if (!config) throw new GatewayError("invalid_request", "Extension config is unavailable")
+  if (!config) throw new RouteError("invalid_request", "Extension config is unavailable")
   const requestedRoutes = [
     { providerId: routing.providerId, modelId: routing.modelId },
     ...(routing.fallbackRoutes ?? []),
@@ -146,7 +147,7 @@ async function executeMedia<T>(
     candidateFor(operation, route.providerConfig, route.modelId, index),
   )
   const planned = planGatewayRoutes(operation, candidates, {
-    maxAttempts: Math.min(3, Math.max(1, routing.maxGatewayAttempts ?? 1)),
+    maxAttempts: Math.min(MAX_GATEWAY_ATTEMPTS, Math.max(1, routing.maxGatewayAttempts ?? 1)),
     health: mediaHealth,
   })
   const byRoute = new Map(candidates.map((candidate, index) => [candidate.routeId, routes[index]!]))
@@ -172,7 +173,7 @@ export async function runVisionRequest(
 ): Promise<BackgroundVisionResponse> {
   assertPrompt(request.prompt)
   if (!request.mediaType.startsWith("image/"))
-    throw new GatewayError("invalid_request", "mediaType must be image/*")
+    throw new RouteError("invalid_request", "mediaType must be image/*")
   assertBinaryInput(request.imageBase64)
   return executeMedia(
     "vision.generate",
@@ -210,22 +211,22 @@ export async function runImageRequest(
   assertPrompt(request.prompt)
   const n = request.n ?? 1
   if (!Number.isInteger(n) || n < 1 || n > MAX_IMAGE_COUNT) {
-    throw new GatewayError("invalid_request", `n must be between 1 and ${MAX_IMAGE_COUNT}`)
+    throw new RouteError("invalid_request", `n must be between 1 and ${MAX_IMAGE_COUNT}`)
   }
   if (request.size) {
     const match = /^(\d{1,4})x(\d{1,4})$/.exec(request.size)
     if (!match || Number(match[1]) > 4096 || Number(match[2]) > 4096) {
-      throw new GatewayError("invalid_request", "size must be at most 4096x4096")
+      throw new RouteError("invalid_request", "size must be at most 4096x4096")
     }
   }
   if (request.aspectRatio) {
     const match = /^(\d{1,3}):(\d{1,3})$/.exec(request.aspectRatio)
     if (!match || Number(match[1]) === 0 || Number(match[2]) === 0) {
-      throw new GatewayError("invalid_request", "aspectRatio is invalid")
+      throw new RouteError("invalid_request", "aspectRatio is invalid")
     }
   }
   if (request.seed !== undefined && !Number.isSafeInteger(request.seed)) {
-    throw new GatewayError("invalid_request", "seed must be a safe integer")
+    throw new RouteError("invalid_request", "seed must be a safe integer")
   }
   const factoryNames: FactoryName[] = ["imageModel", "image"]
   return executeMedia(
@@ -250,7 +251,7 @@ export async function runImageRequest(
       }))
       const totalBytes = images.reduce((total, image) => total + base64ByteLength(image.base64), 0)
       if (totalBytes > MAX_GENERATED_BINARY_BYTES) {
-        throw new GatewayError("provider", "Generated image payload exceeds extension limit")
+        throw new RouteError("provider", "Generated image payload exceeds extension limit")
       }
       return { images, providerId: config.id, modelId }
     },
@@ -261,16 +262,16 @@ export async function runEmbeddingRequest(
   request: BackgroundEmbeddingRequest,
 ): Promise<BackgroundEmbeddingResponse> {
   if (request.values.length < 1 || request.values.length > MAX_EMBEDDING_VALUES) {
-    throw new GatewayError("invalid_request", `values must contain 1-${MAX_EMBEDDING_VALUES} items`)
+    throw new RouteError("invalid_request", `values must contain 1-${MAX_EMBEDDING_VALUES} items`)
   }
   if (request.values.some((value) => !value.trim() || value.length > MAX_EMBEDDING_VALUE_CHARS)) {
-    throw new GatewayError("invalid_request", "Embedding value is empty or too long")
+    throw new RouteError("invalid_request", "Embedding value is empty or too long")
   }
   if (
     request.dimensions !== undefined &&
     (!Number.isInteger(request.dimensions) || request.dimensions < 1 || request.dimensions > 8192)
   ) {
-    throw new GatewayError("invalid_request", "dimensions must be between 1 and 8192")
+    throw new RouteError("invalid_request", "dimensions must be between 1 and 8192")
   }
   const factoryNames: FactoryName[] = ["embeddingModel", "embedding"]
   return executeMedia(
@@ -291,7 +292,7 @@ export async function runEmbeddingRequest(
         0,
       )
       if (outputValues > MAX_EMBEDDING_OUTPUT_VALUES) {
-        throw new GatewayError("provider", "Embedding output exceeds extension limit")
+        throw new RouteError("provider", "Embedding output exceeds extension limit")
       }
       return {
         embeddings: result.embeddings,
@@ -307,7 +308,7 @@ export async function runTranscriptionRequest(
   request: BackgroundTranscriptionRequest,
 ): Promise<BackgroundTranscriptionResponse> {
   if (!request.mediaType.startsWith("audio/"))
-    throw new GatewayError("invalid_request", "mediaType must be audio/*")
+    throw new RouteError("invalid_request", "mediaType must be audio/*")
   assertBinaryInput(request.audioBase64)
   const factoryNames: FactoryName[] = ["transcriptionModel", "transcription"]
   return executeMedia(
@@ -341,9 +342,9 @@ export async function runSpeechRequest(
 ): Promise<BackgroundSpeechResponse> {
   assertNonEmpty(request.text, "text")
   if (request.text.length > MAX_SPEECH_TEXT_CHARS)
-    throw new GatewayError("invalid_request", "Speech text is too long")
+    throw new RouteError("invalid_request", "Speech text is too long")
   if (request.speed !== undefined && (request.speed < 0.25 || request.speed > 4)) {
-    throw new GatewayError("invalid_request", "Speech speed must be between 0.25 and 4")
+    throw new RouteError("invalid_request", "Speech speed must be between 0.25 and 4")
   }
   const factoryNames: FactoryName[] = ["speechModel", "speech"]
   return executeMedia(
@@ -364,7 +365,7 @@ export async function runSpeechRequest(
         maxRetries: 0,
       })
       if (base64ByteLength(result.audio.base64) > MAX_GENERATED_BINARY_BYTES) {
-        throw new GatewayError("provider", "Generated speech payload exceeds extension limit")
+        throw new RouteError("provider", "Generated speech payload exceeds extension limit")
       }
       return {
         audioBase64: result.audio.base64,

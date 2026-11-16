@@ -93,6 +93,7 @@ export function ReadView() {
           providerId: selectedModel.providerId,
           providerConfig:
             matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          automaticRouting: true,
           instructions: systemInstruction,
           messages: [
             {

@@ -1,5 +1,5 @@
+import type { GatewayAuditMetadata } from "@workmate-ai/ai-gateway/routing"
 import type { ProviderRequestRouting } from "./hosted-request"
-import type { GatewayAuditMetadata } from "@/utils/ai-gateway/types"
 import type { PromptableProviderRef } from "@/utils/providers/provider-ref"
 
 export type BackgroundGenerateTextPayload = ProviderRequestRouting<PromptableProviderRef> & {

@@ -1,11 +1,12 @@
+import type { GatewayAuditMetadata } from "@workmate-ai/ai-gateway/routing"
 import type { ChatMessage } from "../adapter/types"
 import type { LLMProviderConfig } from "@/types/config/provider"
-import type { GatewayAuditMetadata } from "@/utils/ai-gateway/types"
 import type { AuditLogTokenUsage } from "@/utils/db/dexie/tables/audit-log"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { recordAuditLog } from "@/utils/audit-log/audit-log-service"
 import { getLocalConfig } from "@/utils/config/storage"
 import { sendMessage } from "@/utils/message"
+import { selectFallbackProviders } from "@/utils/providers/fallback-providers"
 import { maskPII } from "../pii/mask"
 import { unmaskPII } from "../pii/unmask"
 
@@ -125,23 +126,14 @@ export async function callWebChatLLM(options: CallWebChatLLMOptions): Promise<st
     : systemPrompt
 
   try {
-    const gatewayConfig = config?.aiGateway
-    const excludedProviderIds = new Set(gatewayConfig?.excludedProviderIds ?? [])
-    const automaticRoutingEnabled = gatewayConfig?.enabled ?? true
-    const fallbackProviderRefs = (config?.providersConfig ?? [])
-      .filter(
-        (candidate): candidate is LLMProviderConfig =>
-          automaticRoutingEnabled &&
-          candidate.enabled &&
-          candidate.id !== targetProviderId &&
-          !excludedProviderIds.has(candidate.id) &&
-          isLLMProviderConfig(candidate),
-      )
-      .map((candidate) => ({ kind: "local" as const, config: candidate }))
+    const { fallbackProviders, maxAttempts } = selectFallbackProviders(config, targetProviderId)
     const response = await sendMessage("backgroundGenerateText", {
       providerRef: { kind: "local", config: providerConfig },
-      fallbackProviderRefs,
-      maxGatewayAttempts: automaticRoutingEnabled ? (gatewayConfig?.maxAttempts ?? 3) : 1,
+      fallbackProviderRefs: fallbackProviders.map((candidate) => ({
+        kind: "local" as const,
+        config: candidate,
+      })),
+      maxGatewayAttempts: maxAttempts,
       skipAudit: true,
       instructions: fullSystemPrompt,
       prompt: processedPrompt,

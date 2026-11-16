@@ -1,4 +1,4 @@
-import type { GatewayAuditMetadata } from "@/utils/ai-gateway/types"
+import type { GatewayAuditMetadata } from "@workmate-ai/ai-gateway/routing"
 import { Entity } from "dexie"
 
 export interface AuditLogMessage {

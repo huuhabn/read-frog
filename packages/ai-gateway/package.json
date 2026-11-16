@@ -1,0 +1,33 @@
+{
+  "name": "@workmate-ai/ai-gateway",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Provider-agnostic AI Gateway, routing, and prompt pipeline",
+  "type": "module",
+  "exports": {
+    ".": "./index.ts",
+    "./routing": "./routing.ts",
+    "./server": "./server/index.ts"
+  },
+  "scripts": {
+    "test": "vitest run",
+    "start": "tsx server/standalone.ts",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@hono/node-server": "^2.1.8",
+    "better-sqlite3": "^12.4.1",
+    "drizzle-orm": "^0.45.4",
+    "hono": "^4.13.19"
+  },
+  "devDependencies": {
+    "@types/better-sqlite3": "^7.6.13",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.23.15",
+    "typescript": "^5.9.3",
+    "vitest": "^5.1.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

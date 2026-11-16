@@ -88,5 +88,76 @@
     ],
     "vitest/no-identical-title": "error",
     "vitest/prefer-hooks-on-top": "error"
-  }
+  },
+  "overrides": [
+    {
+      "files": ["src/**/*.{ts,tsx}"],
+      "rules": {
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "paths": [
+              {
+                "name": "@workmate-ai/ai-gateway",
+                "message": "The full gateway barrel pulls translators and adapters into every bundle that imports it; import @workmate-ai/ai-gateway/routing (or a specific module) instead."
+              }
+            ],
+            "patterns": [
+              {
+                "group": ["@workmate-ai/ai-gateway/server", "@workmate-ai/ai-gateway/server/**"],
+                "message": "Node-only AI gateway code (Hono server, Node crypto, SQLite, Drizzle schema) cannot run in the extension."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": [
+        "packages/ai-gateway/index.ts",
+        "packages/ai-gateway/routing.ts",
+        "packages/ai-gateway/domain/**",
+        "packages/ai-gateway/application/**",
+        "packages/ai-gateway/engine/**",
+        "packages/ai-gateway/pipeline/**",
+        "packages/ai-gateway/adapters/providers/**",
+        "packages/ai-gateway/adapters/db/memory/**"
+      ],
+      "rules": {
+        "eslint/no-restricted-imports": [
+          "error",
+          {
+            "patterns": [
+              {
+                "group": [
+                  "crypto",
+                  "node:*",
+                  "hono",
+                  "hono/*",
+                  "@hono/*",
+                  "drizzle-orm",
+                  "drizzle-orm/*",
+                  "better-sqlite3",
+                  "**/server/*",
+                  "**/adapters/security/*",
+                  "**/adapters/db/schema/*",
+                  "**/adapters/db/sqlite/*",
+                  "@/types/**",
+                  "@/utils/**",
+                  "@/entrypoints/**"
+                ],
+                "message": "The AI gateway core must stay runtime-agnostic and independent of the extension; inject Node-only or app-specific code through a port."
+              }
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "files": ["packages/ai-gateway/**/*.test.ts", "packages/ai-gateway/__tests__/**"],
+      "rules": {
+        "eslint/no-restricted-imports": "off"
+      }
+    }
+  ]
 }

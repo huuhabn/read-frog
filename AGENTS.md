@@ -6,6 +6,8 @@ Operational and development guide for AI agents working in the **Workmate AI** c
 
 ## 1. Project Overview & Tech Stack
 
+Reusable AI gateway lives in the workspace package `@workmate-ai/ai-gateway` (`packages/ai-gateway`): import `./routing` from the extension; use `./server` (Hono + SQLite by default) for Node hosts. See that package’s `README.md` / `AGENTS.md`.
+
 Workmate AI is a high-performance Browser Extension (Manifest V3) built with:
 
 - **Framework**: [WXT](https://wxt.dev/) with Vite

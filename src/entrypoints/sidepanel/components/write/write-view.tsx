@@ -115,6 +115,7 @@ export function WriteView() {
           providerId: selectedModel.providerId,
           providerConfig:
             matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
+          automaticRouting: true,
           instructions: instruction,
           messages: [{ role: "user", content: inputText }],
           temperature: 0.5,
