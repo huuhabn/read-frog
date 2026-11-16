@@ -1,4 +1,4 @@
-# Plan 006: Simplify the public gateway API
+# Plan 002: Simplify the public gateway API
 
 > **Executor instructions**: Read this plan fully. Keep `InferenceService` as the advanced compatibility layer while adding a small typed facade. Update `plans/README.md` when done.
 >
@@ -9,7 +9,7 @@
 - **Priority**: P1
 - **Effort**: M
 - **Risk**: MED
-- **Depends on**: plans/005-standalone-saas-master-tenant.md
+- **Depends on**: plans/001-standalone-saas-master-tenant.md
 - **Category**: dx
 - **Planned at**: commit `c44e88ea`, 2026-11-17
 
@@ -31,7 +31,7 @@ Consumers currently choose between raw `InferenceService.execute()` with wire-fo
 
 **In scope**: typed `GatewayClient`/`createGatewayClient` facade, `generate`, `stream`, and `embed` methods, normalized result metadata, tests, README quick-start, export map only if it remains compatible with workspace tooling.
 
-**Out of scope**: publishing, build artifacts/declarations, protocol route fixes (Plan 005), gateway routing options (Plan 007), pricing/budgets, dashboard.
+**Out of scope**: publishing, build artifacts/declarations, protocol route fixes (Plan 001), gateway routing options (Plan 003), pricing/budgets, dashboard.
 
 ## Steps
 
@@ -77,4 +77,4 @@ Export facade/types from `index.ts`. Add a minimal quick-start to README for cor
 
 ## Maintenance notes
 
-Keep the facade thin: policy belongs in application services, provider-specific options belong in Plan 007. Any future method should reuse normalized request/result types instead of adding a parallel API family.
+Keep the facade thin: policy belongs in application services, provider-specific options belong in Plan 003. Any future method should reuse normalized request/result types instead of adding a parallel API family.

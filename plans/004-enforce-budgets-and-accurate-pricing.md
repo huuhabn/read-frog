@@ -1,4 +1,4 @@
-# Plan 008: Enforce tenant budgets and calculate model pricing accurately
+# Plan 004: Enforce tenant budgets and calculate model pricing accurately
 
 > **Executor instructions**: Implement only after master-tenant semantics and catalog metadata are established. Update `plans/README.md` when done.
 >
@@ -9,7 +9,7 @@
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: plans/005-standalone-saas-master-tenant.md, plans/007-unified-routing-and-model-catalog.md
+- **Depends on**: plans/001-standalone-saas-master-tenant.md, plans/003-unified-routing-and-model-catalog.md
 - **Category**: correctness
 - **Planned at**: commit `c44e88ea`, 2026-11-17
 
@@ -25,8 +25,8 @@ The current `QuotaService` creates a reservation but does not compare accumulate
 - `application/inferenceService.ts` uses total tokens at a fixed rate in both stream and non-stream paths.
 - `adapters/db/schema/ledger.ts` stores reservations and usage records in SQLite.
 - `adapters/db/sqlite/sqliteRepos.ts` implements reservation persistence and tenant usage summary.
-- Plan 005 defines master tenant unlimited semantics: it bypasses quota enforcement but records usage/audit.
-- Plan 007 defines catalog pricing metadata; consume its versioned input/output rates and capability model.
+- Plan 001 defines master tenant unlimited semantics: it bypasses quota enforcement but records usage/audit.
+- Plan 003 defines catalog pricing metadata; consume its versioned input/output rates and capability model.
 
 ## Scope
 

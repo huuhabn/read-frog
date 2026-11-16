@@ -1,4 +1,4 @@
-# Plan 010: Build the SaaS model catalog and tenant dashboard
+# Plan 006: Build the SaaS model catalog and tenant dashboard
 
 > **Executor instructions**: Start only after the management API and model, pricing, budget, and request-log contracts are stable. Keep all UI access behind authorized management APIs.
 >
@@ -9,7 +9,7 @@
 - **Priority**: P2
 - **Effort**: L
 - **Risk**: HIGH
-- **Depends on**: plans/007-unified-routing-and-model-catalog.md, plans/008-enforce-budgets-and-accurate-pricing.md, plans/009-observability-and-provider-kit.md
+- **Depends on**: plans/003-unified-routing-and-model-catalog.md, plans/004-enforce-budgets-and-accurate-pricing.md, plans/005-observability-and-provider-kit.md
 - **Category**: direction
 - **Planned at**: commit `c44e88ea`, 2026-11-17
 
@@ -23,7 +23,7 @@ The existing dashboard proposal describes a broad SaaS control plane, but buildi
 - Current service management routes are in `packages/ai-gateway/server/routes/management.ts` and `models.ts`.
 - Current SQLite model repository provides provider/enabled filters but is not yet a full metadata catalog.
 - Current tenant entity includes provider/model allowlists and monthly spend field.
-- Plans 007–009 establish catalog/pricing, budget, and request-log contracts required by this UI.
+- Plans 003–005 establish catalog/pricing, budget, and request-log contracts required by this UI.
 - Existing architecture requires dashboards to call Management API and never access database/provider APIs directly.
 
 ## Scope

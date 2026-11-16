@@ -1,4 +1,4 @@
-# Plan 007: Unify routing options and introduce a model catalog
+# Plan 003: Unify routing options and introduce a model catalog
 
 > **Executor instructions**: Follow steps in order; preserve legacy direct-service behavior while introducing the namespaced options. Update `plans/README.md` when complete.
 >
@@ -9,7 +9,7 @@
 - **Priority**: P1
 - **Effort**: L
 - **Risk**: MED
-- **Depends on**: plans/006-simplify-public-gateway-api.md
+- **Depends on**: plans/002-simplify-public-gateway-api.md
 - **Category**: direction
 - **Planned at**: commit `c44e88ea`, 2026-11-17
 
@@ -31,7 +31,7 @@ Workmate supports provider/model fallback in `InferenceService`, but the HTTP ha
 
 **In scope**: `GatewayOptions` contract; HTTP mapping and validation; route planner controls; provider timeout before first response event; model/provider catalog metadata sufficient for capability filtering; compatibility mapping for direct `fallbackModels` callers.
 
-**Out of scope**: price accuracy implementation (Plan 008); dashboard, automatic model synchronization from external catalog, confidence-based decisions, adaptive latency/cost routing, database migration to Postgres.
+**Out of scope**: price accuracy implementation (Plan 004); dashboard, automatic model synchronization from external catalog, confidence-based decisions, adaptive latency/cost routing, database migration to Postgres.
 
 ## Steps
 
@@ -43,7 +43,7 @@ Define a validated, documented shape with `models` (ordered model fallbacks), `p
 
 ### Step 2: Expose options consistently through HTTP and facade
 
-Map `body.gateway` from OpenAI-compatible requests and the facade from Plan 006 into core route planning. Never forward gateway-only properties upstream. Add `fallbackModels` legacy compatibility only where required and document deprecation timing; do not silently change customer behavior.
+Map `body.gateway` from OpenAI-compatible requests and the facade from Plan 002 into core route planning. Never forward gateway-only properties upstream. Add `fallbackModels` legacy compatibility only where required and document deprecation timing; do not silently change customer behavior.
 
 **Verify**: route tests prove HTTP primary/fallback order and that upstream body has no `gateway` control object.
 

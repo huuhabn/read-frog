@@ -1,4 +1,4 @@
-# Plan 005: Establish the standalone SaaS tenant and master-tenant contract
+# Plan 001: Establish the standalone SaaS tenant and master-tenant contract
 
 > **Executor instructions**: Follow this plan step by step. Run every verification command and confirm the expected result before moving on. Stop on any STOP condition. Update `plans/README.md` when complete.
 >
@@ -78,9 +78,9 @@ Follow package conventions: domain ports/entities stay framework-independent, SQ
 
 - PostgreSQL, Redis, queues, workers, or dashboard implementation.
 - Public endpoint or API-key access to the master tenant.
-- General budget enforcement for customer tenants (Plan 008).
-- Model catalog/pricing changes (Plan 007).
-- Broad inference API redesign (Plan 006).
+- General budget enforcement for customer tenants (Plan 004).
+- Model catalog/pricing changes (Plan 003).
+- Broad inference API redesign (Plan 002).
 
 ## Steps
 
@@ -104,7 +104,7 @@ Introduce an explicit trusted request context that distinguishes customer API-ke
 
 ### Step 4: Make master usage unlimited without skipping accounting
 
-Adjust inference accounting so master-tenant requests bypass quota rejection/reservation limits but still record usage, provider/model, token counts, latency, status, and audit context. If reservation records are retained for operational consistency, mark them as unlimited/internal and do not represent a synthetic balance or customer charge. Keep customer reservation behavior unchanged pending Plan 008.
+Adjust inference accounting so master-tenant requests bypass quota rejection/reservation limits but still record usage, provider/model, token counts, latency, status, and audit context. If reservation records are retained for operational consistency, mark them as unlimited/internal and do not represent a synthetic balance or customer charge. Keep customer reservation behavior unchanged pending Plan 004.
 
 **Verify**: inference tests prove master requests succeed regardless of customer budget state and still write one usage record and audit event for both streaming and non-streaming completion; failure/interruption records retain correct status.
 

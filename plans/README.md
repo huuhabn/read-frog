@@ -6,12 +6,12 @@ These plans define the next phase of `@workmate-ai/ai-gateway` as a standalone m
 
 | Plan | Title                                                       | Priority | Effort | Depends on | Status |
 | ---- | ----------------------------------------------------------- | -------: | -----: | ---------- | ------ |
-| 005  | Establish standalone SaaS tenant and master-tenant contract |       P1 |      M | —          | TODO   |
-| 006  | Simplify the public gateway API                             |       P1 |      M | 005        | TODO   |
-| 007  | Unify routing options and introduce a model catalog         |       P1 |      L | 006        | TODO   |
-| 008  | Enforce tenant budgets and accurate pricing                 |       P1 |      L | 005, 007   | TODO   |
-| 009  | Add request observability and provider conformance kit      |       P2 |      L | 007, 008   | TODO   |
-| 010  | Build SaaS model catalog and tenant dashboard               |       P2 |      L | 007–009    | TODO   |
+| 001  | Establish standalone SaaS tenant and master-tenant contract |       P1 |      M | —          | TODO   |
+| 002  | Simplify the public gateway API                             |       P1 |      M | 001        | TODO   |
+| 003  | Unify routing options and introduce a model catalog         |       P1 |      L | 002        | TODO   |
+| 004  | Enforce tenant budgets and accurate pricing                 |       P1 |      L | 001, 003   | TODO   |
+| 005  | Add request observability and provider conformance kit      |       P2 |      L | 003, 004   | TODO   |
+| 006  | Build SaaS model catalog and tenant dashboard               |       P2 |      L | 003–005    | TODO   |
 
 ## Product decisions
 
@@ -24,10 +24,10 @@ These plans define the next phase of `@workmate-ai/ai-gateway` as a standalone m
 
 ## Dependency notes
 
-- 005 establishes tenant identity, trust boundaries, and accounting semantics before other SaaS features.
-- 006 adds the simple typed API that 007 configures.
-- 007 establishes route options and model metadata consumed by 008 and 009.
-- 008 depends on 005's master tenant policy and 007's model pricing metadata.
-- 010 follows the stable catalog, budget, and request-log contracts from 007–009.
+- 001 establishes tenant identity, trust boundaries, and accounting semantics before other SaaS features.
+- 002 adds the simple typed API that 003 configures.
+- 003 establishes route options and model metadata consumed by 004 and 005.
+- 004 depends on 001's master tenant policy and 003's model pricing metadata.
+- 006 follows the stable catalog, budget, and request-log contracts from 003–005.
 
 Status values: TODO | IN PROGRESS | DONE | BLOCKED (with reason) | REJECTED (with rationale).

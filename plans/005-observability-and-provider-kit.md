@@ -1,4 +1,4 @@
-# Plan 009: Add request observability and a provider conformance kit
+# Plan 005: Add request observability and a provider conformance kit
 
 > **Executor instructions**: Keep request, attempt, usage, and admin audit records distinct. Update `plans/README.md` when done.
 >
@@ -9,7 +9,7 @@
 - **Priority**: P2
 - **Effort**: L
 - **Risk**: MED
-- **Depends on**: plans/007-unified-routing-and-model-catalog.md, plans/008-enforce-budgets-and-accurate-pricing.md
+- **Depends on**: plans/003-unified-routing-and-model-catalog.md, plans/004-enforce-budgets-and-accurate-pricing.md
 - **Category**: direction
 - **Planned at**: commit `c44e88ea`, 2026-11-17
 
