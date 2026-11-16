@@ -202,7 +202,7 @@ export function ChatInputBox({
       )}
 
       {/* Main Input Container */}
-      <div className="relative flex w-full min-w-0 flex-col rounded-2xl border border-border/70 bg-muted/25 p-2 transition-all focus-within:border-primary/50 focus-within:bg-background focus-within:ring-1 focus-within:ring-primary/20">
+      <div className="relative flex w-full min-w-0 flex-col rounded-xl border border-border/60 bg-muted/20 p-2 transition-all focus-within:border-primary/50 focus-within:bg-background focus-within:ring-1 focus-within:ring-primary/20">
         {/* Selection Snippet Card */}
         {selectedSnippet && (
           <SelectionSnippetCard text={selectedSnippet} onClear={handleClearSnippet} />

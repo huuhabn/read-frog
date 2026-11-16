@@ -101,11 +101,7 @@ export function ChatMessageItem({
             title={isCopied ? i18n.t("sidePanel.chat.copied") : i18n.t("sidePanel.chat.copy")}
             aria-label={isCopied ? i18n.t("sidePanel.chat.copied") : i18n.t("sidePanel.chat.copy")}
           >
-            {isCopied ? (
-              <Check className="size-3.5 text-emerald-500" />
-            ) : (
-              <Copy className="size-3.5" />
-            )}
+            {isCopied ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
           </Button>
         </div>
       </div>
@@ -195,20 +191,17 @@ export function ChatMessageItem({
               size="icon-xs"
               variant="ghost"
               className={cn(
-                "size-6 text-emerald-700 hover:bg-emerald-500/10 hover:text-emerald-800 dark:text-emerald-400",
-                hasFillStatus && "bg-emerald-500/15 text-emerald-600 dark:text-emerald-300",
+                "size-6 text-success hover:bg-success/10 hover:text-success",
+                hasFillStatus && "bg-success/15 text-success",
               )}
               onClick={() => void onFillCoverLetter(message.content, index)}
               title={fillStatusText || i18n.t("options.upwork.sidepanel.fillIntoUpwork")}
               aria-label={fillStatusText || i18n.t("options.upwork.sidepanel.fillIntoUpwork")}
             >
               {hasFillStatus ? (
-                <Check className="size-3.5 text-emerald-600 dark:text-emerald-400" />
+                <Check className="size-3.5 text-success" />
               ) : (
-                <Icon
-                  icon="tabler:arrow-down-to-arc"
-                  className="size-3.5 text-emerald-600 dark:text-emerald-400"
-                />
+                <Icon icon="tabler:arrow-down-to-arc" className="size-3.5 text-success" />
               )}
             </Button>
           )}
@@ -222,11 +215,7 @@ export function ChatMessageItem({
             title={isCopied ? i18n.t("sidePanel.chat.copied") : i18n.t("sidePanel.chat.copy")}
             aria-label={isCopied ? i18n.t("sidePanel.chat.copied") : i18n.t("sidePanel.chat.copy")}
           >
-            {isCopied ? (
-              <Check className="size-3.5 text-emerald-500" />
-            ) : (
-              <Copy className="size-3.5" />
-            )}
+            {isCopied ? <Check className="size-3.5 text-success" /> : <Copy className="size-3.5" />}
           </Button>
         </div>
       )}

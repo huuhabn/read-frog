@@ -38,23 +38,17 @@ export function ChatEmptyState({ isUpworkJob, onSendPrompt }: ChatEmptyStateProp
             <button
               type="button"
               onClick={() => void onSendPrompt(UPWORK_QUICK_PROMPT_COVER_LETTER)}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-600/40 bg-emerald-500/10 p-2.5 text-xs font-medium text-emerald-800 transition-all hover:border-emerald-600/60 hover:bg-emerald-500/20 dark:text-emerald-300"
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-success/30 bg-success/10 p-2.5 text-xs font-medium text-success transition-all hover:border-success/50 hover:bg-success/20"
             >
-              <Icon
-                icon="tabler:briefcase"
-                className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
-              />
+              <Icon icon="tabler:briefcase" className="size-4 shrink-0 text-success" />
               <span>{UPWORK_QUICK_PROMPT_COVER_LETTER}</span>
             </button>
             <button
               type="button"
               onClick={() => void onSendPrompt(UPWORK_QUICK_PROMPT_ANALYZE_JOB)}
-              className="flex cursor-pointer items-center gap-2 rounded-lg border border-emerald-600/30 bg-emerald-500/5 p-2.5 text-xs text-emerald-700 transition-all hover:border-emerald-600/50 hover:bg-emerald-500/15 dark:text-emerald-400"
+              className="flex cursor-pointer items-center gap-2 rounded-lg border border-success/20 bg-success/5 p-2.5 text-xs text-success transition-all hover:border-success/40 hover:bg-success/10"
             >
-              <Icon
-                icon="tabler:file-search"
-                className="size-4 shrink-0 text-emerald-600 dark:text-emerald-400"
-              />
+              <Icon icon="tabler:file-search" className="size-4 shrink-0 text-success" />
               <span>{UPWORK_QUICK_PROMPT_ANALYZE_JOB}</span>
             </button>
           </>

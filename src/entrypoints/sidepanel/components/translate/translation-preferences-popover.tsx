@@ -71,10 +71,10 @@ export function TranslationPreferencesPopover({
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger
         className={cn(
-          "flex h-8 cursor-pointer items-center gap-1.5 rounded-full border px-3 text-xs font-medium shadow-xs outline-hidden transition-colors",
+          "flex h-6.5 cursor-pointer items-center gap-1 rounded-md border px-2 text-[11px] font-medium outline-hidden transition-colors",
           isCustom
             ? "border-primary/40 bg-primary/10 text-primary hover:bg-primary/15"
-            : "border-border/80 bg-background/80 text-foreground hover:bg-muted/60",
+            : "border-border/60 bg-muted/40 text-foreground/90 hover:bg-muted",
         )}
       >
         <span>{isCustom ? "Custom preferences" : "Default preferences"}</span>

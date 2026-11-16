@@ -8,6 +8,7 @@ import {
   Copy,
   FileText,
   ImageIcon,
+  Languages,
   Loader2,
   Mic,
   MicOff,
@@ -368,37 +369,41 @@ export function TranslateView() {
   return (
     <div className="flex h-full flex-col bg-background text-foreground antialiased selection:bg-primary/20">
       {/* Top Header */}
-      <header className="flex h-12 shrink-0 items-center justify-between px-4">
-        <h1 className="text-xl font-bold tracking-tight text-foreground">
-          {i18n.t("sidePanel.translate.title")}
-        </h1>
+      <header className="flex h-11 shrink-0 items-center justify-between border-b border-border/60 bg-background/80 px-3 backdrop-blur-xs">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex size-6 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <Languages className="size-3.5" />
+          </div>
+          <span className="truncate text-xs font-semibold tracking-tight">
+            {i18n.t("sidePanel.translate.title")}
+          </span>
+        </div>
+
+        <div className="flex items-center gap-1.5">
+          {/* Model Selector Dropdown */}
+          <ModelSelectorDropdown
+            selectedProviderId={selectedModel.providerId}
+            selectedModelName={selectedModel.model}
+            onSelectModel={handleSelectModel}
+            llmProviders={llmProviders}
+            variant="subtle"
+          />
+
+          {/* Translation Preferences Popover */}
+          <TranslationPreferencesPopover
+            open={isPrefsOpen}
+            onOpenChange={setIsPrefsOpen}
+            preferences={preferences}
+            onChange={handlePreferencesChange}
+            isCustom={isCustom}
+          />
+        </div>
       </header>
 
-      {/* Model & Preferences Row */}
-      <div className="flex shrink-0 items-center justify-between gap-2 px-4 pb-3">
-        {/* Model Selector Dropdown */}
-        <ModelSelectorDropdown
-          selectedProviderId={selectedModel.providerId}
-          selectedModelName={selectedModel.model}
-          onSelectModel={handleSelectModel}
-          llmProviders={llmProviders}
-          variant="pill"
-        />
-
-        {/* Translation Preferences Popover */}
-        <TranslationPreferencesPopover
-          open={isPrefsOpen}
-          onOpenChange={setIsPrefsOpen}
-          preferences={preferences}
-          onChange={handlePreferencesChange}
-          isCustom={isCustom}
-        />
-      </div>
-
       {/* Main Content Area */}
-      <div className="scrollbar-slim flex-1 space-y-3.5 overflow-y-auto px-4 pb-4">
+      <div className="scrollbar-slim flex-1 space-y-3.5 overflow-y-auto px-3.5 py-3">
         {/* Input Card */}
-        <div className="space-y-2.5 rounded-2xl border border-border/80 bg-card p-3 shadow-xs">
+        <div className="space-y-2.5 rounded-xl border border-border/60 bg-muted/20 p-3 shadow-xs">
           {/* Card Header: Language Selectors & Swap */}
           <div className="flex items-center justify-between rounded-xl bg-muted/40 px-2 py-1.5">
             {/* Source Language */}
@@ -479,7 +484,7 @@ export function TranslateView() {
                 className={cn(
                   "flex size-7 cursor-pointer items-center justify-center rounded-full outline-hidden transition-colors",
                   isListening
-                    ? "animate-pulse bg-red-500/15 text-red-500"
+                    ? "animate-pulse bg-destructive/15 text-destructive"
                     : "text-muted-foreground hover:bg-muted hover:text-foreground",
                 )}
                 title={isListening ? "Stop listening" : "Speech to text"}
@@ -520,7 +525,7 @@ export function TranslateView() {
 
         {/* Translation Output Result Card */}
         {(translatedText || isTranslating) && (
-          <div className="animate-in space-y-2 rounded-2xl border border-border/80 bg-muted/20 p-3.5 shadow-xs duration-200 fade-in-50">
+          <div className="animate-in space-y-2 rounded-xl border border-border/60 bg-muted/20 p-3.5 shadow-xs duration-200 fade-in-50">
             <div className="flex items-center justify-between border-b border-border/40 pb-2">
               <div className="flex items-center gap-1.5">
                 <span className="text-xs font-semibold text-foreground">{targetLang.name}</span>
@@ -554,7 +559,7 @@ export function TranslateView() {
                       title="Copy translation"
                     >
                       {isCopied ? (
-                        <Check className="size-3.5 text-emerald-500" />
+                        <Check className="size-3.5 text-success" />
                       ) : (
                         <Copy className="size-3.5" />
                       )}

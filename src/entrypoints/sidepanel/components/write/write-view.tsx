@@ -145,12 +145,14 @@ export function WriteView() {
   return (
     <div className="flex h-full flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="flex h-12 items-center justify-between border-b border-border/60 px-4">
-        <div className="flex items-center gap-2">
-          <PenTool className="size-4 text-primary" />
-          <h2 className="text-sm font-semibold tracking-tight">
+      <header className="flex h-11 shrink-0 items-center justify-between border-b border-border/60 bg-background/80 px-3 backdrop-blur-xs">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex size-6 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <PenTool className="size-3.5" />
+          </div>
+          <span className="truncate text-xs font-semibold tracking-tight">
             {i18n.t("sidePanel.write.title")}
-          </h2>
+          </span>
         </div>
         <ModelSelectorDropdown
           selectedProviderId={selectedModel.providerId}
@@ -243,7 +245,7 @@ export function WriteView() {
                     onClick={() => void handleCopy()}
                   >
                     {isCopied ? (
-                      <Check className="size-3 text-emerald-500" />
+                      <Check className="size-3 text-success" />
                     ) : (
                       <Copy className="size-3" />
                     )}
@@ -253,7 +255,7 @@ export function WriteView() {
             </div>
           </div>
 
-          <div className="min-h-[120px] rounded-lg border border-border/70 bg-muted/20 p-3 text-xs leading-relaxed">
+          <div className="min-h-[120px] rounded-xl border border-border/60 bg-muted/20 p-3 text-xs leading-relaxed">
             {outputText ? (
               <p className="whitespace-pre-wrap">{outputText}</p>
             ) : (

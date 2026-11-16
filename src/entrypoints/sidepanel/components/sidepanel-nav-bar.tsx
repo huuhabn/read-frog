@@ -49,7 +49,7 @@ export function SidePanelNavBar() {
   }
 
   return (
-    <aside className="flex h-screen w-10 flex-col items-center justify-between border-l border-border/60 bg-muted/20 py-2.5 select-none">
+    <aside className="flex h-screen w-10 flex-col items-center justify-between border-l border-sidebar-border bg-sidebar py-2.5 text-sidebar-foreground select-none">
       <div className="flex flex-col items-center gap-3">
         <button
           type="button"

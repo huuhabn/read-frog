@@ -137,15 +137,19 @@ export function ReadView() {
   return (
     <div className="flex h-full flex-col bg-background text-foreground">
       {/* Header */}
-      <header className="flex h-12 items-center justify-between border-b border-border/60 px-4">
-        <div className="flex items-center gap-2">
-          <BookOpen className="size-4 text-primary" />
-          <h2 className="text-sm font-semibold tracking-tight">{i18n.t("sidePanel.read.title")}</h2>
+      <header className="flex h-11 shrink-0 items-center justify-between border-b border-border/60 bg-background/80 px-3 backdrop-blur-xs">
+        <div className="flex min-w-0 items-center gap-2">
+          <div className="flex size-6 items-center justify-center rounded-lg bg-primary/10 text-primary">
+            <BookOpen className="size-3.5" />
+          </div>
+          <span className="truncate text-xs font-semibold tracking-tight">
+            {i18n.t("sidePanel.read.title")}
+          </span>
         </div>
         <Button
-          size="icon"
+          size="icon-xs"
           variant="ghost"
-          className="size-7.5"
+          className="size-6 text-muted-foreground hover:text-foreground"
           onClick={() => void loadTab()}
           disabled={isLoadingTab}
           title={i18n.t("sidePanel.read.reloadTab")}
@@ -234,7 +238,7 @@ export function ReadView() {
                   onClick={() => void handleCopy()}
                 >
                   {isCopied ? (
-                    <Check className="size-3 text-emerald-500" />
+                    <Check className="size-3 text-success" />
                   ) : (
                     <Copy className="size-3" />
                   )}

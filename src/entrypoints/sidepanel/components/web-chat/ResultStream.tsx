@@ -91,7 +91,7 @@ export function ResultStream({
 
   return (
     <div className="flex flex-col gap-3 p-3">
-      <div className="rounded-lg border border-border/60 bg-muted/20 p-3 shadow-xs">
+      <div className="rounded-xl border border-border/60 bg-muted/20 p-3 shadow-xs">
         <div className="text-xs leading-relaxed whitespace-pre-wrap text-foreground select-text">
           {content}
         </div>
@@ -109,7 +109,7 @@ export function ResultStream({
             onClick={handleCopy}
             className="h-7 gap-1 px-2 text-[11px] text-muted-foreground hover:text-foreground"
           >
-            {copied ? <Check className="size-3 text-emerald-500" /> : <Copy className="size-3" />}
+            {copied ? <Check className="size-3 text-success" /> : <Copy className="size-3" />}
             <span>
               {copied
                 ? i18n.t("options.webChat.sidepanel.copied")

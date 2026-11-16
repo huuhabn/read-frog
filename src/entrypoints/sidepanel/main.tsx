@@ -51,12 +51,12 @@ const TranslateView = lazy(() =>
  */
 function SidePanelSkeleton() {
   return (
-    <div className="flex h-full w-full flex-col justify-between overflow-hidden bg-background p-3 select-none">
+    <div className="flex h-full w-full flex-col justify-between overflow-hidden bg-background select-none">
       {/* Top Header Placeholder */}
-      <div className="flex items-center justify-between border-b border-border/40 pb-2.5">
+      <div className="flex h-11 shrink-0 items-center justify-between border-b border-border/60 bg-background/80 px-3 backdrop-blur-xs">
         <div className="flex items-center gap-2">
-          <div className="h-6 w-24 animate-pulse rounded-md bg-muted/60" />
-          <div className="h-6 w-16 animate-pulse rounded-md bg-muted/40" />
+          <div className="size-6 animate-pulse rounded-lg bg-muted/60" />
+          <div className="h-4 w-24 animate-pulse rounded-md bg-muted/50" />
         </div>
         <div className="flex items-center gap-1.5">
           <div className="size-6 animate-pulse rounded-md bg-muted/40" />
@@ -65,19 +65,19 @@ function SidePanelSkeleton() {
       </div>
 
       {/* Message List Placeholder */}
-      <div className="flex flex-1 flex-col gap-4 overflow-hidden py-4">
+      <div className="flex flex-1 flex-col gap-4 overflow-hidden p-3">
         {/* Assistant welcome message placeholder */}
         <div className="flex items-start gap-2.5">
           <div className="size-7 shrink-0 animate-pulse rounded-full bg-muted/60" />
           <div className="flex max-w-[80%] flex-col gap-2">
             <div className="h-4 w-44 animate-pulse rounded-sm bg-muted/50" />
-            <div className="h-14 w-60 animate-pulse rounded-lg bg-muted/30" />
+            <div className="h-14 w-60 animate-pulse rounded-2xl bg-muted/30" />
           </div>
         </div>
 
         {/* User prompt placeholder */}
         <div className="flex justify-end">
-          <div className="h-9 w-48 animate-pulse rounded-lg bg-muted/40" />
+          <div className="h-9 w-48 animate-pulse rounded-2xl bg-muted/40" />
         </div>
 
         {/* Assistant follow-up placeholder */}
@@ -85,20 +85,22 @@ function SidePanelSkeleton() {
           <div className="size-7 shrink-0 animate-pulse rounded-full bg-muted/60" />
           <div className="flex max-w-[80%] flex-col gap-2">
             <div className="h-4 w-32 animate-pulse rounded-sm bg-muted/50" />
-            <div className="h-16 w-64 animate-pulse rounded-lg bg-muted/30" />
+            <div className="h-16 w-64 animate-pulse rounded-2xl bg-muted/30" />
           </div>
         </div>
       </div>
 
       {/* Bottom Input Area Placeholder */}
-      <div className="flex flex-col gap-2 rounded-xl border border-border/50 bg-muted/20 p-2.5">
-        <div className="h-10 w-full animate-pulse rounded-md bg-muted/40" />
-        <div className="flex items-center justify-between pt-1">
-          <div className="flex gap-2">
-            <div className="size-5 animate-pulse rounded-sm bg-muted/40" />
-            <div className="size-5 animate-pulse rounded-sm bg-muted/40" />
+      <div className="p-2.5">
+        <div className="flex flex-col gap-2 rounded-xl border border-border/60 bg-muted/20 p-2.5">
+          <div className="h-10 w-full animate-pulse rounded-md bg-muted/40" />
+          <div className="flex items-center justify-between pt-1">
+            <div className="flex gap-2">
+              <div className="size-5 animate-pulse rounded-sm bg-muted/40" />
+              <div className="size-5 animate-pulse rounded-sm bg-muted/40" />
+            </div>
+            <div className="h-6 w-14 animate-pulse rounded-md bg-muted/60" />
           </div>
-          <div className="h-6 w-14 animate-pulse rounded-md bg-muted/60" />
         </div>
       </div>
     </div>

@@ -45,7 +45,7 @@ export function ChatHeader({
             className={cn(
               "flex h-7 cursor-pointer items-center gap-1 rounded-md px-2 text-xs font-medium transition-colors hover:bg-muted",
               upworkConfig.translateLang && upworkConfig.translateLang !== "original"
-                ? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                ? "bg-success/10 text-success"
                 : "text-muted-foreground",
             )}
             title={i18n.t("options.upwork.parametersSection.translateLangTitle")}

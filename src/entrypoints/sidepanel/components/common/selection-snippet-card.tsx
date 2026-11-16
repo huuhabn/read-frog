@@ -19,7 +19,7 @@ export function SelectionSnippetCard({
   return (
     <div
       className={cn(
-        "relative mb-2 animate-in rounded-xl border border-border/80 bg-background/90 p-2.5 shadow-xs transition-all fade-in-50",
+        "relative mb-2 animate-in rounded-xl border border-border/60 bg-muted/20 p-2.5 shadow-xs transition-all fade-in-50",
         className,
       )}
     >

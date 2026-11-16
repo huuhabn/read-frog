@@ -34,13 +34,10 @@ export function ChatUpworkBar({
   if (!isUpworkJob) return null
 
   return (
-    <div className="flex w-full min-w-0 items-center justify-between gap-2 border-t border-emerald-500/25 bg-emerald-500/10 px-3 py-1.5 text-xs text-emerald-900 dark:text-emerald-200">
+    <div className="flex w-full min-w-0 items-center justify-between gap-2 border-t border-success/20 bg-success/10 px-3 py-1.5 text-xs text-success">
       <div className="flex min-w-0 items-center gap-1.5">
         <div className="flex min-w-0 items-center gap-1 font-medium">
-          <Icon
-            icon="tabler:briefcase"
-            className="size-3.5 shrink-0 text-emerald-600 dark:text-emerald-400"
-          />
+          <Icon icon="tabler:briefcase" className="size-3.5 shrink-0 text-success" />
           <span className="max-w-[85px] truncate sm:max-w-none">
             {i18n.t("options.upwork.sidepanel.quickActionLabel")}
           </span>
@@ -49,13 +46,10 @@ export function ChatUpworkBar({
         {/* Translation Language & Provider Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="flex h-5.5 cursor-pointer items-center gap-1 rounded-md border border-emerald-600/30 bg-background/80 px-1.5 text-[11px] font-medium text-foreground hover:bg-background"
+            className="flex h-5.5 cursor-pointer items-center gap-1 rounded-md border border-success/30 bg-background/80 px-1.5 text-[11px] font-medium text-foreground hover:bg-background"
             title={i18n.t("options.upwork.parametersSection.translateLangTitle")}
           >
-            <Icon
-              icon="tabler:language"
-              className="size-3 text-emerald-600 dark:text-emerald-400"
-            />
+            <Icon icon="tabler:language" className="size-3 text-success" />
             <span className="max-w-[70px] truncate text-[10px] font-semibold uppercase">
               {upworkConfig.translateLang || "en"}
             </span>
@@ -109,11 +103,11 @@ export function ChatUpworkBar({
       <Button
         size="sm"
         variant="outline"
-        className="h-6 shrink-0 gap-1 border-emerald-600/30 bg-emerald-600/15 px-2 text-[11px] font-medium text-emerald-700 hover:bg-emerald-600/25 dark:text-emerald-300"
+        className="h-6 shrink-0 gap-1 border-success/30 bg-success/15 px-2 text-[11px] font-medium text-success hover:bg-success/25"
         disabled={isStreaming || isTranslating}
         onClick={() => void onCoverLetter()}
       >
-        <Sparkles className="size-3 text-emerald-600 dark:text-emerald-400" />
+        <Sparkles className="size-3 text-success" />
         <span>{i18n.t("options.upwork.sidepanel.coverLetter")}</span>
       </Button>
     </div>
