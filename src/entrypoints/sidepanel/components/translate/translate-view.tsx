@@ -1,5 +1,7 @@
+import type { LanguageTag } from "@read-frog/definitions"
 import type { BackgroundTextStreamSnapshot } from "@/types/background-stream"
-import type { LLMProviderConfig } from "@/types/config/provider"
+import type { LLMProviderConfig, ProviderConfig } from "@/types/config/provider"
+import type { ProviderSelectorOption } from "@/utils/providers/provider-display"
 import type { SelectedModelConfig } from "@/utils/sidepanel/chat-model-storage"
 import { useAtom } from "jotai"
 import {
@@ -22,11 +24,15 @@ import { Textarea } from "@/components/ui/base-ui/textarea"
 import { env } from "@/env"
 import { isLLMProviderConfig } from "@/types/config/provider"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
-import { selectedChatModelAtom } from "@/utils/atoms/sidepanel"
+import { selectedTranslateModelAtom } from "@/utils/atoms/sidepanel"
+import { DEFAULT_PROVIDER_CONFIG } from "@/utils/constants/providers"
 import { streamBackgroundText } from "@/utils/content-script/background-stream-client"
 import { i18n } from "@/utils/i18n"
 import { useActiveTabSelection } from "@/utils/sidepanel/active-tab-selection"
-import { setLocalSelectedChatModel } from "@/utils/sidepanel/chat-model-storage"
+import {
+  getLocalSelectedTranslateModel,
+  setLocalSelectedTranslateModel,
+} from "@/utils/sidepanel/chat-model-storage"
 import {
   buildTranslateInstructions,
   DEFAULT_TRANSLATE_PREFERENCES,
@@ -61,7 +67,7 @@ type SpeechRecognitionInstance = {
 }
 
 export function TranslateView() {
-  const [selectedModel, setSelectedModel] = useAtom(selectedChatModelAtom)
+  const [selectedModel, setSelectedModel] = useAtom(selectedTranslateModelAtom)
   const [providersConfig] = useAtom(configFieldsAtomMap.providersConfig)
 
   const [sourceText, setSourceText] = useState("")
@@ -113,14 +119,49 @@ export function TranslateView() {
     setSourceText("")
   }, [])
 
-  // Filter available LLM providers
-  const llmProviders = useMemo(
-    () =>
-      providersConfig.filter((p): p is LLMProviderConfig => isLLMProviderConfig(p) && p.enabled),
-    [providersConfig],
-  )
+  // Translation providers: Google Translate, Microsoft Translator, other pure translate providers, and enabled LLMs
+  const availableProviders = useMemo<ProviderSelectorOption[]>(() => {
+    const list: ProviderSelectorOption[] = []
 
-  // Load preferences from storage on mount
+    const google =
+      providersConfig.find((p) => p.provider === "google-translate" && p.enabled) ||
+      (!providersConfig.some((p) => p.provider === "google-translate")
+        ? DEFAULT_PROVIDER_CONFIG["google-translate"]
+        : null)
+
+    const microsoft =
+      providersConfig.find((p) => p.provider === "microsoft-translate" && p.enabled) ||
+      (!providersConfig.some((p) => p.provider === "microsoft-translate")
+        ? DEFAULT_PROVIDER_CONFIG["microsoft-translate"]
+        : null)
+
+    if (google) list.push(google)
+    if (microsoft) list.push(microsoft)
+
+    for (const p of providersConfig) {
+      if (!p.enabled) continue
+      if (list.some((item) => item.id === p.id)) continue
+      if (isLLMProviderConfig(p) || p.provider === "deepl" || p.provider === "deeplx") {
+        list.push(p)
+      }
+    }
+
+    if (list.length === 0) {
+      list.push(
+        DEFAULT_PROVIDER_CONFIG["google-translate"],
+        DEFAULT_PROVIDER_CONFIG["microsoft-translate"],
+      )
+    }
+
+    return list
+  }, [providersConfig])
+
+  const isSelectedProviderLLM = useMemo(() => {
+    const provider = availableProviders.find((p) => p.id === selectedModel.providerId)
+    return provider ? isLLMProviderConfig(provider as ProviderConfig) : false
+  }, [availableProviders, selectedModel.providerId])
+
+  // Load preferences and stored selected model from storage on mount
   useEffect(() => {
     let mounted = true
     void getLocalTranslatePreferences().then((stored) => {
@@ -128,32 +169,37 @@ export function TranslateView() {
         setPreferences(stored)
       }
     })
+    void getLocalSelectedTranslateModel().then((stored) => {
+      if (mounted && stored) {
+        setSelectedModel(stored)
+      }
+    })
     return () => {
       mounted = false
     }
-  }, [])
+  }, [setSelectedModel])
 
   // Auto fallback for selected model if not configured
   useEffect(() => {
-    if (llmProviders.length > 0) {
-      const isValid = llmProviders.some((p) => p.id === selectedModel.providerId)
+    if (availableProviders.length > 0) {
+      const isValid = availableProviders.some((p) => p.id === selectedModel.providerId)
       if (!isValid) {
-        const fallbackProvider = llmProviders[0]
-        if (fallbackProvider) {
-          const modelName =
-            typeof fallbackProvider.model === "string"
+        const fallbackProvider = availableProviders[0]!
+        const modelName =
+          "model" in fallbackProvider
+            ? typeof fallbackProvider.model === "string"
               ? fallbackProvider.model
-              : fallbackProvider.model.customModel || fallbackProvider.model.model
-          const fallbackModel: SelectedModelConfig = {
-            providerId: fallbackProvider.id,
-            model: modelName,
-          }
-          setSelectedModel(fallbackModel)
-          void setLocalSelectedChatModel(fallbackModel)
+              : fallbackProvider.model?.customModel || fallbackProvider.model?.model || ""
+            : ""
+        const fallbackModel: SelectedModelConfig = {
+          providerId: fallbackProvider.id,
+          model: modelName,
         }
+        setSelectedModel(fallbackModel)
+        void setLocalSelectedTranslateModel(fallbackModel)
       }
     }
-  }, [llmProviders, selectedModel.providerId, setSelectedModel])
+  }, [availableProviders, selectedModel.providerId, setSelectedModel])
 
   const handlePreferencesChange = useCallback((newPrefs: TranslatePreferences) => {
     setPreferences(newPrefs)
@@ -164,7 +210,7 @@ export function TranslateView() {
     (providerId: string, model: string) => {
       const nextModel: SelectedModelConfig = { providerId, model }
       setSelectedModel(nextModel)
-      void setLocalSelectedChatModel(nextModel)
+      void setLocalSelectedTranslateModel(nextModel)
     },
     [setSelectedModel],
   )
@@ -315,37 +361,63 @@ export function TranslateView() {
     const controller = new AbortController()
     abortControllerRef.current = controller
 
-    const matchedProvider = providersConfig.find((p) => p.id === selectedModel.providerId)
-    const instructions = buildTranslateInstructions(
-      targetLang.name,
-      sourceLang.code === "auto" ? undefined : sourceLang.name,
-      preferences,
-    )
+    const matchedProvider = availableProviders.find((p) => p.id === selectedModel.providerId)
 
     try {
-      await streamBackgroundText(
-        {
-          providerKind: "local",
-          providerId: selectedModel.providerId,
-          providerConfig:
-            matchedProvider && isLLMProviderConfig(matchedProvider) ? matchedProvider : undefined,
-          instructions,
-          messages: [
-            {
-              role: "user",
-              content: textToTranslate,
-            },
-          ],
-          temperature: 0.3,
-          sourceFeature: `Sidepanel Translate (${targetLang.name})`,
-        },
-        {
-          signal: controller.signal,
-          onChunk: (snapshot: BackgroundTextStreamSnapshot) => {
-            setTranslatedText(snapshot.output || "")
+      if (matchedProvider && !isLLMProviderConfig(matchedProvider as ProviderConfig)) {
+        // Non-LLM translation engine (Google Translate, Microsoft Translator, etc.)
+        const langConfig = {
+          sourceCode: sourceLang.code as LanguageTag,
+          targetCode: targetLang.code as LanguageTag,
+          level: "intermediate" as const,
+        }
+        const { executeTranslate } = await import("@/utils/host/translate/execute-translate")
+        const { getTranslatePrompt } = await import("@/utils/prompts/translate")
+        const result = await executeTranslate(
+          textToTranslate,
+          langConfig,
+          matchedProvider as ProviderConfig,
+          getTranslatePrompt,
+          {
+            preserveLineBreaks: true,
+            signal: controller.signal,
           },
-        },
-      )
+        )
+        setTranslatedText(result || "")
+      } else {
+        // LLM translation with streaming
+        const instructions = buildTranslateInstructions(
+          targetLang.name,
+          sourceLang.code === "auto" ? undefined : sourceLang.name,
+          preferences,
+        )
+
+        await streamBackgroundText(
+          {
+            providerKind: "local",
+            providerId: selectedModel.providerId,
+            providerConfig:
+              matchedProvider && isLLMProviderConfig(matchedProvider as ProviderConfig)
+                ? (matchedProvider as LLMProviderConfig)
+                : undefined,
+            instructions,
+            messages: [
+              {
+                role: "user",
+                content: textToTranslate,
+              },
+            ],
+            temperature: 0.3,
+            sourceFeature: `Sidepanel Translate (${targetLang.name})`,
+          },
+          {
+            signal: controller.signal,
+            onChunk: (snapshot: BackgroundTextStreamSnapshot) => {
+              setTranslatedText(snapshot.output || "")
+            },
+          },
+        )
+      }
     } catch (err: unknown) {
       if ((err as Error)?.name !== "AbortError") {
         setTranslatedText(
@@ -366,6 +438,15 @@ export function TranslateView() {
   const isCustom = !isDefaultPreferences(preferences)
   const canTranslate = Boolean(sourceText.trim() || currentSnippet?.trim())
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === "Enter" && !e.shiftKey && !e.nativeEvent.isComposing) {
+      e.preventDefault()
+      if (canTranslate && !isTranslating) {
+        void handleTranslate()
+      }
+    }
+  }
+
   return (
     <div className="flex h-full flex-col bg-background text-foreground antialiased selection:bg-primary/20">
       {/* Top Header */}
@@ -385,18 +466,20 @@ export function TranslateView() {
             selectedProviderId={selectedModel.providerId}
             selectedModelName={selectedModel.model}
             onSelectModel={handleSelectModel}
-            llmProviders={llmProviders}
+            availableProviders={availableProviders}
             variant="subtle"
           />
 
-          {/* Translation Preferences Popover */}
-          <TranslationPreferencesPopover
-            open={isPrefsOpen}
-            onOpenChange={setIsPrefsOpen}
-            preferences={preferences}
-            onChange={handlePreferencesChange}
-            isCustom={isCustom}
-          />
+          {/* Translation Preferences Popover (only shown for LLM providers) */}
+          {isSelectedProviderLLM && (
+            <TranslationPreferencesPopover
+              open={isPrefsOpen}
+              onOpenChange={setIsPrefsOpen}
+              preferences={preferences}
+              onChange={handlePreferencesChange}
+              isCustom={isCustom}
+            />
+          )}
         </div>
       </header>
 
@@ -457,6 +540,7 @@ export function TranslateView() {
               ref={textareaRef}
               value={sourceText}
               onChange={(e) => setSourceText(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder={
                 i18n.t("sidePanel.translate.placeholder") || "Type or paste text here..."
               }

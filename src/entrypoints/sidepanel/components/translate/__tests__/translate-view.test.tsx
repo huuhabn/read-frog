@@ -84,4 +84,12 @@ describe("TranslateView", () => {
     fireEvent.click(clearButton)
     expect(textarea.value).toBe("")
   })
+
+  it("includes Google Translate and Microsoft Translator in provider options without requiring LLM", () => {
+    render(<TranslateView />)
+    expect(screen.getByText("Google Translate")).toBeDefined()
+    // When Google Translate is active, TranslationPreferencesPopover (Default/Custom) should be hidden
+    expect(screen.queryByTitle("Default preferences")).toBeNull()
+    expect(screen.queryByTitle("Custom preferences")).toBeNull()
+  })
 })

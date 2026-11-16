@@ -70,6 +70,7 @@ export function TranslationPreferencesPopover({
   return (
     <Popover open={open} onOpenChange={onOpenChange}>
       <PopoverTrigger
+        title={isCustom ? "Custom preferences" : "Default preferences"}
         className={cn(
           "flex h-6.5 cursor-pointer items-center gap-1 rounded-md border px-2 text-[11px] font-medium outline-hidden transition-colors",
           isCustom
@@ -77,7 +78,7 @@ export function TranslationPreferencesPopover({
             : "border-border/60 bg-muted/40 text-foreground/90 hover:bg-muted",
         )}
       >
-        <span>{isCustom ? "Custom preferences" : "Default preferences"}</span>
+        <span>{isCustom ? "Custom" : "Default"}</span>
         <ChevronDown
           className={cn(
             "size-3 shrink-0 text-muted-foreground transition-transform duration-200",

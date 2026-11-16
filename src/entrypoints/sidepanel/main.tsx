@@ -7,7 +7,11 @@ import { lazy, Suspense, useLayoutEffect } from "react"
 import { browser } from "#imports"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { configAtom } from "@/utils/atoms/config"
-import { selectedChatModelAtom, sidepanelNavTabAtom } from "@/utils/atoms/sidepanel"
+import {
+  selectedChatModelAtom,
+  selectedTranslateModelAtom,
+  sidepanelNavTabAtom,
+} from "@/utils/atoms/sidepanel"
 import { baseThemeModeAtom } from "@/utils/atoms/theme"
 import { getLocalConfig } from "@/utils/config/storage"
 import { DEFAULT_CONFIG } from "@/utils/constants/config"
@@ -17,7 +21,9 @@ import { setupExtensionPageLogging } from "@/utils/logging/setup"
 import { renderPersistentReactRoot } from "@/utils/react-root"
 import {
   DEFAULT_SELECTED_CHAT_MODEL,
+  DEFAULT_SELECTED_TRANSLATE_MODEL,
   getLocalSelectedChatModel,
+  getLocalSelectedTranslateModel,
 } from "@/utils/sidepanel/chat-model-storage"
 import { getLocalThemeMode, initDocumentTheme } from "@/utils/theme"
 import { SidePanelNavBar } from "./components/sidepanel-nav-bar"
@@ -170,6 +176,7 @@ const sidepanelStore = createStore()
 sidepanelStore.set(configAtom, DEFAULT_CONFIG)
 sidepanelStore.set(baseThemeModeAtom, "system")
 sidepanelStore.set(selectedChatModelAtom, DEFAULT_SELECTED_CHAT_MODEL)
+sidepanelStore.set(selectedTranslateModelAtom, DEFAULT_SELECTED_TRANSLATE_MODEL)
 
 async function initApp() {
   setupSidePanelConnection()
@@ -194,15 +201,19 @@ async function initApp() {
 
   // 3. Hydrate storage & locale in parallel
   try {
-    const [configValue, localThemeMode, localSelectedModel] = await Promise.all([
-      getLocalConfig(),
-      getLocalThemeMode(),
-      getLocalSelectedChatModel(),
-    ])
+    const [configValue, localThemeMode, localSelectedModel, localSelectedTranslateModel] =
+      await Promise.all([
+        getLocalConfig(),
+        getLocalThemeMode(),
+        getLocalSelectedChatModel(),
+        getLocalSelectedTranslateModel(),
+      ])
 
     if (configValue) sidepanelStore.set(configAtom, configValue)
     if (localThemeMode) sidepanelStore.set(baseThemeModeAtom, localThemeMode)
     if (localSelectedModel) sidepanelStore.set(selectedChatModelAtom, localSelectedModel)
+    if (localSelectedTranslateModel)
+      sidepanelStore.set(selectedTranslateModelAtom, localSelectedTranslateModel)
 
     if (configValue?.uiLanguage) {
       try {

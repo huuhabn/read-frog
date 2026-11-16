@@ -83,6 +83,7 @@ export const GOOGLE_DRIVE_TOKEN_STORAGE_KEY = "__googleDriveToken"
 
 export const THEME_STORAGE_KEY = "theme"
 export const SIDEPANEL_CHAT_MODEL_STORAGE_KEY = "sidepanelChatModel"
+export const SIDEPANEL_TRANSLATE_MODEL_STORAGE_KEY = "sidepanelTranslateModel"
 export const DEFAULT_DETECTED_CODE = "en" as const
 export const CONFIG_SCHEMA_VERSION = 124
 
