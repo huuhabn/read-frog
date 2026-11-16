@@ -1273,7 +1273,7 @@ options:
       description: Farklı türde Promptları özelleştirmek, çeviri sırasında Prompt türünü kendiniz ayarlamanıza olanak tanır. Prompt, kullanıcının LLM'ye gönderdiği metni temsil eder.
       managePrompts: Promptları yönet
       communityPrompts: Topluluktan prompt al veya paylaş
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      communityPromptsUrl: https://github.com/huuhabn/workmate-ai/discussions/821
       variableReference: Değişken başvurusu
       variableReferenceUrl: https://readfrog.app/tr/docs/page-translation/prompts/variables
       addPrompt: Prompt ekle

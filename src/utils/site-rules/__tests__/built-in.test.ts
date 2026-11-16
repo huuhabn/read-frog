@@ -293,7 +293,7 @@ describe("built-in site rules", () => {
   // CNBC clamps card titles via an INLINE style (-webkit-line-clamp:3), which
   // only an !important declaration can override — without it the rule is a
   // no-op and the injected translation stays clipped.
-  // See https://github.com/mengxi-ream/read-frog/issues/1918
+  // See https://github.com/huuhabn/workmate-ai/issues/1918
   it("unclamps CNBC card titles with !important (issue #1918)", () => {
     const resolved = resolveSiteRule("https://www.cnbc.com/", BUILT_IN_SITE_RULES, [], [])
     expect(resolved.injectedCss).toContain("-webkit-line-clamp: unset !important")
@@ -469,7 +469,7 @@ describe("built-in site rules", () => {
 
   // Vercel `prose-vercel` docs hide `[data-docs-heading] a span`, which also
   // hides Workmate AI's injected wrapper once it lands inside the heading anchor.
-  // See https://github.com/mengxi-ream/read-frog/issues/1050
+  // See https://github.com/huuhabn/workmate-ai/issues/1050
   it("un-hides translations inside Vercel doc headings (issue #1050)", () => {
     for (const url of [
       "https://ai-sdk.dev/docs/foundations/providers-and-models",
@@ -716,7 +716,7 @@ describe("built-in site rules", () => {
   // translation unit while its text was already included whenever any sibling
   // text existed. SillyTavern is self-hosted, so the rule keys on localhost;
   // LAN-IP/reverse-proxy users add a user rule with the same field.
-  // See https://github.com/mengxi-ream/read-frog/issues/1951
+  // See https://github.com/huuhabn/workmate-ai/issues/1951
   it("un-blocks CODE on localhost for SillyTavern narration (issue #1951)", () => {
     for (const url of ["http://localhost:8000/", "http://127.0.0.1:8000/chat"]) {
       const resolved = resolveSiteRule(url, BUILT_IN_SITE_RULES, [], [])

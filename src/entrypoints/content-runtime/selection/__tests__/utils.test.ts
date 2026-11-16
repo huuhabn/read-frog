@@ -588,7 +588,7 @@ describe("readSelectionSnapshot", () => {
   })
 })
 
-// https://github.com/mengxi-ream/read-frog/issues/2371
+// https://github.com/huuhabn/workmate-ai/issues/2371
 describe("ruby annotations", () => {
   // Like the browser's selection text, Range.toString() keeps the furigana.
   function createRangeSelection(range: Range): Selection {

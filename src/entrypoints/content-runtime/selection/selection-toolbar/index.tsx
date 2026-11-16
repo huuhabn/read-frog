@@ -441,8 +441,8 @@ export function SelectionToolbar() {
 
         const selectionSnapshot = readSelectionSnapshot(selection)
 
-        // https://github.com/mengxi-ream/read-frog/issues/547
-        // https://github.com/mengxi-ream/read-frog/pull/790
+        // https://github.com/huuhabn/workmate-ai/issues/547
+        // https://github.com/huuhabn/workmate-ai/pull/790
         if (
           !isInputOrTextarea &&
           interactiveTarget &&

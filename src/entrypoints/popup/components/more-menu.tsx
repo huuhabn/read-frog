@@ -22,7 +22,7 @@ import { getReviewUrl } from "@/utils/utils"
 
 const SUPPORT_EMAIL = "contact@readfrog.app"
 const DISCORD_INVITE_URL = "https://discord.gg/ej45e3PezJ"
-const GITHUB_REPO_URL = "https://github.com/mengxi-ream/read-frog"
+const GITHUB_REPO_URL = "https://github.com/huuhabn/workmate-ai"
 const WECHAT_QR_URL = `${GITHUB_REPO_URL}/blob/main/assets/wechat-account.jpg`
 
 const log = createLogger("popup/more-menu")

@@ -51,7 +51,7 @@ describe("normalizeForComparison", () => {
     expect(normalizeForComparison(source)).toBe(normalizeForComparison(echo))
   })
 
-  // https://github.com/mengxi-ream/read-frog/issues/2382
+  // https://github.com/huuhabn/workmate-ai/issues/2382
   it("ignores spaces between CJK and Latin letters or digits", () => {
     expect(normalizeForComparison("不管你是 GPT、Claude、Gemini，还是其他大模型")).toBe(
       normalizeForComparison("不管你是GPT、Claude、Gemini，还是其他大模型"),

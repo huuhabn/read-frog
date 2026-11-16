@@ -247,13 +247,13 @@ export function isDontWalkIntoButTranslateAsChildElement(
   const dontWalkPreserveText =
     config !== undefined && isSiteRulePreserveTextElement(element, config)
 
-  // issue: https://github.com/mengxi-ream/read-frog/issues/459
+  // issue: https://github.com/huuhabn/workmate-ai/issues/459
   // const dontWalkAttr = element.getAttribute('translate') === 'no'
 
   return dontWalkClass || dontWalkTag || dontWalkPreserveText
 }
 
-// https://github.com/mengxi-ream/read-frog/issues/940
+// https://github.com/huuhabn/workmate-ai/issues/940
 function isInsideContentContainer(element: HTMLElement): boolean {
   let current: HTMLElement | null = element.parentElement
   while (current) {

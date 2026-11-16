@@ -53,7 +53,7 @@ Follow these steps:
    - Upload the verified MP4 and capture the bare URL printed to stdout. Upload a GIF only when the destination needs one:
 
      ```bash
-     gh image "/absolute/path/to/demo.mp4" --repo mengxi-ream/read-frog
+     gh image "/absolute/path/to/demo.mp4" --repo huuhabn/workmate-ai
      ```
 
    - Accept the result only when it is one bare `https://github.com/user-attachments/assets/...` URL. Put it inside stable markers in the `## Screenshots` section so a rerun replaces the section instead of appending a second video:
@@ -123,7 +123,7 @@ Follow these steps:
    - Skip when no demo was required. Otherwise confirm the attachment survived the body without printing the whole body:
 
      ```bash
-     gh pr view <pr> --repo mengxi-ream/read-frog --json body -q .body | grep -c 'github.com/user-attachments/'
+     gh pr view <pr> --repo huuhabn/workmate-ai --json body -q .body | grep -c 'github.com/user-attachments/'
      ```
 
    - Expect at least one match. If the embed is missing, fix the PR body; do not upload the video again.

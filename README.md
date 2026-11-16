@@ -6,8 +6,6 @@ Supercharge your productivity and language mastery directly inside your browser.
 
 [![English][english-shield]](./README.md) [![Tiếng Việt][vietnamese-shield]](./docs/README.vi.md)
 
-[Official Website](https://www.readfrog.app/en?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [All Features](https://www.readfrog.app/en/features?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Tutorial](https://www.readfrog.app/en/docs?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en) · [Changelog][github-release-link] · [Blog](https://www.readfrog.app/en/blog?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en)
-
 </div>
 
 <details>
@@ -15,29 +13,26 @@ Supercharge your productivity and language mastery directly inside your browser.
 
 #### TOC
 
-- [👋🏻 Getting Started](#-getting-started)
+- [Getting Started](#-getting-started)
   - [Download](#download)
   - [Tech Stack](#tech-stack)
-- [✨ Key Features](#-key-features)
-  - [💬 AI Web Chat Assistant (Telegram, Zalo, Slack)](#-ai-web-chat-assistant)
-  - [💼 Upwork Copilot & Proposal Writer](#-upwork-copilot--proposal-writer)
-  - [⚡ Sider-Style Instant Sidepanel](#-sider-style-instant-sidepanel)
-  - [🪄 Custom AI Actions](#-custom-ai-actions)
-  - [🧠 Flashcards \& Spaced Repetition (FSRS)](#-flashcards--spaced-repetition)
-  - [🔄 Bilingual / Translation Only](#-bilingual--translation-only)
-  - [✨ Selection Translation Toolbar](#-selection-translation)
-  - [🎬 Video Subtitle Translation (YouTube & Netflix)](#-subtitle-translation)
-  - [🔊 Text-to-Speech (TTS)](#-text-to-speech-tts)
-  - [📦 Batch Requests & Cost Optimization](#-batch-requests)
-  - [🤖 20+ AI Providers](#-20-ai-providers)
-- [🧩 Prompt Processing Workflow & Architecture](#-prompt-processing-workflow--architecture)
+- [Key Features](#-key-features)
+  - [AI Web Chat Assistant (Telegram, Zalo, Slack)](#-ai-web-chat-assistant)
+  - [Upwork Copilot & Proposal Writer](#-upwork-copilot--proposal-writer)
+  - [Sider-Style Instant Sidepanel](#-sider-style-instant-sidepanel)
+  - [Custom AI Actions](#-custom-ai-actions)
+  - [Flashcards \& Spaced Repetition (FSRS)](#-flashcards--spaced-repetition)
+  - [Bilingual / Translation Only](#-bilingual--translation-only)
+  - [Selection Translation Toolbar](#-selection-translation)
+  - [Video Subtitle Translation (YouTube & Netflix)](#-subtitle-translation)
+  - [Text-to-Speech (TTS)](#-text-to-speech-tts)
+  - [Batch Requests & Cost Optimization](#-batch-requests)
+  - [20+ AI Providers](#-20-ai-providers)
+- [Prompt Processing Workflow & Architecture](#-prompt-processing-workflow--architecture)
   - [Architecture Overview](#architecture-overview)
   - [Prompt Pipeline Lifecycle](#prompt-pipeline-lifecycle)
   - [Developer Guide: Adding a New Prompt](#developer-guide-adding-a-new-prompt)
-- [💻 Development & Contributing](#-development--contributing)
-- [📜 License](#-license)
-- [📜 Commercial License Grant](#-commercial-license-grant)
-- [❤️ Sponsors](#️-sponsors)
+- [Development & Contributing](#-development--contributing)
 
 <br/>
 
@@ -116,7 +111,7 @@ A lightweight, multi-tab sidepanel inspired by Sider that loads in milliseconds 
 
 </div>
 
-### 🪄 [Custom AI Actions][docs-custom-actions]
+### 🪄 [Custom Prompts][docs-custom-actions]
 
 Turn selected text into reusable AI tools that match the way you read and learn. Define your own prompts and structured output fields, choose a provider, model, and icon, then run the action directly from the selection toolbar for dictionary lookups, rewriting, summaries, explanations, or any workflow you design.
 
@@ -539,7 +534,7 @@ To add a new built-in translation prompt or custom prompt preset:
 1. **Clone the repository**:
 
    ```bash
-   git clone https://github.com/mengxi-ream/read-frog.git
+   git clone https://github.com/huuhabn/workmate-ai.git
    cd read-frog
    ```
 
@@ -552,6 +547,8 @@ To add a new built-in translation prompt or custom prompt preset:
 3. **Start the development server**:
    ```bash
    pnpm dev
+   # Or skip env validate
+   WXT_SKIP_ENV_VALIDATION=true pnpm dev
    ```
    Loads the extension into Chrome via WXT. For other browsers:
    ```bash
@@ -590,85 +587,3 @@ To add a new built-in translation prompt or custom prompt preset:
 [![Back to top][back-to-top]](#readme-top)
 
 </div>
-
-## 📜 Commercial License Grant
-
-<img src="assets/tabbit.avif" alt="Tabbit" height="20" /> **Meituan Tabbit Browser Team**: Free license (at no cost) for closed-source commercial use, limited to v1.21.3 and earlier versions (commit [`724863f`](https://github.com/mengxi-ream/read-frog/commit/724863fdbc2d777766cada6c111235534ee03ca0)). Granted on March 3, 2026, 9:00 AM (Vancouver Time, UTC-8).
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
-## ❤️ Sponsors
-
-Every donation helps us build a better language learning experience. Thank you for supporting our mission!
-
-[![Sponsors][sponsor-image]][sponsor-link]
-
-<a href="https://ifapi.org/?aff=readfrog&utm_source=readfrog&utm_medium=readme">
-  <img src="assets/promotion/ifapi.png" alt="IF API: GPT, Claude, Gemini and more from one key. Read Frog users get +10% credit with code READFROG">
-</a>
-
-<div align="right">
-
-[![Back to top][back-to-top]](#readme-top)
-
-</div>
-
-<!-- LINK GROUP -->
-
-[back-to-top]: https://img.shields.io/badge/-BACK_TO_TOP-151515?style=flat-square
-[chrome-store-link]: https://chromewebstore.google.com/detail/read-frog-open-source-ai/modkelfkcfjpgbfmnbnllalkiogfofhb
-[chrome-users-shield]: https://img.shields.io/chrome-web-store/users/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20Users&color=yellow&labelColor=black
-[chrome-version-shield]: https://img.shields.io/chrome-web-store/v/modkelfkcfjpgbfmnbnllalkiogfofhb?style=flat-square&label=Chrome%20Version&labelColor=black&color=yellow
-[contributors-link]: https://github.com/mengxi-ream/read-frog/graphs/contributors
-[contributors-shield]: https://img.shields.io/github/contributors/mengxi-ream/read-frog?style=flat-square&labelColor=black
-[crxsoso-link]: https://www.crxsoso.com/webstore/detail/modkelfkcfjpgbfmnbnllalkiogfofhb
-[chinese-shield]: https://img.shields.io/badge/%E7%AE%80%E4%BD%93%E4%B8%AD%E6%96%87-gray?style=flat-square
-[discord-link]: https://discord.gg/ej45e3PezJ
-[discord-shield]: https://img.shields.io/discord/1371229720942874646?style=flat-square&label=Discord&logo=discord&logoColor=white&color=5865F2&labelColor=black
-[discord-shield-badge]: https://img.shields.io/badge/chat-Discord-5865F2?style=for-the-badge&logo=discord&logoColor=white&labelColor=black
-[edge-store-link]: https://microsoftedge.microsoft.com/addons/detail/read-frog-open-source-a/cbcbomlgikfbdnoaohcjfledcoklcjbo
-[english-shield]: https://img.shields.io/badge/English-gray?style=flat-square
-[firefox-store-link]: https://addons.mozilla.org/firefox/addon/read-frog-open-ai-translator/
-[firefox-version-shield]: https://img.shields.io/amo/v/read-frog-open-ai-translator?style=flat-square&label=Firefox%20Version&labelColor=black&color=orange
-[firefox-users-shield]: https://img.shields.io/amo/users/read-frog-open-ai-translator?style=flat-square&label=Firefox%20Users&color=orange&labelColor=black
-[edge-users-shield]: https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Edge%20Users&query=%24.activeInstallCount&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black
-[edge-version-shield]: https://img.shields.io/badge/dynamic/json?style=flat-square&logo=microsoft-edge&label=Edge%20Version&query=%24.version&url=https%3A%2F%2Fmicrosoftedge.microsoft.com%2Faddons%2Fgetproductdetailsbycrxid%2Fcbcbomlgikfbdnoaohcjfledcoklcjbo&labelColor=black&prefix=v
-[extension-release-shield]: https://img.shields.io/github/package-json/v/mengxi-ream/read-frog?filename=package.json&style=flat-square&label=Latest%20Version&color=brightgreen&labelColor=black
-[github-release-link]: https://github.com/mengxi-ream/read-frog/releases
-[github-star-link]: https://github.com/mengxi-ream/read-frog/stargazers
-[image-banner]: /assets/banner.png
-[image-star]: ./assets/star.png
-[issues-link]: https://github.com/mengxi-ream/read-frog/issues
-[issues-shield]: https://img.shields.io/github/issues/mengxi-ream/read-frog?style=flat-square&labelColor=black
-[japanese-shield]: https://img.shields.io/badge/%E6%97%A5%E6%9C%AC%E8%AA%9E-gray?style=flat-square
-[korean-shield]: https://img.shields.io/badge/%ED%95%9C%EA%B5%AD%EC%96%B4-gray?style=flat-square
-[last-commit-shield]: https://img.shields.io/github/last-commit/mengxi-ream/read-frog?style=flat-square&label=commit&labelColor=black
-[russian-shield]: https://img.shields.io/badge/%D0%A0%D1%83%D1%81%D1%81%D0%BA%D0%B8%D0%B9-gray?style=flat-square
-[sponsor-image]: https://cdn.jsdelivr.net/gh/mengxi-ream/static/sponsorkit/sponsors.svg
-[sponsor-link]: https://github.com/sponsors/mengxi-ream
-[sponsor-shield]: https://img.shields.io/github/sponsors/mengxi-ream?style=flat-square&label=Sponsor&color=EA4AAA&labelColor=black
-[spanish-shield]: https://img.shields.io/badge/Espa%C3%B1ol-gray?style=flat-square
-[star-history-link]: https://www.star-history.com/#mengxi-ream/read-frog&Timeline
-[star-history-shield]: https://img.shields.io/github/stars/mengxi-ream/read-frog?style=flat-square&label=stars&color=yellow&labelColor=black
-[traditional-chinese-shield]: https://img.shields.io/badge/%E7%B9%81%E9%AB%94%E4%B8%AD%E6%96%87-gray?style=flat-square
-[turkish-shield]: https://img.shields.io/badge/T%C3%BCrk%C3%A7e-gray?style=flat-square
-[vietnamese-shield]: https://img.shields.io/badge/Ti%E1%BA%BFng%20Vi%E1%BB%87t-gray?style=flat-square
-[website]: https://www.readfrog.app/en?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[wechat-link]: ./assets/wechat-account.jpg
-[wechat-shield-badge]: https://img.shields.io/badge/chat-WeChat-07C160?style=for-the-badge&logo=wechat&logoColor=white&labelColor=black
-
-<!-- Feature links -->
-
-[blog-context-translation]: https://www.readfrog.app/en/blog/smart-context-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[docs-custom-actions]: https://www.readfrog.app/en/docs/custom-actions?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[docs-learning]: https://www.readfrog.app/en/docs/learning?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[docs-page-translation]: https://www.readfrog.app/en/docs/page-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[docs-providers]: https://www.readfrog.app/en/docs/providers/overview?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[docs-request-control]: https://www.readfrog.app/en/docs/request-control?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[docs-selection-translation]: https://www.readfrog.app/en/docs/selection-translation?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[docs-tts]: https://www.readfrog.app/en/docs/tts?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en
-[video-subtitles]: https://www.readfrog.app/en/features/youtube-subtitles?utm_source=github&utm_medium=readme&utm_campaign=read-frog&utm_content=en

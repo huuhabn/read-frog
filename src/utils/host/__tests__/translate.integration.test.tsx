@@ -545,7 +545,7 @@ describe("translate", () => {
     })
     describe("block node -> shallow inline node (inline node) -> single inline node + block node", () => {
       it("bilingual mode: should translate the unwrapped inline parent with the outer block layout", async () => {
-        // https://github.com/mengxi-ream/read-frog/pull/1055
+        // https://github.com/huuhabn/workmate-ai/pull/1055
         render(
           <div data-testid="test-node">
             <div style={{ display: "inline" }}>
@@ -571,7 +571,7 @@ describe("translate", () => {
         expect(node.textContent).toBe(`${MOCK_ORIGINAL_TEXT}${MOCK_ORIGINAL_TEXT}`)
       })
       it("translation only mode: should replace the unwrapped inline parent content with a single wrapper", async () => {
-        // https://github.com/mengxi-ream/read-frog/pull/1055
+        // https://github.com/huuhabn/workmate-ai/pull/1055
         render(
           <div data-testid="test-node">
             <div style={{ display: "inline" }}>
@@ -1753,7 +1753,7 @@ describe("translate", () => {
     })
     describe("inline nodes with aria-hidden block children", () => {
       it("bilingual mode: should treat inline node with aria-hidden block child as inline and translate as one paragraph", async () => {
-        // Github issue: https://github.com/mengxi-ream/read-frog/issues/737
+        // Github issue: https://github.com/huuhabn/workmate-ai/issues/737
         render(
           <div data-testid="test-node">
             <div style={{ display: "inline" }}>{MOCK_ORIGINAL_TEXT}</div>
@@ -2098,7 +2098,7 @@ describe("translate", () => {
         )
       })
       it("bilingual mode: should let br node to make its ancestor node to be forced block node", async () => {
-        // Github issue: https://github.com/mengxi-ream/read-frog/issues/587
+        // Github issue: https://github.com/huuhabn/workmate-ai/issues/587
         render(
           <div data-testid="test-node">
             {MOCK_ORIGINAL_TEXT}
@@ -2196,7 +2196,7 @@ describe("translate", () => {
       })
     })
     describe("inline node has only one block node child", () => {
-      // Github issue: https://github.com/mengxi-ream/read-frog/issues/530
+      // Github issue: https://github.com/huuhabn/workmate-ai/issues/530
       it("bilingual mode: should treat inline node with only one block node child as inline", async () => {
         render(
           <div data-testid="test-node">
@@ -2246,7 +2246,7 @@ describe("translate", () => {
         )
       })
       it("should treat inline element with only one meaningful block child as inline (not block)", async () => {
-        // https://github.com/mengxi-ream/read-frog/issues/530
+        // https://github.com/huuhabn/workmate-ai/issues/530
         render(
           <div data-testid="test-node">
             <span style={{ display: "inline" }}>
@@ -2348,7 +2348,7 @@ describe("translate", () => {
         )
       })
       it("bilingual mode: should skip ruby annotations without splitting the paragraph", async () => {
-        // https://github.com/mengxi-ream/read-frog/pull/1055
+        // https://github.com/huuhabn/workmate-ai/pull/1055
         render(
           <p data-testid="test-node">
             {MOCK_ORIGINAL_TEXT}
@@ -2382,7 +2382,7 @@ describe("translate", () => {
     })
   })
   describe("don't walk into siblings (SVG, style, etc.)", () => {
-    // https://github.com/mengxi-ream/read-frog/issues/754
+    // https://github.com/huuhabn/workmate-ai/issues/754
     it("bilingual mode: should filter ignored siblings and keep the outer block layout", async () => {
       render(
         <div data-testid="test-node">
@@ -2433,7 +2433,7 @@ describe("translate", () => {
   })
   describe("empty nodes in multiple child nodes", () => {
     it("bilingual mode: should ignore the empty sibling and keep the non-empty block layout", async () => {
-      // https://github.com/mengxi-ream/read-frog/issues/717
+      // https://github.com/huuhabn/workmate-ai/issues/717
       render(
         <div data-testid="test-node">
           <div>
@@ -3704,8 +3704,8 @@ describe("translate", () => {
                 <li>
                   <a
                     data-hovercard-type="pull_request"
-                    data-hovercard-url="/mengxi-ream/read-frog/pull/1837/hovercard"
-                    href="/mengxi-ream/read-frog/pull/1837"
+                    data-hovercard-url="/huuhabn/workmate-ai/pull/1837/hovercard"
+                    href="/huuhabn/workmate-ai/pull/1837"
                   >
                     #1837
                   </a>

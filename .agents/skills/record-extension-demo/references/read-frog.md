@@ -6,7 +6,7 @@ Repo-specific facts for the generic workflow in `SKILL.md`. Do not re-derive the
 
 - `python3` is 3.12 with Pillow installed, and `ffmpeg`/`ffprobe` are on `PATH` (Homebrew). `scripts/build_demo.py` and `scripts/qa_demo.py` run directly — no venv, no `ffmpeg-static`.
 - Puppeteer is **not** a dependency of this repo. `npm i puppeteer` inside the session scratchpad; Chrome binaries are already cached in `~/.cache/puppeteer`, so this is fast and installs nothing into the repository.
-- Upload with `gh image <file> --repo mengxi-ream/read-frog`. Verified here on 2026-09-17 with gh-image v1.3.0: it went through the normal `gh` token, asked for no browser session and no Keychain access, and printed one bare `user-attachments` URL. Accept nothing else as the result.
+- Upload with `gh image <file> --repo huuhabn/workmate-ai`. Verified here on 2026-09-17 with gh-image v1.3.0: it went through the normal `gh` token, asked for no browser session and no Keychain access, and printed one bare `user-attachments` URL. Accept nothing else as the result.
 - Measured cost of a small take: `pnpm build` ≈ 5 s (warm), record two scenes ≈ 40 s, assemble MP4 + GIF ≈ 10 s.
 
 ## Build the artifact under test

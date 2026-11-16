@@ -1273,7 +1273,7 @@ options:
       description: Настройка различных типов промптов позволяет вам самостоятельно изменять тип промпта во время перевода. Промпт — это текст, который пользователь отправляет LLM.
       managePrompts: Управление промптами
       communityPrompts: Получайте или делитесь промптами с сообществом
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      communityPromptsUrl: https://github.com/huuhabn/workmate-ai/discussions/821
       variableReference: Справочник переменных
       variableReferenceUrl: https://readfrog.app/ru/docs/page-translation/prompts/variables
       addPrompt: Добавить промпт

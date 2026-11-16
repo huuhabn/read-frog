@@ -1656,7 +1656,7 @@ options:
       description: Tùy chỉnh các loại Prompt khác nhau cho phép bạn tự điều chỉnh loại Prompt trong quá trình dịch. Prompt là văn bản mà người dùng gửi cho LLM.
       managePrompts: Quản lý prompt
       communityPrompts: Nhận hoặc chia sẻ prompt từ cộng đồng
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      communityPromptsUrl: https://github.com/huuhabn/workmate-ai/discussions/821
       variableReference: Tham chiếu biến
       variableReferenceUrl: https://readfrog.app/vi/docs/page-translation/prompts/variables
       addPrompt: Thêm Prompt

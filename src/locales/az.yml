@@ -1278,7 +1278,7 @@ options:
       description: Müxtəlif təlimat növlərini fərdiləşdirməklə tərcümə zamanı istifadə ediləcək təlimatı özünüz seçə bilərsiniz. Təlimat istifadəçinin LLM modelinə göndərdiyi mətndir.
       managePrompts: Təlimatları idarə et
       communityPrompts: İcmadan təlimat əldə et və ya icma ilə paylaş
-      communityPromptsUrl: https://github.com/mengxi-ream/read-frog/discussions/821
+      communityPromptsUrl: https://github.com/huuhabn/workmate-ai/discussions/821
       variableReference: Dəyişənlər arayışı
       variableReferenceUrl: https://readfrog.app/en/docs/page-translation/prompts/variables
       addPrompt: Təlimat əlavə et
