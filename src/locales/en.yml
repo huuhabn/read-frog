@@ -50,7 +50,7 @@ sidePanel:
     noResponse: "No response"
     copied: "Copied"
     copy: "Copy"
-    slashHint: "Type / for Custom AI Actions"
+    slashHint: "Type / for Custom Prompts"
     slashKey: "/"
     quickPrompts:
       summarize: "Summarize the key points on this page"
@@ -68,7 +68,7 @@ sidePanel:
     noResults: No conversations found.
     clearAll: Clear all history
   slashMenu:
-    title: Custom AI Actions
+    title: Custom Prompts
     select: select
     use: use
     close: close
@@ -278,7 +278,7 @@ options:
       features:
         customPrompts: Custom prompts
         pageTranslation: Page translation
-        customAction: Custom AI Actions
+        customAction: Custom Prompts
         noteSuggestion: Note suggestions
         selectionTranslation: Selection translation
         videoSubtitles: Video subtitles
@@ -374,8 +374,8 @@ options:
         customChatComplete: Custom Chat Complete
         customResponses: Custom Responses
       attribution:
-        builtInAi: Workmate AI's hosted standard model. Pro and Ultra members can use it on every feature, on a weekly quota; on the free plan it runs Custom AI Actions only.
-        builtInAiAdvance: Workmate AI's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom AI Actions, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
+        builtInAi: Workmate AI's hosted standard model. Pro and Ultra members can use it on every feature, on a weekly quota; on the free plan it runs Custom Prompts only.
+        builtInAiAdvance: Workmate AI's hosted advanced model, exclusive to Ultra members. Runs page translation, Custom Prompts, and every other Built-in AI feature on a shared weekly quota. Uses up the quota faster than the standard model.
       description:
         openai: Provides models like GPT-4o
         azure: Azure-hosted OpenAI models through your deployments
@@ -833,13 +833,13 @@ options:
       providerDisabled: Selected provider is disabled
       providerUnavailable: Selected provider is unavailable
     customActions:
-      title: Custom AI Actions
+      title: Custom Prompts
       pageDescription: Write your own prompts and run them on selected text from the selection toolbar. The data, style and interactions of each result are all yours to customize.
       description: Add your own structured AI actions for selected text
       configTitle: Action config
       introVideo:
         trigger: "Watch video"
-        title: "Custom AI Actions in 30 seconds"
+        title: "Custom Prompts in 30 seconds"
       builtIn: Built-in
       badges:
         new: New
@@ -2195,7 +2195,7 @@ action:
   saveToNotebaseAccessDenied: This account cannot access the selected Notebase
   saveToNotebaseLimitExceeded: Upgrade is required to save more Notebase notes
   saveToNotebaseTableUnavailable: The selected Notebase is no longer available
-  saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom AI Actions and fix the mappings.
+  saveToNotebaseConnectionInvalid: This Notebase connection is out of date. Refresh it in Custom Prompts and fix the mappings.
   saveToNotebaseInvalidContent: "The AI answer has a value in the wrong format, so it was not saved. Run the action again, then save."
   saveToNotebaseNoFieldSaved: "Not saved: this action saves no field to the Notebase. Pick at least one in its settings."
   saveToNotebaseUndecidedTitle: "Saved. You haven't decided whether to save these fields"
@@ -2212,14 +2212,14 @@ action:
   saveToNotebaseLoginConnectedTitle: Log in to save?
   saveToNotebaseLoginConnectedDescription: This Custom Action is connected to the account below. After login, Workmate AI will save to the existing Notebase when possible, or create a new Notebase for the logged-in account.
   saveToNotebaseConnectionUnavailableTitle: Notebase connection unavailable
-  saveToNotebaseMissingNotebaseDescription: The old Notebase no longer exists or cannot be opened by this account. Create a new Notebase and save this result, or connect an existing Notebase in Custom AI Actions.
-  saveToNotebaseAccountUnavailableDescription: The logged-in account does not match the connected account below. Creating and saving will replace the previous connection and field mappings. You can also connect an existing Notebase in Custom AI Actions.
+  saveToNotebaseMissingNotebaseDescription: The old Notebase no longer exists or cannot be opened by this account. Create a new Notebase and save this result, or connect an existing Notebase in Custom Prompts.
+  saveToNotebaseAccountUnavailableDescription: The logged-in account does not match the connected account below. Creating and saving will replace the previous connection and field mappings. You can also connect an existing Notebase in Custom Prompts.
   saveToNotebasePendingLogin: Log in to finish saving
   saveToNotebasePendingLoginDescription: After login, Workmate AI will create the Notebase and save this result automatically.
   saveToNotebasePendingConnectedLoginDescription: After login, Workmate AI will save to the connected Notebase when possible. If this account cannot use it, Workmate AI will create a new Notebase and save this result.
   upgrade: Upgrade
   updatePayment: Update payment
-  openCustomActions: Open Custom AI Actions
+  openCustomActions: Open Custom Prompts
   openNotebase: Open Notebase
   reviewDueOne: "$1 card to review"
   reviewDueOther: "$1 cards to review"

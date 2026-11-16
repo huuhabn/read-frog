@@ -1,11 +1,11 @@
 // @vitest-environment jsdom
 import { render, screen, fireEvent } from "@testing-library/react"
 import { describe, expect, it, vi } from "vitest"
-import { CUSTOM_AI_ACTIONS, type CustomAIAction } from "../custom-ai-actions"
+import { CUSTOM_PROMPTS, type CustomAIAction } from "../custom-ai-actions"
 import { SlashPromptPopover } from "../slash-prompt-popover"
 
 describe("SlashPromptPopover", () => {
-  it("renders Custom AI Actions header and action items", () => {
+  it("renders Custom Prompts header and action items", () => {
     const handleSelect = vi.fn<(action: CustomAIAction) => void>()
     const handleClose = vi.fn<() => void>()
     const handleHover = vi.fn<(index: number) => void>()
@@ -13,7 +13,7 @@ describe("SlashPromptPopover", () => {
     render(
       <SlashPromptPopover
         query=""
-        actions={CUSTOM_AI_ACTIONS}
+        actions={CUSTOM_PROMPTS}
         selectedIndex={0}
         onSelect={handleSelect}
         onClose={handleClose}
@@ -21,8 +21,8 @@ describe("SlashPromptPopover", () => {
       />,
     )
 
-    expect(screen.getByText("Custom AI Actions")).toBeDefined()
-    expect(screen.getByText(String(CUSTOM_AI_ACTIONS.length))).toBeDefined()
+    expect(screen.getByText("Custom Prompts")).toBeDefined()
+    expect(screen.getByText(String(CUSTOM_PROMPTS.length))).toBeDefined()
     expect(screen.getByText("Tóm tắt nội dung (Summarize)")).toBeDefined()
   })
 
@@ -34,7 +34,7 @@ describe("SlashPromptPopover", () => {
     render(
       <SlashPromptPopover
         query=""
-        actions={CUSTOM_AI_ACTIONS}
+        actions={CUSTOM_PROMPTS}
         selectedIndex={0}
         onSelect={handleSelect}
         onClose={handleClose}
@@ -45,7 +45,7 @@ describe("SlashPromptPopover", () => {
     const firstItem = screen.getByText("Tóm tắt nội dung (Summarize)")
     fireEvent.click(firstItem)
 
-    expect(handleSelect).toHaveBeenCalledWith(CUSTOM_AI_ACTIONS[0])
+    expect(handleSelect).toHaveBeenCalledWith(CUSTOM_PROMPTS[0])
   })
 
   it("calls onClose when the close button is clicked", () => {
@@ -56,7 +56,7 @@ describe("SlashPromptPopover", () => {
     render(
       <SlashPromptPopover
         query=""
-        actions={CUSTOM_AI_ACTIONS}
+        actions={CUSTOM_PROMPTS}
         selectedIndex={0}
         onSelect={handleSelect}
         onClose={handleClose}

@@ -50,7 +50,7 @@ export function SlashPromptPopover({
           <div className="flex size-5 items-center justify-center rounded-md bg-primary/10 text-primary">
             <Sparkles className="size-3" />
           </div>
-          <span className="font-semibold text-foreground">Custom AI Actions</span>
+          <span className="font-semibold text-foreground">Custom Prompts</span>
           <span className="py-0.2 rounded-full bg-primary/15 px-1.5 text-[10px] font-medium text-primary">
             {actions.length}
           </span>

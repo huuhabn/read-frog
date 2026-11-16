@@ -823,7 +823,7 @@ describe("saveToNotebaseButton notebase availability", () => {
     )
   })
 
-  it("shows a Custom AI Actions toast action instead of disabling invalid mappings", async () => {
+  it("shows a Custom Prompts toast action instead of disabling invalid mappings", async () => {
     const config = cloneConfig(DEFAULT_CONFIG)
     config.betaExperience.enabled = true
     vi.mocked(orpcClient.notebase.getSchema).mockResolvedValueOnce(createSchema("removed-column"))

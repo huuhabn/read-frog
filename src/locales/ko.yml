@@ -1659,7 +1659,7 @@ action:
   saveToNotebaseAccessDenied: 이 계정은 선택한 Notebase에 접근할 수 없습니다
   saveToNotebaseLimitExceeded: 더 많은 Notebase 노트를 저장하려면 업그레이드가 필요합니다
   saveToNotebaseTableUnavailable: 선택한 Notebase를 더 이상 사용할 수 없습니다
-  saveToNotebaseConnectionInvalid: 현재 Notebase 연결이 오래되었습니다. Custom AI Actions에서 새로고침하고 매핑을 수정하세요.
+  saveToNotebaseConnectionInvalid: 현재 Notebase 연결이 오래되었습니다. Custom Prompts에서 새로고침하고 매핑을 수정하세요.
   saveToNotebaseInvalidContent: "AI 응답에 형식이 맞지 않는 값이 있어 저장하지 않았습니다. 다시 실행한 뒤 저장하세요."
   saveToNotebaseNoFieldSaved: "저장하지 않았습니다: 이 작업에는 Notebase에 저장할 필드가 없습니다. 설정에서 하나 이상 고르세요."
   saveToNotebaseUndecidedTitle: "저장했습니다. 다음 필드는 저장할지 아직 정하지 않았습니다"
@@ -1676,14 +1676,14 @@ action:
   saveToNotebaseLoginConnectedTitle: 로그인하고 저장할까요?
   saveToNotebaseLoginConnectedDescription: 이 Custom Action은 아래 계정에 연결되어 있습니다. 로그인 후 가능하면 기존 Notebase에 저장하고, 사용할 수 없으면 로그인한 계정에 새 Notebase를 만듭니다.
   saveToNotebaseConnectionUnavailableTitle: Notebase 연결을 사용할 수 없습니다
-  saveToNotebaseMissingNotebaseDescription: 이전 Notebase가 없거나 이 계정에서 열 수 없습니다. 새 Notebase를 만들고 저장하거나 Custom AI Actions에서 기존 Notebase를 연결하세요.
-  saveToNotebaseAccountUnavailableDescription: 로그인한 계정이 아래의 연결된 계정과 다릅니다. 만들고 저장하면 이전 연결 설정과 필드 매핑이 교체됩니다. Custom AI Actions에서 기존 Notebase를 연결할 수도 있습니다.
+  saveToNotebaseMissingNotebaseDescription: 이전 Notebase가 없거나 이 계정에서 열 수 없습니다. 새 Notebase를 만들고 저장하거나 Custom Prompts에서 기존 Notebase를 연결하세요.
+  saveToNotebaseAccountUnavailableDescription: 로그인한 계정이 아래의 연결된 계정과 다릅니다. 만들고 저장하면 이전 연결 설정과 필드 매핑이 교체됩니다. Custom Prompts에서 기존 Notebase를 연결할 수도 있습니다.
   saveToNotebasePendingLogin: 로그인 후 저장 완료
   saveToNotebasePendingLoginDescription: 로그인 후 Workmate AI가 Notebase를 만들고 이 결과를 자동으로 저장합니다.
   saveToNotebasePendingConnectedLoginDescription: 로그인 후 Workmate AI는 가능하면 연결된 Notebase에 저장합니다. 이 계정에서 사용할 수 없으면 새 Notebase를 만들고 저장합니다.
   upgrade: 업그레이드
   updatePayment: 결제 수단 업데이트
-  openCustomActions: Custom AI Actions 열기
+  openCustomActions: Custom Prompts 열기
   openNotebase: Notebase 열기
   reviewDueOne: "복습할 카드 $1장"
   reviewDueOther: "복습할 카드 $1장"

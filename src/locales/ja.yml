@@ -1659,7 +1659,7 @@ action:
   saveToNotebaseAccessDenied: このアカウントでは選択した Notebase にアクセスできません
   saveToNotebaseLimitExceeded: さらに Notebase ノートを保存するにはアップグレードが必要です
   saveToNotebaseTableUnavailable: 選択した Notebase は利用できなくなりました
-  saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom AI Actions で更新し、マッピングを修正してください。
+  saveToNotebaseConnectionInvalid: この Notebase 接続は古くなっています。Custom Prompts で更新し、マッピングを修正してください。
   saveToNotebaseInvalidContent: "AI の回答に形式の合わない値があったため、保存しませんでした。もう一度実行してから保存してください。"
   saveToNotebaseNoFieldSaved: "保存しませんでした：この操作には Notebase に保存するフィールドがありません。設定で少なくとも 1 つ選んでください。"
   saveToNotebaseUndecidedTitle: "保存しました。次のフィールドは保存するかまだ決まっていません"
@@ -1676,14 +1676,14 @@ action:
   saveToNotebaseLoginConnectedTitle: ログインして保存しますか？
   saveToNotebaseLoginConnectedDescription: この Custom Action は下のアカウントに接続されています。ログイン後、可能であれば既存の Notebase に保存し、利用できない場合はログイン中のアカウント用に新しい Notebase を作成します。
   saveToNotebaseConnectionUnavailableTitle: Notebase 接続を利用できません
-  saveToNotebaseMissingNotebaseDescription: 以前の Notebase は存在しないか、このアカウントでは開けません。新しい Notebase を作成して保存するか、Custom AI Actions で既存の Notebase に接続してください。
-  saveToNotebaseAccountUnavailableDescription: ログイン中のアカウントが下の接続済みアカウントと一致しません。作成して保存すると、以前の接続設定とフィールドマッピングが置き換えられます。Custom AI Actions で既存の Notebase に接続することもできます。
+  saveToNotebaseMissingNotebaseDescription: 以前の Notebase は存在しないか、このアカウントでは開けません。新しい Notebase を作成して保存するか、Custom Prompts で既存の Notebase に接続してください。
+  saveToNotebaseAccountUnavailableDescription: ログイン中のアカウントが下の接続済みアカウントと一致しません。作成して保存すると、以前の接続設定とフィールドマッピングが置き換えられます。Custom Prompts で既存の Notebase に接続することもできます。
   saveToNotebasePendingLogin: ログイン後に保存を完了
   saveToNotebasePendingLoginDescription: ログイン後、Workmate AI が Notebase を作成し、この結果を自動で保存します。
   saveToNotebasePendingConnectedLoginDescription: ログイン後、Workmate AI は可能であれば接続済み Notebase に保存します。このアカウントで利用できない場合は、新しい Notebase を作成して保存します。
   upgrade: アップグレード
   updatePayment: 支払いを更新
-  openCustomActions: Custom AI Actions を開く
+  openCustomActions: Custom Prompts を開く
   openNotebase: Notebase を開く
   reviewDueOne: "$1 枚のカードが復習待ち"
   reviewDueOther: "$1 枚のカードが復習待ち"

@@ -1659,7 +1659,7 @@ action:
   saveToNotebaseAccessDenied: Bu hesap seçilen Notebase'e erişemiyor
   saveToNotebaseLimitExceeded: Daha fazla Notebase notu kaydetmek için yükseltme gerekir
   saveToNotebaseTableUnavailable: Seçilen Notebase artık kullanılamıyor
-  saveToNotebaseConnectionInvalid: Bu Notebase bağlantısı güncel değil. Custom AI Actions içinde yenileyin ve eşlemeleri düzeltin.
+  saveToNotebaseConnectionInvalid: Bu Notebase bağlantısı güncel değil. Custom Prompts içinde yenileyin ve eşlemeleri düzeltin.
   saveToNotebaseInvalidContent: "Yapay zekâ yanıtında biçimi hatalı bir değer var, bu yüzden kaydedilmedi. Eylemi yeniden çalıştırıp sonra kaydedin."
   saveToNotebaseNoFieldSaved: "Kaydedilmedi: bu eylem Notebase'e hiçbir alan kaydetmiyor. Ayarlarından en az birini seçin."
   saveToNotebaseUndecidedTitle: "Kaydedildi. Bu alanları kaydedip kaydetmeyeceğinize henüz karar vermediniz"
@@ -1676,14 +1676,14 @@ action:
   saveToNotebaseLoginConnectedTitle: Giriş yapıp kaydedilsin mi?
   saveToNotebaseLoginConnectedDescription: Bu Custom Action aşağıdaki hesaba bağlı. Girişten sonra mümkünse mevcut Notebase'e kaydedilir; kullanılamazsa giriş yapılan hesap için yeni bir Notebase oluşturulur.
   saveToNotebaseConnectionUnavailableTitle: Notebase bağlantısı kullanılamıyor
-  saveToNotebaseMissingNotebaseDescription: Eski Notebase artık yok veya bu hesapla açılamıyor. Yeni bir Notebase oluşturup kaydedin ya da Custom AI Actions içinde mevcut bir Notebase bağlayın.
-  saveToNotebaseAccountUnavailableDescription: Giriş yapılan hesap aşağıdaki bağlı hesapla eşleşmiyor. Oluşturup kaydetmek önceki bağlantıyı ve alan eşlemelerini değiştirir. Custom AI Actions içinde mevcut bir Notebase de bağlayabilirsiniz.
+  saveToNotebaseMissingNotebaseDescription: Eski Notebase artık yok veya bu hesapla açılamıyor. Yeni bir Notebase oluşturup kaydedin ya da Custom Prompts içinde mevcut bir Notebase bağlayın.
+  saveToNotebaseAccountUnavailableDescription: Giriş yapılan hesap aşağıdaki bağlı hesapla eşleşmiyor. Oluşturup kaydetmek önceki bağlantıyı ve alan eşlemelerini değiştirir. Custom Prompts içinde mevcut bir Notebase de bağlayabilirsiniz.
   saveToNotebasePendingLogin: Kaydetmeyi tamamlamak için giriş yapın
   saveToNotebasePendingLoginDescription: Giriş yaptıktan sonra Workmate AI Notebase'i oluşturur ve bu sonucu otomatik olarak kaydeder.
   saveToNotebasePendingConnectedLoginDescription: Girişten sonra Workmate AI mümkünse bağlı Notebase'e kaydeder. Bu hesap onu kullanamazsa yeni bir Notebase oluşturup kaydeder.
   upgrade: Yükselt
   updatePayment: Ödemeyi güncelle
-  openCustomActions: Custom AI Actions'ı aç
+  openCustomActions: Custom Prompts'ı aç
   openNotebase: Notebase'i aç
   reviewDueOne: "$1 kart tekrar bekliyor"
   reviewDueOther: "$1 kart tekrar bekliyor"

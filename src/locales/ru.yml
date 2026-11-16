@@ -1659,7 +1659,7 @@ action:
   saveToNotebaseAccessDenied: Этот аккаунт не может открыть выбранную Notebase
   saveToNotebaseLimitExceeded: Для сохранения большего числа заметок Notebase требуется апгрейд
   saveToNotebaseTableUnavailable: Выбранная Notebase больше недоступна
-  saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom AI Actions и исправьте сопоставления.
+  saveToNotebaseConnectionInvalid: Это подключение Notebase устарело. Обновите его в Custom Prompts и исправьте сопоставления.
   saveToNotebaseInvalidContent: "В ответе ИИ есть значение в неверном формате, поэтому он не сохранён. Запустите действие ещё раз и сохраните."
   saveToNotebaseNoFieldSaved: "Не сохранено: это действие не сохраняет в Notebase ни одного поля. Выберите хотя бы одно в настройках."
   saveToNotebaseUndecidedTitle: "Сохранено. Вы ещё не решили, сохранять ли эти поля"
@@ -1676,14 +1676,14 @@ action:
   saveToNotebaseLoginConnectedTitle: Войти и сохранить?
   saveToNotebaseLoginConnectedDescription: Этот Custom Action подключён к аккаунту ниже. После входа Workmate AI сохранит в существующую Notebase, если это возможно, или создаст новую Notebase для текущего аккаунта.
   saveToNotebaseConnectionUnavailableTitle: Подключение Notebase недоступно
-  saveToNotebaseMissingNotebaseDescription: Старая Notebase больше не существует или недоступна этому аккаунту. Создайте новую Notebase и сохраните результат либо подключите существующую Notebase в Custom AI Actions.
-  saveToNotebaseAccountUnavailableDescription: Текущий аккаунт не совпадает с подключённым аккаунтом ниже. Создание и сохранение заменит прежнее подключение и сопоставления полей. Также можно подключить существующую Notebase в Custom AI Actions.
+  saveToNotebaseMissingNotebaseDescription: Старая Notebase больше не существует или недоступна этому аккаунту. Создайте новую Notebase и сохраните результат либо подключите существующую Notebase в Custom Prompts.
+  saveToNotebaseAccountUnavailableDescription: Текущий аккаунт не совпадает с подключённым аккаунтом ниже. Создание и сохранение заменит прежнее подключение и сопоставления полей. Также можно подключить существующую Notebase в Custom Prompts.
   saveToNotebasePendingLogin: Войдите, чтобы завершить сохранение
   saveToNotebasePendingLoginDescription: После входа Workmate AI автоматически создаст Notebase и сохранит этот результат.
   saveToNotebasePendingConnectedLoginDescription: После входа Workmate AI сохранит в подключённую Notebase, если это возможно. Если аккаунт не может её использовать, будет создана новая Notebase.
   upgrade: Повысить тариф
   updatePayment: Обновить оплату
-  openCustomActions: Открыть Custom AI Actions
+  openCustomActions: Открыть Custom Prompts
   openNotebase: Открыть Notebase
   reviewDueOne: "Карточек к повторению: $1"
   reviewDueOther: "Карточек к повторению: $1"

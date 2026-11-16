@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest"
-import {
-  CUSTOM_AI_ACTIONS,
-  filterCustomAIActions,
-  normalizeSearchString,
-} from "../custom-ai-actions"
+import { CUSTOM_PROMPTS, filterCustomAIActions, normalizeSearchString } from "../custom-ai-actions"
 
 describe("custom-ai-actions", () => {
   it("normalizes text and removes accents correctly", () => {
@@ -13,9 +9,9 @@ describe("custom-ai-actions", () => {
   })
 
   it("returns all actions when query is empty or slash alone", () => {
-    expect(filterCustomAIActions("")).toHaveLength(CUSTOM_AI_ACTIONS.length)
-    expect(filterCustomAIActions("/")).toHaveLength(CUSTOM_AI_ACTIONS.length)
-    expect(filterCustomAIActions("   ")).toHaveLength(CUSTOM_AI_ACTIONS.length)
+    expect(filterCustomAIActions("")).toHaveLength(CUSTOM_PROMPTS.length)
+    expect(filterCustomAIActions("/")).toHaveLength(CUSTOM_PROMPTS.length)
+    expect(filterCustomAIActions("   ")).toHaveLength(CUSTOM_PROMPTS.length)
   })
 
   it("filters actions by keyword with leading slash", () => {

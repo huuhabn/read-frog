@@ -50,7 +50,7 @@ sidePanel:
     noResponse: "Không có phản hồi"
     copied: "Đã chép"
     copy: "Sao chép"
-    slashHint: "Gõ / để chọn Custom AI Actions"
+    slashHint: "Gõ / để chọn Custom Prompts"
     slashKey: "/"
     quickPrompts:
       summarize: "Tóm tắt các ý chính trên trang này"
@@ -68,7 +68,7 @@ sidePanel:
     noResults: Không tìm thấy cuộc trò chuyện nào.
     clearAll: Xóa toàn bộ lịch sử
   slashMenu:
-    title: Custom AI Actions
+    title: Custom Prompts
     select: chọn
     use: dùng
     close: đóng
@@ -2047,7 +2047,7 @@ action:
   saveToNotebaseAccessDenied: Tài khoản này không thể truy cập Notebase đã chọn
   saveToNotebaseLimitExceeded: Cần nâng cấp để lưu thêm ghi chú Notebase
   saveToNotebaseTableUnavailable: Notebase đã chọn không còn khả dụng
-  saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom AI Actions và sửa các ánh xạ.
+  saveToNotebaseConnectionInvalid: Kết nối Notebase này đã lỗi thời. Hãy làm mới trong Custom Prompts và sửa các ánh xạ.
   saveToNotebaseInvalidContent: "Câu trả lời của AI có giá trị sai định dạng nên chưa được lưu. Hãy chạy lại thao tác rồi lưu."
   saveToNotebaseNoFieldSaved: "Chưa lưu: thao tác này không lưu trường nào vào Notebase. Hãy chọn ít nhất một trường trong phần cài đặt."
   saveToNotebaseUndecidedTitle: "Đã lưu. Bạn chưa quyết định có lưu các trường này không"
@@ -2064,14 +2064,14 @@ action:
   saveToNotebaseLoginConnectedTitle: Đăng nhập để lưu?
   saveToNotebaseLoginConnectedDescription: Custom Action này đang kết nối với tài khoản bên dưới. Sau khi đăng nhập, Workmate AI sẽ lưu vào Notebase hiện có nếu có thể, hoặc tạo Notebase mới cho tài khoản đã đăng nhập.
   saveToNotebaseConnectionUnavailableTitle: Kết nối Notebase không khả dụng
-  saveToNotebaseMissingNotebaseDescription: Notebase cũ không còn tồn tại hoặc tài khoản này không mở được. Hãy tạo Notebase mới và lưu kết quả này, hoặc kết nối Notebase hiện có trong Custom AI Actions.
-  saveToNotebaseAccountUnavailableDescription: Tài khoản đã đăng nhập không khớp với tài khoản đã kết nối bên dưới. Tạo và lưu sẽ thay thế kết nối trước đó cùng các ánh xạ trường. Bạn cũng có thể kết nối Notebase hiện có trong Custom AI Actions.
+  saveToNotebaseMissingNotebaseDescription: Notebase cũ không còn tồn tại hoặc tài khoản này không mở được. Hãy tạo Notebase mới và lưu kết quả này, hoặc kết nối Notebase hiện có trong Custom Prompts.
+  saveToNotebaseAccountUnavailableDescription: Tài khoản đã đăng nhập không khớp với tài khoản đã kết nối bên dưới. Tạo và lưu sẽ thay thế kết nối trước đó cùng các ánh xạ trường. Bạn cũng có thể kết nối Notebase hiện có trong Custom Prompts.
   saveToNotebasePendingLogin: Đăng nhập để hoàn tất lưu
   saveToNotebasePendingLoginDescription: Sau khi đăng nhập, Workmate AI sẽ tự động tạo Notebase và lưu kết quả này.
   saveToNotebasePendingConnectedLoginDescription: Sau khi đăng nhập, Workmate AI sẽ lưu vào Notebase đã kết nối nếu có thể. Nếu tài khoản này không dùng được, Workmate AI sẽ tạo Notebase mới và lưu kết quả này.
   upgrade: Nâng cấp
   updatePayment: Cập nhật thanh toán
-  openCustomActions: Mở Custom AI Actions
+  openCustomActions: Mở Custom Prompts
   openNotebase: Mở Notebase
   reviewDueOne: "$1 thẻ cần ôn tập"
   reviewDueOther: "$1 thẻ cần ôn tập"

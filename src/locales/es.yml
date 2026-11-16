@@ -1681,14 +1681,14 @@ action:
   saveToNotebaseLoginConnectedTitle: ¿Iniciar sesión para guardar?
   saveToNotebaseLoginConnectedDescription: Esta Custom Action está conectada a la cuenta de abajo. Después de iniciar sesión, Workmate AI guardará en la Notebase existente si es posible, o creará una nueva Notebase para la cuenta actual.
   saveToNotebaseConnectionUnavailableTitle: Conexión de Notebase no disponible
-  saveToNotebaseMissingNotebaseDescription: La Notebase anterior ya no existe o esta cuenta no puede abrirla. Crea una nueva Notebase y guarda este resultado, o conecta una Notebase existente en Custom AI Actions.
-  saveToNotebaseAccountUnavailableDescription: La cuenta actual no coincide con la cuenta conectada de abajo. Crear y guardar reemplazará la conexión anterior y los mapeos de campos. También puedes conectar una Notebase existente en Custom AI Actions.
+  saveToNotebaseMissingNotebaseDescription: La Notebase anterior ya no existe o esta cuenta no puede abrirla. Crea una nueva Notebase y guarda este resultado, o conecta una Notebase existente en Custom Prompts.
+  saveToNotebaseAccountUnavailableDescription: La cuenta actual no coincide con la cuenta conectada de abajo. Crear y guardar reemplazará la conexión anterior y los mapeos de campos. También puedes conectar una Notebase existente en Custom Prompts.
   saveToNotebasePendingLogin: Inicia sesión para terminar de guardar
   saveToNotebasePendingLoginDescription: Después de iniciar sesión, Workmate AI creará la Notebase y guardará este resultado automáticamente.
   saveToNotebasePendingConnectedLoginDescription: Después de iniciar sesión, Workmate AI guardará en la Notebase conectada si es posible. Si esta cuenta no puede usarla, creará una nueva Notebase y guardará este resultado.
   upgrade: Mejorar plan
   updatePayment: Actualizar pago
-  openCustomActions: Abrir Custom AI Actions
+  openCustomActions: Abrir Custom Prompts
   openNotebase: Abrir Notebase
   reviewDueOne: "$1 tarjeta por repasar"
   reviewDueOther: "$1 tarjetas por repasar"

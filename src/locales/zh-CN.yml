@@ -1669,7 +1669,7 @@ action:
   saveToNotebaseAccessDenied: 当前账号无法访问选中的笔记库
   saveToNotebaseLimitExceeded: 需要升级后才能保存更多笔记库内容
   saveToNotebaseTableUnavailable: 选中的笔记库已不可用
-  saveToNotebaseConnectionInvalid: 当前笔记库连接已经过期，请到 Custom AI Actions 中刷新并修复映射
+  saveToNotebaseConnectionInvalid: 当前笔记库连接已经过期，请到 Custom Prompts 中刷新并修复映射
   saveToNotebaseInvalidContent: "AI 返回的内容格式不对，没有保存。请重新运行一次再保存。"
   saveToNotebaseNoFieldSaved: "没有保存：这个指令没有要存进笔记库的字段，请在设置里至少选一个。"
   saveToNotebaseUndecidedTitle: "已保存。这些字段还没决定存不存"
@@ -1686,14 +1686,14 @@ action:
   saveToNotebaseLoginConnectedTitle: 登录后继续保存？
   saveToNotebaseLoginConnectedDescription: 这个 Custom Action 已连接到下面的账号。登录后，如果可以使用原笔记库会直接保存；如果当前账号无法使用它，会创建新的笔记库并保存。
   saveToNotebaseConnectionUnavailableTitle: 当前笔记库连接不可用
-  saveToNotebaseMissingNotebaseDescription: 旧笔记库不存在或当前账号无法打开。可以创建新的笔记库并保存当前结果，或去 Custom AI Actions 连接已有笔记库。
-  saveToNotebaseAccountUnavailableDescription: 当前登录账号和下方已连接账号不同。选择创建并保存会替换之前的连接配置和字段映射；也可以去 Custom AI Actions 连接已有笔记库。
+  saveToNotebaseMissingNotebaseDescription: 旧笔记库不存在或当前账号无法打开。可以创建新的笔记库并保存当前结果，或去 Custom Prompts 连接已有笔记库。
+  saveToNotebaseAccountUnavailableDescription: 当前登录账号和下方已连接账号不同。选择创建并保存会替换之前的连接配置和字段映射；也可以去 Custom Prompts 连接已有笔记库。
   saveToNotebasePendingLogin: 登录后继续保存
   saveToNotebasePendingLoginDescription: 登录完成后，Workmate AI 会自动创建笔记库并保存当前结果。
   saveToNotebasePendingConnectedLoginDescription: 登录完成后，Workmate AI 会优先保存到已连接的笔记库；如果当前账号无法使用它，会创建新的笔记库并保存当前结果。
   upgrade: 升级
   updatePayment: 更新支付方式
-  openCustomActions: 打开 Custom AI Actions
+  openCustomActions: 打开 Custom Prompts
   openNotebase: 打开笔记库
   reviewDueOne: "$1 张卡片需复习"
   reviewDueOther: "$1 张卡片需复习"

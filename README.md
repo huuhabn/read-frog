@@ -20,7 +20,7 @@ Supercharge your productivity and language mastery directly inside your browser.
   - [AI Web Chat Assistant (Telegram, Zalo, Slack)](#-ai-web-chat-assistant)
   - [Upwork Copilot & Proposal Writer](#-upwork-copilot--proposal-writer)
   - [Sider-Style Instant Sidepanel](#-sider-style-instant-sidepanel)
-  - [Custom AI Actions](#-custom-ai-actions)
+  - [Custom Prompts](#-custom-ai-actions)
   - [Flashcards \& Spaced Repetition (FSRS)](#-flashcards--spaced-repetition)
   - [Bilingual / Translation Only](#-bilingual--translation-only)
   - [Selection Translation Toolbar](#-selection-translation)

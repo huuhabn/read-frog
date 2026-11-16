@@ -189,7 +189,7 @@ export function ChatInputBox({
 
   return (
     <div ref={containerRef} className="relative w-full min-w-0 bg-background p-2.5">
-      {/* Custom AI Actions Floating Popover */}
+      {/* Custom Prompts Floating Popover */}
       {isSlashOpen && (
         <SlashPromptPopover
           query={slashQuery}

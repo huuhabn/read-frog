@@ -23,7 +23,7 @@ export interface CustomAIAction {
   icon: LucideIcon
 }
 
-export const CUSTOM_AI_ACTIONS: CustomAIAction[] = [
+export const CUSTOM_PROMPTS: CustomAIAction[] = [
   {
     id: "summarize",
     title: "Tóm tắt nội dung (Summarize)",
@@ -154,7 +154,7 @@ export function normalizeSearchString(text: string): string {
 
 export function filterCustomAIActions(
   query: string,
-  actions: CustomAIAction[] = CUSTOM_AI_ACTIONS,
+  actions: CustomAIAction[] = CUSTOM_PROMPTS,
 ): CustomAIAction[] {
   // Strip leading slash if present
   const cleaned = query.startsWith("/") ? query.slice(1) : query
