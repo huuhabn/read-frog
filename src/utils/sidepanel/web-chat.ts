@@ -2,11 +2,30 @@ import type { ChatMessage, ChatRoom } from "../web-chat/adapter/types"
 import type { WebChatRemoteConfig } from "../web-chat/remote-config/types"
 import { browser } from "#imports"
 import { createLogger } from "@/utils/logging/logger"
+import { urlMatchesPattern } from "@/utils/url-pattern"
 import { DEFAULT_PLATFORM_SELECTORS } from "../web-chat/remote-config/types"
 
 const log = createLogger("sidepanel:web-chat")
 
-export async function getActiveChatMessagesFromTab(tabId: number): Promise<{
+/**
+ * Checks whether a URL matches one of the supported web chat platforms
+ * (Zalo, Telegram, Slack, or user-configured generic chat patterns).
+ */
+export function isSupportedChatUrl(url?: string, genericPatterns: string[] = []): boolean {
+  if (!url) return false
+  if (url.includes("zalo.me")) return true
+  if (url.includes("telegram.org")) return true
+  if (url.includes("slack.com")) return true
+  if (genericPatterns && genericPatterns.length > 0) {
+    return genericPatterns.some((pattern) => urlMatchesPattern(url, pattern))
+  }
+  return false
+}
+
+export async function getActiveChatMessagesFromTab(
+  tabId: number,
+  genericMatchUrls: string[] = [],
+): Promise<{
   room: ChatRoom | null
   messages: ChatMessage[]
 }> {
@@ -17,17 +36,22 @@ export async function getActiveChatMessagesFromTab(tabId: number): Promise<{
         type: "WEB_CHAT_GET_ACTIVE_DATA",
       })
 
-    if (response?.room && Array.isArray(response.messages)) {
-      const sanitizedName = response.room.name?.trim()
-      if (
-        !sanitizedName ||
-        sanitizedName.toLowerCase() === "undefined" ||
-        sanitizedName.toLowerCase() === "null"
-      ) {
-        response.room.name =
-          response.room.platform === "zalo" ? "Cuộc trò chuyện Zalo" : "Active Chat"
+    if (response) {
+      if (response.room === null) {
+        return { room: null, messages: [] }
       }
-      return response
+      if (response.room && Array.isArray(response.messages)) {
+        const sanitizedName = response.room.name?.trim()
+        if (
+          !sanitizedName ||
+          sanitizedName.toLowerCase() === "undefined" ||
+          sanitizedName.toLowerCase() === "null"
+        ) {
+          response.room.name =
+            response.room.platform === "zalo" ? "Cuộc trò chuyện Zalo" : "Active Chat"
+        }
+        return response
+      }
     }
   } catch {
     // Content script not ready or not loaded on this tab, fallback to direct executeScript
@@ -37,13 +61,25 @@ export async function getActiveChatMessagesFromTab(tabId: number): Promise<{
   try {
     const results = await browser.scripting.executeScript({
       target: { tabId },
-      args: [DEFAULT_PLATFORM_SELECTORS],
-      func: (remoteConfig: WebChatRemoteConfig) => {
+      args: [DEFAULT_PLATFORM_SELECTORS, genericMatchUrls],
+      func: (remoteConfig: WebChatRemoteConfig, genericPatterns: string[]) => {
         const url = window.location.href
-        let platform: "zalo" | "telegram" | "slack" | "generic" = "generic"
+        let platform: "zalo" | "telegram" | "slack" | "generic" | null = null
         if (url.includes("zalo.me")) platform = "zalo"
         else if (url.includes("telegram.org")) platform = "telegram"
         else if (url.includes("slack.com")) platform = "slack"
+        else if (
+          Array.isArray(genericPatterns) &&
+          genericPatterns.some(
+            (p) => p && url.includes(p.replace(/^\*:\/\//, "").replace(/\/\*$/, "")),
+          )
+        ) {
+          platform = "generic"
+        }
+
+        if (!platform) {
+          return { room: null, messages: [] }
+        }
 
         const isValidName = (str: string | null | undefined): boolean => {
           if (!str) return false
@@ -314,17 +350,54 @@ export async function getActiveChatMessagesFromTab(tabId: number): Promise<{
           })
         } else if (platform === "slack") {
           // --- SLACK EXTRACTION ---
-          const titleEl = document.querySelector(
-            remoteConfig.platforms.slack.roomTitleSelector ||
-              "[data-qa='channel_name'], .p-classic_nav__channel_header__title",
+          const threadPane = document.querySelector<HTMLElement>(
+            ".p-view_contents--secondary, [data-qa='threads_flexpane'], .p-threads_flexpane",
           )
-          const text = cleanText(titleEl)
-          roomName = isValidName(text) ? text : "Slack Channel"
-          roomId = window.location.pathname || "slack-active-chat"
+          const activeEl = document.activeElement
+          const isThreadFocused = Boolean(
+            activeEl?.closest(
+              ".p-view_contents--secondary, [data-qa='threads_flexpane'], .p-threads_flexpane",
+            ),
+          )
 
-          const container = document.querySelector<HTMLElement>(
+          const activeContainer =
+            (isThreadFocused && threadPane) ||
+            document.querySelector<HTMLElement>(".p-view_contents--primary, .p-message_pane") ||
+            threadPane ||
+            document.body
+
+          const isThread = Boolean(
+            activeContainer === threadPane ||
+            activeContainer.closest(".p-view_contents--secondary, [data-qa='threads_flexpane']"),
+          )
+
+          const channelTitleEl = document.querySelector(
+            ".p-view_contents--primary [data-qa='channel_name'], [data-qa='channel_name'], .p-view_header__member_name, .p-view_header__title",
+          )
+          const channelName = cleanText(channelTitleEl)
+
+          if (isThread) {
+            const threadComposer = activeContainer.querySelector("[data-qa='message_input']")
+            const threadKey =
+              threadComposer?.getAttribute("data-thread-key") ||
+              threadComposer?.getAttribute("data-thread-ts")
+            const secondaryAria = threadPane?.getAttribute("aria-label")
+            let threadName = channelName ? `${channelName} (Thread)` : "Slack Thread"
+            if (secondaryAria?.toLowerCase().startsWith("thread")) {
+              threadName = secondaryAria
+                .replace(/^Thread in conversation with @?/i, "Thread with ")
+                .trim()
+            }
+            roomName = threadName
+            roomId = threadKey ? `slack-thread-${threadKey}` : "slack-thread"
+          } else {
+            roomName = isValidName(channelName) ? channelName : "Slack Channel"
+            roomId = window.location.pathname || "slack-active-chat"
+          }
+
+          const container = activeContainer.querySelector<HTMLElement>(
             remoteConfig.platforms.slack.messageListSelector ||
-              "[data-qa='virtual-list'], .c-virtual_list__scroll_container",
+              "[data-qa='slack_kit_list'], .c-virtual_list__scroll_container, [data-qa='virtual-list']",
           )
 
           if (!container) {
@@ -339,13 +412,23 @@ export async function getActiveChatMessagesFromTab(tabId: number): Promise<{
               "[data-qa='message_container'], .c-message_kit__message",
           )
 
+          let lastAuthor = roomName || "Slack User"
+
           items.forEach((item, index) => {
             const el = item as HTMLElement
             const contentEl = el.querySelector(
               remoteConfig.platforms.slack.contentSelector ||
                 "[data-qa='message-text'], .p-rich_text_section",
             )
-            const content = cleanText(contentEl)
+            let content = cleanText(contentEl)
+            if (
+              !content &&
+              el.querySelector(
+                "[data-qa='message_file_image_thumbnail'], .c-message_kit__file, img",
+              )
+            ) {
+              content = "[Hình ảnh]"
+            }
             if (!content) return
 
             const isOwn = el.classList.contains("c-message--own")
@@ -353,10 +436,21 @@ export async function getActiveChatMessagesFromTab(tabId: number): Promise<{
               remoteConfig.platforms.slack.authorSelector ||
                 "[data-qa='message_sender_name'], .c-message__sender_button",
             )
-            const author = isOwn ? "Tôi" : cleanText(authorEl) || roomName || "Member"
-            const id = el.getAttribute("data-qa") || `slack-msg-${index}`
+            const extractedAuthor = cleanText(authorEl)
+            let author = isOwn ? "Tôi" : extractedAuthor
+            if (!author) {
+              author = lastAuthor
+            } else if (!isOwn) {
+              lastAuthor = author
+            }
+
+            const tsAttr = el.getAttribute("data-msg-ts")
+            const timestamp = tsAttr ? Math.round(parseFloat(tsAttr) * 1000) : Date.now()
+            const id = tsAttr || el.getAttribute("data-qa") || `slack-msg-${index}`
+
             const timeEl = el.querySelector(
-              remoteConfig.platforms.slack.timestampSelector || ".c-timestamp",
+              remoteConfig.platforms.slack.timestampSelector ||
+                ".c-timestamp, [data-qa='timestamp_label']",
             )
             const timeText = cleanText(timeEl) || undefined
 
@@ -364,7 +458,7 @@ export async function getActiveChatMessagesFromTab(tabId: number): Promise<{
               id,
               author,
               content,
-              timestamp: Date.now(),
+              timestamp,
               timeText,
               isOwn,
             })
@@ -460,9 +554,27 @@ export async function insertTextToActiveChatTab(
           document.querySelector<HTMLElement>(".composer-text") ||
           document.querySelector<HTMLElement>(".input-message-container [contenteditable='true']")
 
+        // Slack specific input (respecting thread vs channel active pane)
+        const threadPane = document.querySelector<HTMLElement>(
+          ".p-view_contents--secondary, [data-qa='threads_flexpane'], .p-threads_flexpane",
+        )
+        const isThreadFocused = Boolean(
+          document.activeElement?.closest(
+            ".p-view_contents--secondary, [data-qa='threads_flexpane'], .p-threads_flexpane",
+          ),
+        )
+        const slackContainer =
+          (isThreadFocused && threadPane) ||
+          document.querySelector<HTMLElement>(".p-view_contents--primary, .p-message_pane") ||
+          threadPane
+        const slackInput = slackContainer?.querySelector<HTMLElement>(
+          "[data-qa='message_input'] div[role='textbox'][contenteditable='true'], [data-qa='message_input'] .ql-editor",
+        )
+
         const target =
           zaloInput ||
           telegramInput ||
+          slackInput ||
           document.querySelector<HTMLElement>(
             "[contenteditable='true'], [contenteditable], textarea, [role='textbox']",
           )
@@ -482,6 +594,19 @@ export async function insertTextToActiveChatTab(
         const triggerSend = () => {
           if (!autoSend) return
           setTimeout(() => {
+            // First check if slackContainer has a scoped send button
+            if (slackContainer) {
+              const scopedSend = slackContainer.querySelector<HTMLElement>(
+                "[data-qa='texty_send_button']",
+              )
+              if (scopedSend) {
+                scopedSend.removeAttribute("data-disabled")
+                scopedSend.removeAttribute("disabled")
+                scopedSend.click()
+                return
+              }
+            }
+
             const sendSelectors = [
               // Telegram Web
               ".btn-send.send",

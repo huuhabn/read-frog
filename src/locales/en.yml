@@ -1516,6 +1516,11 @@ options:
     sidepanel:
       tabLabel: Web Assistant
       noRoomDetected: No chat room detected
+      unsupportedTitle: Unsupported Platform
+      unsupportedDesc: The current tab is not a supported chat platform (Zalo, Telegram, Slack) or configured custom Web Chat.
+      unsupportedBadge: Unsupported
+      supportedPlatformsTitle: Supported platforms
+      configureGenericChat: Configure Generic Chat URLs
       refreshTooltip: Refresh messages
       resetDefaults: Reset to settings defaults
       model: Model

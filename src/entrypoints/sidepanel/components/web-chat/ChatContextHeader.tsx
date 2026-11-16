@@ -22,6 +22,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/base-ui/dropdown-menu"
 import { i18n } from "@/utils/i18n"
+import { openOptionsPage } from "@/utils/navigation"
 import { cn } from "@/utils/styles/utils"
 import { LanguageSelectorDropdown } from "../common/language-selector-dropdown"
 import { ModelSelectorDropdown } from "../common/model-selector-dropdown"
@@ -51,6 +52,7 @@ export interface ChatContextHeaderProps {
 
   isOverridden: boolean
   onResetDefaults: () => void
+  disabled?: boolean
 }
 
 const TONE_VALUES: WebChatTone[] = ["friendly", "professional", "brief", "casual", "humorous"]
@@ -132,6 +134,7 @@ export function ChatContextHeader({
   onToggleSubline,
   isOverridden,
   onResetDefaults,
+  disabled = false,
 }: ChatContextHeaderProps) {
   const platformColors: Record<string, string> = {
     zalo: "bg-blue-500/10 text-blue-500 border-blue-500/20",
@@ -143,12 +146,13 @@ export function ChatContextHeader({
   const platformKey = room?.platform || "generic"
 
   const rawName = room?.name?.trim()
-  const displayRoomName =
-    rawName &&
-    rawName !== "undefined" &&
-    rawName !== "null" &&
-    rawName.toLowerCase() !== "undefined" &&
-    rawName.toLowerCase() !== "null"
+  const displayRoomName = disabled
+    ? i18n.t("options.webChat.sidepanel.unsupportedTitle")
+    : rawName &&
+        rawName !== "undefined" &&
+        rawName !== "null" &&
+        rawName.toLowerCase() !== "undefined" &&
+        rawName.toLowerCase() !== "null"
       ? rawName
       : i18n.t("options.webChat.sidepanel.noRoomDetected")
 
@@ -167,12 +171,28 @@ export function ChatContextHeader({
       {/* Row 1: Platform Badge, Room Name, Action Buttons */}
       <div className="flex items-center justify-between gap-2">
         <div className="flex min-w-0 items-center gap-2">
-          <Badge
-            variant="outline"
-            className={`text-[10px] font-semibold tracking-wider uppercase ${platformColors[platformKey]}`}
-          >
-            {room?.platform || "Web Chat"}
-          </Badge>
+          {disabled || !room?.platform ? (
+            <button
+              type="button"
+              onClick={() => void openOptionsPage({ route: "/web-chat" })}
+              className="cursor-pointer transition-opacity hover:opacity-80"
+              title={i18n.t("options.webChat.sidepanel.configureGenericChat")}
+            >
+              <Badge
+                variant="outline"
+                className="border-border/40 bg-muted/60 text-[10px] font-semibold tracking-wider text-muted-foreground uppercase hover:bg-muted"
+              >
+                {i18n.t("options.webChat.sidepanel.unsupportedBadge")}
+              </Badge>
+            </button>
+          ) : (
+            <Badge
+              variant="outline"
+              className={`text-[10px] font-semibold tracking-wider uppercase ${platformColors[platformKey]}`}
+            >
+              {room?.platform || "Web Chat"}
+            </Badge>
+          )}
           <span className="truncate text-xs font-semibold text-foreground" title={displayRoomName}>
             {displayRoomName}
           </span>
@@ -183,6 +203,7 @@ export function ChatContextHeader({
             <Button
               variant="ghost"
               size="icon"
+              disabled={disabled}
               onClick={onResetDefaults}
               className="size-6 text-amber-500 hover:text-amber-600 dark:hover:text-amber-400"
               title={i18n.t("options.webChat.sidepanel.resetDefaults")}
@@ -194,7 +215,7 @@ export function ChatContextHeader({
             variant="ghost"
             size="icon"
             onClick={onRefresh}
-            disabled={loading}
+            disabled={loading || disabled}
             className="size-6 text-muted-foreground hover:text-foreground"
             title={i18n.t("options.webChat.sidepanel.refreshTooltip")}
           >
@@ -204,13 +225,19 @@ export function ChatContextHeader({
       </div>
 
       {/* Row 2: Custom Options Toolbar (Model, Language, Tone) */}
-      <div className="no-scrollbar flex items-center gap-1.5 overflow-x-auto py-0.5">
+      <div
+        className={cn(
+          "no-scrollbar flex items-center gap-1.5 overflow-x-auto py-0.5",
+          disabled && "pointer-events-none opacity-50",
+        )}
+      >
         {/* Model Pill Dropdown */}
         <ModelSelectorDropdown
           selectedProviderId={selectedProviderId}
           onSelectModel={(id) => onSelectProvider(id)}
           availableProviders={availableProviders}
           variant="pill"
+          disabled={disabled}
           title={i18n.t("options.webChat.sidepanel.model")}
           triggerClassName="max-w-[120px] px-1"
         />
@@ -221,6 +248,7 @@ export function ChatContextHeader({
           onSelect={(lang) => onSelectLang(lang.code)}
           options={displayLanguages}
           variant="pill"
+          disabled={disabled}
           displayMode="code"
           showIcon
           title={i18n.t("options.webChat.sidepanel.language")}
@@ -230,7 +258,11 @@ export function ChatContextHeader({
         {/* Tone Pill Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger
-            className="flex h-6.5 shrink-0 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden"
+            disabled={disabled}
+            className={cn(
+              "flex h-6.5 shrink-0 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden",
+              disabled && "cursor-not-allowed opacity-50",
+            )}
             title={i18n.t("options.webChat.sidepanel.tone")}
           >
             <Smile className="size-3 text-primary" />
@@ -254,10 +286,12 @@ export function ChatContextHeader({
         {/* Auto Reply Pill Dropdown */}
         <DropdownMenu>
           <DropdownMenuTrigger
+            disabled={disabled}
             className={cn(
               "flex h-6.5 shrink-0 items-center gap-1 rounded-md border border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden",
               autoReplyMode !== "none" &&
                 "border-emerald-500/40 bg-emerald-500/10 font-semibold text-emerald-600 dark:text-emerald-400",
+              disabled && "cursor-not-allowed opacity-50",
             )}
             title={i18n.t("options.webChat.sidepanel.autoReply.title")}
           >
@@ -296,11 +330,13 @@ export function ChatContextHeader({
             type="button"
             variant="outline"
             size="sm"
+            disabled={disabled}
             onClick={onToggleSubline}
             className={cn(
               "h-6.5 shrink-0 gap-1 rounded-md border-border/60 bg-muted/40 px-2 text-[11px] font-medium text-foreground/90 transition-colors hover:bg-muted focus-visible:outline-hidden",
               sublineTranslate &&
                 "border-blue-500/40 bg-blue-500/10 font-semibold text-blue-600 dark:text-blue-400",
+              disabled && "cursor-not-allowed opacity-50",
             )}
             title={i18n.t("options.webChat.sidepanel.subline.tooltip")}
           >

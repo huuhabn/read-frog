@@ -7,9 +7,15 @@ interface ActionChipsProps {
   loading: boolean
   activeAction: WebChatActionType | null
   onSelectAction: (action: WebChatActionType) => void
+  disabled?: boolean
 }
 
-export function ActionChips({ loading, activeAction, onSelectAction }: ActionChipsProps) {
+export function ActionChips({
+  loading,
+  activeAction,
+  onSelectAction,
+  disabled = false,
+}: ActionChipsProps) {
   const chips = [
     {
       type: "summary" as const,
@@ -37,17 +43,18 @@ export function ActionChips({ loading, activeAction, onSelectAction }: ActionChi
     <div className="flex flex-wrap gap-1.5 p-3 pb-1">
       {chips.map(({ type, labelKey, icon: Icon }) => {
         const isActive = activeAction === type
+        const isBtnDisabled = loading || disabled
         return (
           <button
             key={type}
             type="button"
-            disabled={loading}
+            disabled={isBtnDisabled}
             onClick={() => onSelectAction(type)}
             className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-1 text-xs font-medium transition-all ${
               isActive
                 ? "border-primary bg-primary text-primary-foreground shadow-xs"
                 : "border-border/60 bg-muted/40 text-muted-foreground hover:bg-muted hover:text-foreground"
-            } ${loading ? "cursor-not-allowed opacity-50" : "cursor-pointer"}`}
+            } ${isBtnDisabled ? "cursor-not-allowed opacity-40" : "cursor-pointer"}`}
           >
             <Icon className="size-3" />
             <span>{i18n.t(labelKey)}</span>

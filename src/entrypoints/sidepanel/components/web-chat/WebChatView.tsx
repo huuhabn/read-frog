@@ -2,12 +2,17 @@ import type { WebChatAutoReplyMode, WebChatTone } from "@/types/config/web-chat"
 import type { ChatMessage, ChatRoom } from "@/utils/web-chat/adapter/types"
 import { useAtomValue } from "jotai"
 import { useCallback, useEffect, useMemo, useRef, useState } from "react"
+import { browser } from "#imports"
 import { configFieldsAtomMap } from "@/utils/atoms/config"
 import { i18n } from "@/utils/i18n"
 import { createLogger } from "@/utils/logging/logger"
 import { getSelectableProvidersForCapability } from "@/utils/providers/provider-registry"
 import { getActiveTabInfo } from "@/utils/sidepanel/page-context"
-import { getActiveChatMessagesFromTab, insertTextToActiveChatTab } from "@/utils/sidepanel/web-chat"
+import {
+  getActiveChatMessagesFromTab,
+  insertTextToActiveChatTab,
+  isSupportedChatUrl,
+} from "@/utils/sidepanel/web-chat"
 import {
   generateSmartReply,
   summarizeChatRoom,
@@ -160,12 +165,37 @@ export function WebChatView() {
 
         setCurrentTabId(tabInfo.id)
         setCurrentTabUrl(tabInfo.url)
-        const data = await getActiveChatMessagesFromTab(tabInfo.id)
+
+        const isSupported = isSupportedChatUrl(tabInfo.url, webChatConfig?.genericMatchUrls || [])
+        if (!isSupported) {
+          setRoom(null)
+          setMessages([])
+          setResultContent("")
+          setSecondaryResult(undefined)
+          setActiveAction(null)
+          setAutoReplyMode("none")
+          setIsAutoReplying(false)
+          currentRoomIdRef.current = null
+          return
+        }
+
+        const data = await getActiveChatMessagesFromTab(
+          tabInfo.id,
+          webChatConfig?.genericMatchUrls || [],
+        )
         const currentRoom = data.room
         setRoom(currentRoom)
         setMessages(data.messages)
 
-        const roomId = currentRoom?.id || "unknown"
+        if (!currentRoom) {
+          setResultContent("")
+          setSecondaryResult(undefined)
+          setActiveAction(null)
+          currentRoomIdRef.current = null
+          return
+        }
+
+        const roomId = currentRoom.id || "unknown"
         if (roomId !== currentRoomIdRef.current) {
           currentRoomIdRef.current = roomId
           await applyRoomSettings(roomId)
@@ -192,6 +222,7 @@ export function WebChatView() {
     },
     [
       applyRoomSettings,
+      webChatConfig?.genericMatchUrls,
       setCurrentTabId,
       setCurrentTabUrl,
       setRoom,
@@ -209,6 +240,21 @@ export function WebChatView() {
     return () => clearTimeout(timer)
   }, [loadActiveChat])
 
+  // Listen to tab switches / updates to immediately sync or reset
+  useEffect(() => {
+    const handleTabChange = () => {
+      void loadActiveChat(false)
+    }
+
+    browser.tabs?.onActivated?.addListener(handleTabChange)
+    browser.tabs?.onUpdated?.addListener(handleTabChange)
+
+    return () => {
+      browser.tabs?.onActivated?.removeListener(handleTabChange)
+      browser.tabs?.onUpdated?.removeListener(handleTabChange)
+    }
+  }, [loadActiveChat])
+
   // Periodic Auto Reply & Room Sync checker
   useEffect(() => {
     let isSubscribed = true
@@ -218,7 +264,25 @@ export function WebChatView() {
       const tabInfo = await getActiveTabInfo(true)
       if (!tabInfo?.id || !isSubscribed) return
 
-      const data = await getActiveChatMessagesFromTab(tabInfo.id)
+      const isSupported = isSupportedChatUrl(tabInfo.url, webChatConfig?.genericMatchUrls || [])
+      if (!isSupported) {
+        if (currentRoomIdRef.current !== null) {
+          currentRoomIdRef.current = null
+          setRoom(null)
+          setMessages([])
+          setResultContent("")
+          setSecondaryResult(undefined)
+          setActiveAction(null)
+          setAutoReplyMode("none")
+          setIsAutoReplying(false)
+        }
+        return
+      }
+
+      const data = await getActiveChatMessagesFromTab(
+        tabInfo.id,
+        webChatConfig?.genericMatchUrls || [],
+      )
       const currentRoom = data.room
       if (!currentRoom?.id || !isSubscribed) return
 
@@ -307,9 +371,10 @@ export function WebChatView() {
       isSubscribed = false
       clearInterval(interval)
     }
-  }, [applyRoomSettings, webChatConfig?.rules])
+  }, [applyRoomSettings, webChatConfig?.genericMatchUrls, webChatConfig?.rules])
 
   const handleActionSelect = async (action: WebChatActionType) => {
+    if (!room) return
     setActiveAction(action)
     setLoading(true)
 
@@ -433,6 +498,10 @@ export function WebChatView() {
     await insertTextToActiveChatTab(currentTabId, text)
   }
 
+  const isSupported = Boolean(
+    currentTabUrl && isSupportedChatUrl(currentTabUrl, webChatConfig?.genericMatchUrls || []),
+  )
+
   return (
     <div className="flex h-full flex-col bg-background text-foreground">
       <ChatContextHeader
@@ -454,12 +523,14 @@ export function WebChatView() {
         onToggleSubline={handleToggleSubline}
         isOverridden={isOverridden}
         onResetDefaults={handleResetDefaults}
+        disabled={!isSupported}
       />
 
       <ActionChips
         loading={loading}
         activeAction={activeAction}
         onSelectAction={(action) => void handleActionSelect(action)}
+        disabled={!isSupported || !room}
       />
 
       <div className="scrollbar-slim flex-1 overflow-y-auto">
@@ -468,6 +539,7 @@ export function WebChatView() {
           secondaryContent={secondaryResult}
           loading={loading}
           onInsertToChat={(text) => void handleInsertToChat(text)}
+          isUnsupported={!isSupported && !loading}
         />
       </div>
     </div>

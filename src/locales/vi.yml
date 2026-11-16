@@ -1368,6 +1368,11 @@ options:
     sidepanel:
       tabLabel: Trợ lý Web Chat
       noRoomDetected: Chưa phát hiện phòng chat
+      unsupportedTitle: Nền tảng chưa được hỗ trợ
+      unsupportedDesc: Tab hiện tại không phải là nền tảng chat được hỗ trợ (Zalo, Telegram, Slack) hoặc Web Chat tùy chỉnh.
+      unsupportedBadge: Chưa hỗ trợ
+      supportedPlatformsTitle: Các nền tảng được hỗ trợ
+      configureGenericChat: Cấu hình Generic Chat Match URLs
       refreshTooltip: Làm mới tin nhắn
       resetDefaults: Khôi phục cấu hình mặc định
       model: Mô hình

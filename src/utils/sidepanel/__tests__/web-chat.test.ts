@@ -1,7 +1,11 @@
 // @vitest-environment jsdom
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest"
 import { browser } from "#imports"
-import { getActiveChatMessagesFromTab, insertTextToActiveChatTab } from "../web-chat"
+import {
+  getActiveChatMessagesFromTab,
+  insertTextToActiveChatTab,
+  isSupportedChatUrl,
+} from "../web-chat"
 
 describe("Sidepanel Web Chat Bridge", () => {
   const originalLocation = window.location
@@ -214,6 +218,56 @@ describe("Sidepanel Web Chat Bridge", () => {
       const res = await getActiveChatMessagesFromTab(201)
       expect(res.room?.platform).toBe("zalo")
       expect(res.messages).toEqual([])
+    })
+  })
+
+  describe("isSupportedChatUrl and unsupported platform handling", () => {
+    it("correctly identifies supported and unsupported chat URLs", () => {
+      expect(isSupportedChatUrl("https://app.slack.com/client/T123/C456")).toBe(true)
+      expect(isSupportedChatUrl("https://chat.zalo.me/")).toBe(true)
+      expect(isSupportedChatUrl("https://web.telegram.org/a/")).toBe(true)
+      expect(isSupportedChatUrl("https://web.telegram.org/k/")).toBe(true)
+      expect(isSupportedChatUrl("https://google.com/search?q=test")).toBe(false)
+      expect(isSupportedChatUrl("https://github.com/")).toBe(false)
+      expect(isSupportedChatUrl(undefined)).toBe(false)
+
+      // Generic custom patterns
+      expect(
+        isSupportedChatUrl("https://internal.chat.company.com/room", [
+          "https://internal.chat.company.com/*",
+        ]),
+      ).toBe(true)
+      expect(
+        isSupportedChatUrl("https://internal.chat.company.com/room", ["https://other.com/*"]),
+      ).toBe(false)
+    })
+
+    it("returns null room directly without fallback if content script reports room: null", async () => {
+      vi.mocked(browser.tabs.sendMessage).mockResolvedValueOnce({
+        room: null,
+        messages: [],
+      } as any)
+
+      const result = await getActiveChatMessagesFromTab(301)
+      expect(result.room).toBeNull()
+      expect(result.messages).toEqual([])
+      expect(browser.scripting.executeScript).not.toHaveBeenCalled()
+    })
+
+    it("returns null room from executeScript if platform is unsupported", async () => {
+      vi.mocked(browser.tabs.sendMessage).mockRejectedValueOnce(new Error("offline"))
+
+      delete (window as any).location
+      window.location = new URL("https://google.com/") as any
+
+      vi.mocked(browser.scripting.executeScript).mockImplementationOnce(async (options: any) => {
+        const result = options.func(...options.args)
+        return [{ result }] as any
+      })
+
+      const result = await getActiveChatMessagesFromTab(302)
+      expect(result.room).toBeNull()
+      expect(result.messages).toEqual([])
     })
   })
 })

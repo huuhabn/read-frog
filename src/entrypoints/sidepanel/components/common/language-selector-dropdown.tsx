@@ -23,6 +23,7 @@ export interface LanguageSelectorDropdownProps {
   ariaLabel?: string
   title?: string
   showIcon?: boolean
+  disabled?: boolean
 }
 
 export function LanguageSelectorDropdown({
@@ -38,6 +39,7 @@ export function LanguageSelectorDropdown({
   ariaLabel,
   title,
   showIcon = false,
+  disabled = false,
 }: LanguageSelectorDropdownProps) {
   const currentOption = useMemo(() => {
     if (allowAutoDetect && (selectedCode === "auto" || selectedCode === AUTO_DETECT_OPTION.code)) {
@@ -67,9 +69,14 @@ export function LanguageSelectorDropdown({
   return (
     <DropdownMenu>
       <DropdownMenuTrigger
+        disabled={disabled}
         aria-label={ariaLabel || currentOption.name}
         title={title || ariaLabel || currentOption.name}
-        className={cn(triggerVariants[variant], triggerClassName)}
+        className={cn(
+          triggerVariants[variant],
+          disabled && "pointer-events-none cursor-not-allowed opacity-50",
+          triggerClassName,
+        )}
       >
         {showIcon && <Languages className="size-3 shrink-0 text-primary" />}
         {displayMode === "code" ? (
